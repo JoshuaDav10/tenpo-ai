@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Xcode / Swift
+ios/Kizuna.xcodeproj/xcuserdata/
+ios/Kizuna.xcodeproj/project.xcworkspace/xcuserdata/
+DerivedData/
+.build/
+.swiftpm/
+*.xcresult
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.pem
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Content build artifacts (regenerate via tools/import_content.py)
+tools/build/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
