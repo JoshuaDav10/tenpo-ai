@@ -9,24 +9,26 @@ struct RoleplayListView: View {
     let container: AppContainer
     @State private var scenarios: [ContentItem] = []
     @State private var active: ActiveRoleplay?
+    @State private var policy: CostPolicy = .full
 
     var body: some View {
-        List(scenarios) { item in
-            if let scenario = Scenario(item) {
-                Button {
-                    if let made = container.makeRoleplaySession(item) {
-                        active = ActiveRoleplay(runner: made.runner, scenario: made.scenario)
-                    }
-                } label: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(scenario.title).font(.headline)
-                            Spacer()
-                            RegisterBadge(register: scenario.register)
+        List {
+            if policy != .full {
+                Section { CostNotice(policy: policy) }
+            }
+            Section {
+                ForEach(scenarios) { item in
+                    if let scenario = Scenario(item) {
+                        Button {
+                            // R13: caps gate STARTING. Past the hard cap, no new roleplay.
+                            guard policy.allowsNewRoleplay,
+                                  let made = container.makeRoleplaySession(item, pipeline: policy.roleplayPipeline)
+                            else { return }
+                            active = ActiveRoleplay(runner: made.runner, scenario: made.scenario)
+                        } label: {
+                            row(scenario)
                         }
-                        Text(scenario.setting).font(.caption).foregroundStyle(.secondary)
-                        Text("\(scenario.goals.filter(\.required).count) goals · \(scenario.band)")
-                            .font(.caption2).foregroundStyle(.tertiary)
+                        .disabled(!policy.allowsNewRoleplay)
                     }
                 }
             }
@@ -35,7 +37,43 @@ struct RoleplayListView: View {
         .navigationDestination(item: $active) { rp in
             GuidedRoleplayView(runner: rp.runner, scenario: rp.scenario)
         }
-        .task { scenarios = (try? await container.scenarios()) ?? [] }
+        .task {
+            scenarios = (try? await container.scenarios()) ?? []
+            policy = await container.costPolicy()
+        }
+    }
+
+    private func row(_ scenario: Scenario) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(scenario.title).font(.headline)
+                Spacer()
+                RegisterBadge(register: scenario.register)
+            }
+            Text(scenario.setting).font(.caption).foregroundStyle(.secondary)
+            Text("\(scenario.goals.filter(\.required).count) goals · \(scenario.band)")
+                .font(.caption2).foregroundStyle(.tertiary)
+        }
+    }
+}
+
+/// Explains why roleplay is degraded/blocked today (R13/§4.3.6 cost caps). Honest,
+/// non-punitive framing per R14.
+private struct CostNotice: View {
+    let policy: CostPolicy
+    var body: some View {
+        switch policy {
+        case .cheapMode:
+            Label("Today's voice budget is used up — roleplays run in text/cheap mode for now. Drills are unaffected.",
+                  systemImage: "tortoise")
+                .font(.caption).foregroundStyle(.secondary)
+        case .drillsOnly:
+            Label("Daily spending cap reached — new roleplays are paused until tomorrow. Your drills are always free.",
+                  systemImage: "pause.circle")
+                .font(.caption).foregroundStyle(.secondary)
+        case .full:
+            EmptyView()
+        }
     }
 }
 

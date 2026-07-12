@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var deletedNote: String?
 
     @State private var persona = Preferences.persona
+    @State private var forceCheap = Preferences.forceCheapMode
 
     var body: some View {
         List {
@@ -26,6 +27,13 @@ struct SettingsView: View {
                 }
             }
             .onChange(of: persona) { _, new in Preferences.persona = new }
+
+            Section {
+                Toggle("Save on voice costs", isOn: $forceCheap)
+                    .onChange(of: forceCheap) { _, new in Preferences.forceCheapMode = new }
+            } footer: {
+                Text("Always use the cheaper text-based roleplay pipeline instead of live voice. Turn this off for the full spoken-conversation experience.")
+            }
 
             Section("Privacy") {
                 NavigationLink {

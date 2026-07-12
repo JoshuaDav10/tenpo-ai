@@ -6,10 +6,18 @@ import CoreModels
 /// (`LanguagePack.ttsVoiceMap`).
 enum Preferences {
     private static let personaKey = "actor_persona"
+    private static let forceCheapKey = "force_cheap_mode"
 
     static var persona: PersonaID {
         get { PersonaID(rawValue: UserDefaults.standard.string(forKey: personaKey) ?? PersonaID.warmTutor.rawValue) }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: personaKey) }
+    }
+
+    /// Manual "always use the cheap pipeline" toggle (R14 cost transparency). When
+    /// on, roleplays never use realtime voice regardless of remaining budget.
+    static var forceCheapMode: Bool {
+        get { UserDefaults.standard.bool(forKey: forceCheapKey) }
+        set { UserDefaults.standard.set(newValue, forKey: forceCheapKey) }
     }
 
     struct PersonaChoice: Identifiable {

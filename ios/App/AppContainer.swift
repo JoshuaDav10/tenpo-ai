@@ -78,15 +78,26 @@ final class AppContainer {
         return (value ?? 0) ?? 0
     }
 
+    /// Resolve today's cost policy (§4.3.6, R13): reads metered spend + the manual
+    /// cheap-mode toggle and decides whether realtime voice / new roleplays may start.
+    func costPolicy() async -> CostPolicy {
+        let spend = await todaySpendUSD()
+        let gov = CostGovernor(caps: .dogfoodDefault, forceCheapMode: Preferences.forceCheapMode)
+        return gov.policy(todaySpendUSD: spend)
+    }
+
     /// All roleplay scenarios in the content store.
     func scenarios() async throws -> [ContentItem] {
         try await content.items(kind: .scenario, band: nil, limit: 100)
     }
 
     /// A runner for a specific scenario. Returns the decoded Scenario for the HUD.
-    func makeRoleplaySession(_ item: ContentItem) -> (runner: SessionRunner, scenario: Scenario)? {
+    /// `pipeline` (from `costPolicy()`) picks realtime vs. cascade; today the app
+    /// only ships the cascade GuidedRoleplayMode, so both currently run cheap-mode,
+    /// but the pipeline is recorded on the session for the cost meter and R13.
+    func makeRoleplaySession(_ item: ContentItem, pipeline: SessionPipeline = .cascade) -> (runner: SessionRunner, scenario: Scenario)? {
         guard let scenario = Scenario(item) else { return nil }
-        let plan = SessionPlan(items: [item], scenarioID: item.id)
+        let plan = SessionPlan(items: [item], scenarioID: item.id, pipeline: pipeline)
         let mode = GuidedRoleplayMode(context: roleplayContext(), persona: Preferences.persona)
         let runner = SessionRunner(mode: mode, plan: plan, store: store, learner: learner, sync: sync)
         return (runner, scenario)

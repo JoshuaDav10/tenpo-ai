@@ -35,11 +35,15 @@ public struct SessionPlan: Sendable {
     public var sessionID: UUID
     public var items: [ContentItem]
     public var scenarioID: ItemID?
+    /// Which pipeline this session runs on (§4.3.1). Defaults to the cheap cascade;
+    /// the cost governor sets `.realtime` for full-experience roleplay (R13/§4.3.6).
+    public var pipeline: SessionPipeline
 
-    public init(sessionID: UUID = UUID(), items: [ContentItem], scenarioID: ItemID? = nil) {
+    public init(sessionID: UUID = UUID(), items: [ContentItem], scenarioID: ItemID? = nil, pipeline: SessionPipeline = .cascade) {
         self.sessionID = sessionID
         self.items = items
         self.scenarioID = scenarioID
+        self.pipeline = pipeline
     }
 }
 

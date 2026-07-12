@@ -46,7 +46,7 @@ public actor SessionRunner {
     public func start() async {
         let record = SessionRecord(
             id: plan.sessionID, modeID: modeID, scenarioID: plan.scenarioID,
-            startedAt: Date(), pipeline: .cascade
+            startedAt: Date(), pipeline: plan.pipeline
         )
         try? await store.begin(record)
 

@@ -19,7 +19,7 @@ Last updated: 2026-07-12 (batch 5)
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **60** tests (`swift test`) — all green.
+- Swift: **65** tests (`swift test`) — all green.
 - Server: **7** tests (`npm test`) — all green.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)
@@ -65,7 +65,14 @@ proxy with auth/routing/cost-meter/stubs. App boots.
 - ✅ `SupabaseSyncService` (account-gated, injectable config) — full-table upsert push +
   LWW/append-only merge pull per §4.7; drop-in `SyncService` (`.live` uses `NoopSyncService`
   until a Supabase config exists). `SessionRunner` already fires `syncNow()` post-session.
-- **REMAINING:** client cost caps enforcement; cheap-mode client switch; modes 11.
+- ✅ Client cost caps (§4.3.6, R13): pure `CostGovernor` in CoreModels (soft $2.50→cheap
+  mode, hard $5→drills only; manual toggle only tightens). `AppContainer.costPolicy()`
+  reads metered spend; `RoleplayListView` gates STARTING (cheap-mode notice / drills-only
+  pause) and passes the chosen `SessionPipeline` (recorded on the session). Never kills an
+  active session (R13). 5 unit tests.
+- ✅ Cheap-mode client switch: `Preferences.forceCheapMode` + "Save on voice costs" Settings
+  toggle → governor forces cascade regardless of budget.
+- **REMAINING:** mode 11 (last deferred drill mode).
 
 ### Phase 5 — Post-MVP (NOT this push, per spec §9)
 Pitch-accent drill (needs Kanjium data), FSRS weight optimization, scenario auto-gen UI,

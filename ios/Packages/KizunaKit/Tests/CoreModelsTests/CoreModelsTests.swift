@@ -44,3 +44,44 @@ import Foundation
         #expect(verdict.sceneControl == "continue")
     }
 }
+
+@Suite struct CostGovernorTests {
+    let caps = CostCaps.dogfoodDefault // soft 2.50, hard 5.00
+
+    @Test func fullExperienceBelowSoftCap() {
+        let gov = CostGovernor(caps: caps, forceCheapMode: false)
+        #expect(gov.policy(todaySpendUSD: 0) == .full)
+        #expect(gov.policy(todaySpendUSD: 2.49) == .full)
+        #expect(gov.policy(todaySpendUSD: 0).roleplayPipeline == .realtime)
+    }
+
+    @Test func softCapForcesCheapMode() {
+        let gov = CostGovernor(caps: caps, forceCheapMode: false)
+        #expect(gov.policy(todaySpendUSD: 2.50) == .cheapMode)
+        #expect(gov.policy(todaySpendUSD: 4.99) == .cheapMode)
+        // Cheap mode still lets a roleplay start, on the cascade pipeline.
+        #expect(gov.policy(todaySpendUSD: 3.00).allowsNewRoleplay)
+        #expect(gov.policy(todaySpendUSD: 3.00).roleplayPipeline == .cascade)
+    }
+
+    @Test func hardCapAllowsDrillsOnly() {
+        let gov = CostGovernor(caps: caps, forceCheapMode: false)
+        #expect(gov.policy(todaySpendUSD: 5.00) == .drillsOnly)
+        #expect(gov.policy(todaySpendUSD: 42) == .drillsOnly)
+        #expect(gov.policy(todaySpendUSD: 5.00).allowsNewRoleplay == false)
+    }
+
+    @Test func manualToggleOnlyTightens() {
+        let gov = CostGovernor(caps: caps, forceCheapMode: true)
+        // Below soft cap, the manual toggle still forces cheap mode.
+        #expect(gov.policy(todaySpendUSD: 0) == .cheapMode)
+        // It never loosens: past the hard cap it is still drills-only.
+        #expect(gov.policy(todaySpendUSD: 6) == .drillsOnly)
+    }
+
+    @Test func pipelineMapping() {
+        #expect(CostPolicy.full.roleplayPipeline == .realtime)
+        #expect(CostPolicy.cheapMode.roleplayPipeline == .cascade)
+        #expect(CostPolicy.drillsOnly.roleplayPipeline == .cascade)
+    }
+}
