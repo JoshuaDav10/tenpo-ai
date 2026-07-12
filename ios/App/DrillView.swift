@@ -1,6 +1,7 @@
 import SwiftUI
 import CoreModels
 import ModeEngine
+import SpeechKit
 import DesignSystem
 
 /// Drives a `SessionRunner` and renders the shared drill shell (§4.6). Phase-1
@@ -14,6 +15,8 @@ final class DrillViewModel: ObservableObject {
     @Published var answer: String = ""
     @Published var finished = false
     @Published var reviewedCount = 0
+    @Published var isRecording = false
+    @Published var micDenied = false
 
     struct VerdictBadge: Equatable {
         var grade: ReviewGrade
@@ -22,9 +25,32 @@ final class DrillViewModel: ObservableObject {
 
     private let runner: SessionRunner
     private var consumeTask: Task<Void, Never>?
+    #if os(iOS)
+    private let recorder = AudioRecorder()
+    #endif
 
     init(runner: SessionRunner) {
         self.runner = runner
+    }
+
+    /// Toggle mic capture: start on first tap, stop + grade the clip on the second.
+    func toggleMic() async {
+        #if os(iOS)
+        if isRecording {
+            isRecording = false
+            if let clip = recorder.stop() {
+                await runner.handle(.speech(clip))
+            }
+        } else {
+            guard await recorder.requestPermission() else { micDenied = true; return }
+            do {
+                try recorder.start()
+                isRecording = true
+            } catch {
+                isRecording = false
+            }
+        }
+        #endif
     }
 
     func start() async {
@@ -126,6 +152,22 @@ struct DrillView: View {
                 Button("Check") { Task { await model.submit() } }
                     .buttonStyle(.borderedProminent)
                     .disabled(model.answer.isEmpty)
+            }
+
+            Button {
+                Task { await model.toggleMic() }
+            } label: {
+                Label(model.isRecording ? "Stop & check" : "Speak your answer",
+                      systemImage: model.isRecording ? "stop.circle.fill" : "mic.fill")
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+            }
+            .buttonStyle(.bordered)
+            .tint(model.isRecording ? .red : .accentColor)
+
+            if model.micDenied {
+                Text("Microphone access is off. Enable it in Settings to speak your answers.")
+                    .font(.caption2).foregroundStyle(.secondary)
             }
         }
     }

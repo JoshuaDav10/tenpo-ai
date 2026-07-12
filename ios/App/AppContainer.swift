@@ -83,8 +83,11 @@ final class AppContainer {
             pack: pack,
             content: LiveContentService(db: db),
             learner: LiveLearnerModelService(db: db),
+            // On-device recognizer is real (free, instant, private). Server STT /
+            // pronunciation / chat stay mock until the Fly.io proxy is deployed —
+            // swap to ProxySTTProvider(config:) etc. once its URL + auth exist.
             speech: LiveSpeechService(
-                onDeviceSTT: MockSTTProvider(),
+                onDeviceSTT: AppleSpeechRecognizer(),
                 serverSTT: MockSTTProvider(),
                 tts: MockTTSProvider(),
                 pronunciation: MockPronunciationAssessor(),
@@ -109,8 +112,11 @@ final class AppContainer {
             pack: pack,
             content: LiveContentService(db: db),
             learner: LiveLearnerModelService(db: db),
+            // On-device recognizer is real (free, instant, private). Server STT /
+            // pronunciation / chat stay mock until the Fly.io proxy is deployed —
+            // swap to ProxySTTProvider(config:) etc. once its URL + auth exist.
             speech: LiveSpeechService(
-                onDeviceSTT: MockSTTProvider(),
+                onDeviceSTT: AppleSpeechRecognizer(),
                 serverSTT: MockSTTProvider(),
                 tts: MockTTSProvider(),
                 pronunciation: MockPronunciationAssessor(),
