@@ -209,3 +209,15 @@ const TEMPLATES: Record<string, PromptTemplate> = {
 export function getTemplate(id: string): PromptTemplate | undefined {
   return TEMPLATES[id];
 }
+
+/** Actor instructions for the realtime (Pipeline A) session.update (§4.3.1). */
+export function getRealtimeInstructions(variables: Record<string, unknown>): string {
+  const scene = {
+    setting: variables.setting ?? null,
+    persona_hint: variables.persona_hint ?? null,
+    persona: variables.persona ?? "warm_tutor",
+    register: variables.register ?? "polite",
+    band: variables.band ?? "N5",
+  };
+  return `${ACTOR_SYSTEM}\n\nScene (JSON): ${JSON.stringify(scene)}`;
+}
