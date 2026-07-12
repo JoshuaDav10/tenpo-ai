@@ -6,6 +6,7 @@ import DesignSystem
 /// access to the mastery dashboard. Loads the bundled curriculum on first launch.
 struct HomeView: View {
     let container: AppContainer
+    let compliance: ComplianceStore
 
     @State private var contentCount = 0
     @State private var dueCount = 0
@@ -56,6 +57,15 @@ struct HomeView: View {
                 }
             }
             .navigationTitle("Kizuna")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink {
+                        SettingsView(container: container, compliance: compliance)
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
             .navigationDestination(item: $activeSession) { session in
                 DrillView(runner: session.runner)
             }
@@ -93,5 +103,5 @@ struct ActiveSession: Identifiable, Hashable {
 }
 
 #Preview {
-    HomeView(container: try! AppContainer.preview())
+    HomeView(container: try! AppContainer.preview(), compliance: ComplianceStore())
 }

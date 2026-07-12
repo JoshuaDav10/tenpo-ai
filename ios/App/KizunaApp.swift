@@ -3,12 +3,18 @@ import SwiftUI
 @main
 struct KizunaApp: App {
     private let bootstrap = AppBootstrap()
+    @StateObject private var compliance = ComplianceStore()
 
     var body: some Scene {
         WindowGroup {
             switch bootstrap.result {
             case .success(let container):
-                HomeView(container: container)
+                // §8.1: block practice behind explicit third-party-AI consent.
+                if compliance.hasConsented {
+                    HomeView(container: container, compliance: compliance)
+                } else {
+                    ConsentView(store: compliance)
+                }
             case .failure(let error):
                 BootFailureView(error: error)
             }

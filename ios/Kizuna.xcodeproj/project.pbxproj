@@ -8,26 +8,36 @@
 
 /* Begin PBXBuildFile section */
 		2AE3BFDE634992ED92B6CC17 /* KizunaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21112E02A46B4490F41771D4 /* KizunaApp.swift */; };
+		3CEA838B2C3B73F7BCE946DF /* ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F15CE3B44C024990767128 /* ConsentView.swift */; };
 		4F065724937E8DD2275FD3D8 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610D354D65D78B83F6244524 /* HomeView.swift */; };
 		5973C65F1565F233037AEDD7 /* seed in Resources */ = {isa = PBXBuildFile; fileRef = 471ECCED2807421DD2C7D9DF /* seed */; };
+		5C03E6AED6488994677D6027 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE745533B0F3928EEBC99EB7 /* SettingsView.swift */; };
+		6277871AEA3EAA8F88411BA8 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E60CA0ACA0246D0C17D425 /* DataManager.swift */; };
 		6725E154E2B1AC945734FA20 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 942369F6BB1406B2BE170AEF /* AppContainer.swift */; };
 		6D0ABC63F57923325C909C20 /* ContentBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB050824D8B2E836FEDC6670 /* ContentBootstrap.swift */; };
 		88FE9C57CA7403FB8C39B0B3 /* RoleplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665A81C30A3AE528C2C69375 /* RoleplayView.swift */; };
 		8C4166C370501BE7C327A44E /* MasteryDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */; };
 		955854218DFA78A56A07801B /* DrillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA25C06355708FC1E61153E /* DrillView.swift */; };
 		B840F5C5935B11972FFFC3F7 /* KizunaKit in Frameworks */ = {isa = PBXBuildFile; productRef = 316018456B31A50F1828C67E /* KizunaKit */; };
+		DD20C5A10B977BD132A8B3D7 /* ComplianceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD28F0B31979AFA8F076322 /* ComplianceStore.swift */; };
+		EBE9349439B5A3494A44D647 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF79D2EFF80F05D29F073E0 /* LicensesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		04F15CE3B44C024990767128 /* ConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentView.swift; sourceTree = "<group>"; };
+		0DD28F0B31979AFA8F076322 /* ComplianceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceStore.swift; sourceTree = "<group>"; };
 		1AA25C06355708FC1E61153E /* DrillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillView.swift; sourceTree = "<group>"; };
 		21112E02A46B4490F41771D4 /* KizunaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KizunaApp.swift; sourceTree = "<group>"; };
 		2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryDashboardView.swift; sourceTree = "<group>"; };
 		471ECCED2807421DD2C7D9DF /* seed */ = {isa = PBXFileReference; lastKnownFileType = folder; name = seed; path = ../tools/seed; sourceTree = SOURCE_ROOT; };
 		610D354D65D78B83F6244524 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		665A81C30A3AE528C2C69375 /* RoleplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleplayView.swift; sourceTree = "<group>"; };
+		66E60CA0ACA0246D0C17D425 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		7959ACC2A9C0556EE5AAC796 /* Kizuna.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Kizuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		942369F6BB1406B2BE170AEF /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		C628DD408B6527E92B9A77EC /* KizunaKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KizunaKit; path = Packages/KizunaKit; sourceTree = SOURCE_ROOT; };
+		CE745533B0F3928EEBC99EB7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		FAF79D2EFF80F05D29F073E0 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		FB050824D8B2E836FEDC6670 /* ContentBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBootstrap.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -50,6 +60,18 @@
 			);
 			name = "tenpo-ai";
 			path = ..;
+			sourceTree = "<group>";
+		};
+		1174DF051784752E462D7C82 /* Compliance */ = {
+			isa = PBXGroup;
+			children = (
+				0DD28F0B31979AFA8F076322 /* ComplianceStore.swift */,
+				04F15CE3B44C024990767128 /* ConsentView.swift */,
+				66E60CA0ACA0246D0C17D425 /* DataManager.swift */,
+				FAF79D2EFF80F05D29F073E0 /* LicensesView.swift */,
+				CE745533B0F3928EEBC99EB7 /* SettingsView.swift */,
+			);
+			path = Compliance;
 			sourceTree = "<group>";
 		};
 		11B3338CFE943B0C273EE5A0 = {
@@ -80,6 +102,7 @@
 				21112E02A46B4490F41771D4 /* KizunaApp.swift */,
 				2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */,
 				665A81C30A3AE528C2C69375 /* RoleplayView.swift */,
+				1174DF051784752E462D7C82 /* Compliance */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -176,12 +199,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				6725E154E2B1AC945734FA20 /* AppContainer.swift in Sources */,
+				DD20C5A10B977BD132A8B3D7 /* ComplianceStore.swift in Sources */,
+				3CEA838B2C3B73F7BCE946DF /* ConsentView.swift in Sources */,
 				6D0ABC63F57923325C909C20 /* ContentBootstrap.swift in Sources */,
+				6277871AEA3EAA8F88411BA8 /* DataManager.swift in Sources */,
 				955854218DFA78A56A07801B /* DrillView.swift in Sources */,
 				4F065724937E8DD2275FD3D8 /* HomeView.swift in Sources */,
 				2AE3BFDE634992ED92B6CC17 /* KizunaApp.swift in Sources */,
+				EBE9349439B5A3494A44D647 /* LicensesView.swift in Sources */,
 				8C4166C370501BE7C327A44E /* MasteryDashboardView.swift in Sources */,
 				88FE9C57CA7403FB8C39B0B3 /* RoleplayView.swift in Sources */,
+				5C03E6AED6488994677D6027 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
