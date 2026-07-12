@@ -36,8 +36,8 @@ actor GuidedRoleplaySession: ModeSession {
     private let plan: SessionPlan
     private let context: ModeContext
     private let scenario: Scenario
-    private let engine: RoleplayEngine
     private let persona: PersonaID
+    private var engine: RoleplayEngine
 
     private var finalOutcome: RoleplayOutcome?
     private var ended = false
@@ -51,6 +51,7 @@ actor GuidedRoleplaySession: ModeSession {
         let scenario = plan.items.compactMap(Scenario.init).first ?? Self.fallbackScenario
         self.scenario = scenario
         let director = context.director ?? StubDirector()
+        // Seed items are resolved in start() (async); engine is rebuilt there if needed.
         self.engine = RoleplayEngine(scenario: scenario, director: director, sessionID: plan.sessionID)
 
         var cont: AsyncStream<ModeEvent>.Continuation!
@@ -59,6 +60,19 @@ actor GuidedRoleplaySession: ModeSession {
     }
 
     func start() async {
+        // Moat loop (§3.2): if the scenario opts in, pull the learner's weak/due items
+        // in this band and hand them to the Director to elicit naturally.
+        if scenario.seedWeakItems {
+            let prefix = String(scenario.band.prefix(2))   // e.g. "N5"
+            let weak = (try? await context.learner.weakItems(bandPrefix: prefix, count: 3)) ?? []
+            if !weak.isEmpty {
+                let director = context.director ?? StubDirector()
+                engine = RoleplayEngine(scenario: scenario, director: director,
+                                        sessionID: plan.sessionID, seedItems: weak.map(\.id))
+                continuation.yield(.info("Weaving in \(weak.count) word\(weak.count == 1 ? "" : "s") you're due to review."))
+            }
+        }
+
         continuation.yield(.info("『\(scenario.title)』 — \(scenario.setting)"))
         let (_, total) = await engine.progress()
         continuation.yield(.goalProgress(completed: 0, total: total))

@@ -26,6 +26,7 @@ private func scenarioItem() -> ContentItem {
                 .object(["id": .string("g2"), "required": .bool(true), "desc_en": .string("Ask for a recommendation"),
                          "target_items": .array([.string("grammar:arimasu")])]),
             ]),
+            "seed_weak_items": .bool(true),
         ])
     )
 }
@@ -109,6 +110,37 @@ private func complete(_ ids: [String], end: Bool = false) -> DirectorVerdict {
         #expect(result.status == .completed)
         #expect(result.reviews.contains { $0.itemID.rawValue == "vocab:頭" })
         #expect(result.score?["praise_allowed"] == .bool(true))
+    }
+
+    @Test func seedWeakItemsAreHandedToTheDirector() async throws {
+        // Moat loop (§3.2): a seed_weak_items scenario pulls the learner's due items
+        // and the engine passes them into every DirectorInput.
+        final class SpyDirector: DirectorService, @unchecked Sendable {
+            private let box = NSLock()
+            private var lastSeed: [ItemID] = []
+            func evaluateTurn(_ input: DirectorInput) async throws -> DirectorVerdict {
+                synced { lastSeed = input.seedItems }
+                return .safeContinue
+            }
+            func capturedSeed() -> [ItemID] { synced { lastSeed } }
+            private func synced<T>(_ body: () -> T) -> T { box.lock(); defer { box.unlock() }; return body() }
+        }
+        let spy = SpyDirector()
+        let learner = MockLearnerModelService()
+        learner.weakItemsToReturn = [
+            ContentItem(id: "vocab:頭", language: .japanese, kind: .vocab, payload: .object([:]), band: "N5.3")
+        ]
+        let context = ModeContext(
+            learner: learner, content: EmptyContent2(),
+            speech: LiveSpeechService(onDeviceSTT: MockSTTProvider(), serverSTT: MockSTTProvider(),
+                                      tts: MockTTSProvider(), pronunciation: MockPronunciationAssessor(), pack: pack),
+            pack: pack, director: spy, actor: EchoActor()
+        )
+        let mode = GuidedRoleplayMode(context: context)
+        let session = mode.makeSession(plan: SessionPlan(items: [scenarioItem()]))  // scenario has seed_weak_items? see below
+        await session.start()
+        await session.handle(.text("頭が痛いです"))
+        #expect(spy.capturedSeed().contains("vocab:頭"))
     }
 
     @Test func oneWordSessionIsIncompleteViaTheMode() async throws {

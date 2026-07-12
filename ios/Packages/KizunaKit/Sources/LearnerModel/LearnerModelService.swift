@@ -1,4 +1,5 @@
 import Foundation
+import GRDB
 import CoreModels
 import Persistence
 
@@ -18,6 +19,9 @@ public protocol LearnerModelService: Sendable {
     func dueCount(now: Date) async throws -> Int
     /// Dashboard: per-dimension stability-band counts (learning/young/mature — R17).
     func masteryCounts() async throws -> MasterySummary
+    /// Due/weak items in a JLPT band, most-overdue first — for `seed_weak_items`
+    /// scenario seeding (§3.2 moat loop: yesterday's errors shape today's scene).
+    func weakItems(bandPrefix: String?, count: Int) async throws -> [ContentItem]
 }
 
 // MARK: - Dashboard summary types
@@ -312,6 +316,27 @@ public final class LiveLearnerModelService: LearnerModelService {
         return MasterySummary(dimensions: dimensions, total: total)
     }
 
+    public func weakItems(bandPrefix: String?, count: Int) async throws -> [ContentItem] {
+        guard count > 0 else { return [] }
+        let now = Date()
+        let records = try await db.read { db -> [ContentItemRecord] in
+            var sql = """
+                SELECT content_item.* FROM content_item
+                JOIN skill_state ON skill_state.item_id = content_item.id
+                WHERE skill_state.suspended = 0 AND skill_state.due IS NOT NULL AND skill_state.due <= ?
+                """
+            var args: [DatabaseValueConvertible] = [now]
+            if let bandPrefix {
+                sql += " AND content_item.band LIKE ?"
+                args.append("\(bandPrefix)%")
+            }
+            sql += " GROUP BY content_item.id ORDER BY MIN(skill_state.due) ASC LIMIT ?"
+            args.append(count)
+            return try ContentItemRecord.fetchAll(db, sql: sql, arguments: StatementArguments(args))
+        }
+        return try records.map { try $0.asContentItem() }
+    }
+
     // MARK: - Queue helpers
 
     private struct QueueEntry {
@@ -389,6 +414,11 @@ public final class MockLearnerModelService: LearnerModelService, @unchecked Send
 
     public func masteryCounts() async throws -> MasterySummary {
         MasterySummary(dimensions: [], total: MasteryBandCounts())
+    }
+
+    public var weakItemsToReturn: [ContentItem] = []
+    public func weakItems(bandPrefix: String?, count: Int) async throws -> [ContentItem] {
+        synced { Array(weakItemsToReturn.prefix(count)) }
     }
 
     private func synced<T>(_ body: () -> T) -> T {

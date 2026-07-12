@@ -52,6 +52,8 @@ public actor RoleplayEngine {
     private let praiseThreshold: Double
     private let now: @Sendable () -> Date
     private let startedAt: Date
+    /// Weak/due items to weave in this scene (§3.2 moat loop). Passed to the Director.
+    private let seedItems: [ItemID]
 
     private var transcript: [ChatMessage] = []
     private var goalStatus: [String: DirectorVerdict.GoalStatus] = [:]
@@ -64,12 +66,14 @@ public actor RoleplayEngine {
 
     public init(
         scenario: Scenario, director: any DirectorService, sessionID: UUID = UUID(),
+        seedItems: [ItemID] = [],
         minSubstantiveTurns: Int = 3, hardCap: TimeInterval = 600, praiseThreshold: Double = 60,
         now: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.scenario = scenario
         self.director = director
         self.sessionID = sessionID
+        self.seedItems = seedItems
         self.minSubstantiveTurns = minSubstantiveTurns
         self.hardCap = hardCap
         self.praiseThreshold = praiseThreshold
@@ -91,7 +95,7 @@ public actor RoleplayEngine {
 
         // A thrown Director error must never crash the scene (§11): fall back to continue.
         let verdict = (try? await director.evaluateTurn(DirectorInput(
-            scenario: scenario, transcript: transcript, turnIndex: turnIndex
+            scenario: scenario, transcript: transcript, turnIndex: turnIndex, seedItems: seedItems
         ))) ?? .safeContinue
 
         for update in verdict.goalUpdates { goalStatus[update.goalID] = update.status }

@@ -165,9 +165,45 @@ const contentGen: PromptTemplate = {
   },
 };
 
+// The Actor (§4.4): the in-character partner for cheap-mode (cascade) roleplay.
+// It NEVER ends the scene, awards scores, or praises overall performance — those
+// belong to the Director + code guardrails (D6, R3, R15). Persona, register, and
+// the Director's directive steer the reply; seed words are elicited naturally.
+const ACTOR_SYSTEM = [
+  "You are an in-character conversation partner in a Japanese roleplay for a learner.",
+  "Speak ONLY in natural Japanese at or just above the learner's JLPT band (comprehensible input, i+1).",
+  "One new structure per exchange at most. Use gentle recasts for errors; do not lecture.",
+  "ABSOLUTE RULES: never end the scene, never say the learner did well/poorly, never give a score,",
+  "never break character, never write English except a brief L1 bridge if explicitly directed.",
+  "Match the scenario's register exactly (casual/polite/keigo).",
+].join("\n");
+
+const actorTurn: PromptTemplate = {
+  id: "actor_turn",
+  kind: "roleplay",
+  render(variables, extra) {
+    const context: Record<string, unknown> = {
+      scenario_id: variables.scenario_id ?? null,
+      setting: variables.setting ?? null,
+      persona_hint: variables.persona_hint ?? null,
+      persona: variables.persona ?? "warm_tutor",
+      register: variables.register ?? "polite",
+      band: variables.band ?? "N5",
+      director_directive: variables.directive ?? null,
+      elicit_words: variables.seed_items ?? null,
+    };
+    const messages: ChatMessage[] = [
+      { role: "user", content: `Continue the scene in character. Context (JSON): ${JSON.stringify(context)}` },
+      ...extra,
+    ];
+    return { system: ACTOR_SYSTEM, messages, maxTokens: 256 };
+  },
+};
+
 const TEMPLATES: Record<string, PromptTemplate> = {
   [directorTurn.id]: directorTurn,
   [contentGen.id]: contentGen,
+  [actorTurn.id]: actorTurn,
 };
 
 export function getTemplate(id: string): PromptTemplate | undefined {
