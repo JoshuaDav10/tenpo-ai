@@ -129,7 +129,7 @@ final class RoleplayViewModel: ObservableObject {
             finished = true
             summary = Self.summary(for: result)
             consume?.cancel()
-        case .verdict, .progress:
+        case .verdict, .progress, .choices:
             break
         }
     }

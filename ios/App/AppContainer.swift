@@ -94,6 +94,8 @@ final class AppContainer {
         registry.register(ProductionMode.self)
         registry.register(ComprehensionMode.self)
         registry.register(ClozeMode.self)
+        registry.register(ListeningPickMeaningMode.self)
+        registry.register(RapidFireMode.self)
         registry.register(GuidedRoleplayMode.self)
     }
 

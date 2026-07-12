@@ -17,6 +17,7 @@ final class DrillViewModel: ObservableObject {
     @Published var reviewedCount = 0
     @Published var isRecording = false
     @Published var micDenied = false
+    @Published var choices: [ChoiceOption] = []
 
     struct VerdictBadge: Equatable {
         var grade: ReviewGrade
@@ -74,10 +75,20 @@ final class DrillViewModel: ObservableObject {
         await runner.handle(.quit)
     }
 
+    func choose(_ id: String) async {
+        choices = []
+        await runner.handle(.tap(choiceID: id))
+    }
+
     private func apply(_ event: ModeEvent) async {
         switch event {
         case .prompt(let text, _):
             prompt = text
+            choices = []
+            lastVerdict = nil
+        case .choices(let text, _, let options):
+            prompt = text
+            choices = options
             lastVerdict = nil
         case .info(let text):
             info = text
@@ -146,6 +157,20 @@ struct DrillView: View {
                 VerdictRow(verdict: verdict)
             }
 
+            if !model.choices.isEmpty {
+                VStack(spacing: 8) {
+                    ForEach(model.choices) { choice in
+                        Button {
+                            Task { await model.choose(choice.id) }
+                        } label: {
+                            Text(choice.label)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 6)
+                        }
+                        .buttonStyle(.bordered)
+                    }
+                }
+            } else {
             HStack {
                 TextField("Type your answer", text: $model.answer)
                     .textFieldStyle(.roundedBorder)
@@ -170,6 +195,7 @@ struct DrillView: View {
             if model.micDenied {
                 Text("Microphone access is off. Enable it in Settings to speak your answers.")
                     .font(.caption2).foregroundStyle(.secondary)
+            }
             }
         }
     }

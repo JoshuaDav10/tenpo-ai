@@ -109,6 +109,7 @@ public actor SessionRunner {
     private static func turn(from event: ModeEvent) -> (role: TranscriptRole, text: String)? {
         switch event {
         case .prompt(let text, _): return (.system, text)
+        case .choices(let text, _, _): return (.system, text)
         case .heard(let t): return (.learner, t.text)
         case .info(let text): return (.system, text)
         case .verdict, .progress, .goalProgress, .finished: return nil

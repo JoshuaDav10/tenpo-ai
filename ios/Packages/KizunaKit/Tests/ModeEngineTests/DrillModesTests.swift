@@ -125,6 +125,44 @@ private func cloze(_ id: String, prompt: String, answer: String) -> ContentItem 
     }
 }
 
+@Suite struct ListeningPickMeaningTests {
+    @Test func tappingCorrectGlossPasses() async throws {
+        let mode = ListeningPickMeaningMode(context: ctx())
+        let items = [vocab("水", kana: "みず", gloss: "water"),
+                     vocab("火", kana: "ひ", gloss: "fire"),
+                     vocab("木", kana: "き", gloss: "tree")]
+        let session = mode.makeSession(plan: SessionPlan(items: items))
+        await session.start()
+        await session.handle(.tap(choiceID: "vocab:水"))   // choice id is the item id
+        let result = await session.finish()
+        #expect(result.reviews.first?.grade == .good)
+        #expect(result.reviews.first?.dimension == .recognitionListening)
+    }
+
+    @Test func tappingWrongGlossFails() async throws {
+        let mode = ListeningPickMeaningMode(context: ctx())
+        let items = [vocab("水", kana: "みず", gloss: "water"),
+                     vocab("火", kana: "ひ", gloss: "fire")]
+        let session = mode.makeSession(plan: SessionPlan(items: items))
+        await session.start()
+        await session.handle(.tap(choiceID: "vocab:火"))
+        let result = await session.finish()
+        #expect(result.reviews.first?.grade == .again)
+    }
+}
+
+@Suite struct RapidFireModeTests {
+    @Test func recallingReadingGradesRecognition() async throws {
+        let mode = RapidFireMode(context: ctx())
+        let session = mode.makeSession(plan: SessionPlan(items: [vocab("水", kana: "みず", gloss: "water")]))
+        await session.start()
+        await session.handle(.text("みず"))
+        let result = await session.finish()
+        #expect(result.reviews.first?.grade == .good)
+        #expect(result.reviews.first?.dimension == .recognitionReading)
+    }
+}
+
 @Suite struct VocabIntroParityTests {
     // Guards that the generic-session refactor preserved VocabIntro behavior.
     @Test func correctKanaAnswerStillGradesGoodWritten() async throws {

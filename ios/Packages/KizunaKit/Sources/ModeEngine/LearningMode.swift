@@ -44,8 +44,16 @@ public struct SessionPlan: Sendable {
 }
 
 /// Events a mode emits to drive the shared UI shell (grows with the shell in Phase 2).
+public struct ChoiceOption: Sendable, Hashable, Identifiable {
+    public var id: String
+    public var label: String
+    public init(id: String, label: String) { self.id = id; self.label = label }
+}
+
 public enum ModeEvent: Sendable {
     case prompt(text: String, audio: AudioClip?)
+    /// Multiple-choice prompt (listening / pick-the-meaning). Answer via `.tap(choiceID)`.
+    case choices(prompt: String, audio: AudioClip?, options: [ChoiceOption])
     case heard(Transcription)
     case verdict(itemID: ItemID, grade: ReviewGrade, diff: String?)
     case progress(current: Int, total: Int)

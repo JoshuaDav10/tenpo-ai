@@ -41,6 +41,13 @@ struct HomeView: View {
                 .disabled(loading || contentCount == 0)
 
                 NavigationLink {
+                    ReaderView(container: container)
+                } label: {
+                    Label("Reader", systemImage: "book.fill")
+                }
+                .disabled(loading || contentCount == 0)
+
+                NavigationLink {
                     MasteryDashboardView(container: container)
                 } label: {
                     Label("Mastery dashboard", systemImage: "chart.bar.fill")
