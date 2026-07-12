@@ -61,5 +61,9 @@ let package = Package(
         .testTarget(name: "CoreModelsTests", dependencies: ["CoreModels"]),
         .testTarget(name: "PersistenceTests", dependencies: ["Persistence", "CoreModels"]),
         .testTarget(name: "JapanesePackTests", dependencies: ["JapanesePack"]),
+        .testTarget(name: "LearnerModelTests", dependencies: ["LearnerModel", "CoreModels", "Persistence"]),
+        .testTarget(name: "SpeechKitTests", dependencies: ["SpeechKit", "CoreModels", "JapanesePack"]),
+        .testTarget(name: "ContentKitTests", dependencies: ["ContentKit", "CoreModels", "Persistence"]),
+        .testTarget(name: "ModeEngineTests", dependencies: ["ModeEngine", "CoreModels"]),
     ]
 )
