@@ -1,0 +1,43 @@
+// Per-user daily cost accounting (§4.3.6). In-memory for dogfooding — the
+// proxy is a single VM, and losing a partial day's meter on restart only
+// under-counts in the user's favor. Persisted metering can move to Supabase later.
+//
+// Caps gate STARTING sessions, never terminate active ones (R13).
+
+export interface UsageSummary {
+  userId: string;
+  day: string;
+  spentUSD: number;
+  softCapUSD: number;
+  hardCapUSD: number;
+  overSoftCap: boolean;
+  overHardCap: boolean;
+}
+
+const SOFT_CAP = Number(process.env.DAILY_SOFT_CAP_USD ?? "2.50");
+const HARD_CAP = Number(process.env.DAILY_HARD_CAP_USD ?? "5.00");
+
+const spent = new Map<string, number>(); // `${userId}:${day}` → USD
+
+function today(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function recordCost(userId: string, usd: number): void {
+  const key = `${userId}:${today()}`;
+  spent.set(key, (spent.get(key) ?? 0) + usd);
+}
+
+export function usage(userId: string): UsageSummary {
+  const day = today();
+  const spentUSD = spent.get(`${userId}:${day}`) ?? 0;
+  return {
+    userId,
+    day,
+    spentUSD,
+    softCapUSD: SOFT_CAP,
+    hardCapUSD: HARD_CAP,
+    overSoftCap: spentUSD >= SOFT_CAP,
+    overHardCap: spentUSD >= HARD_CAP,
+  };
+}

@@ -1,0 +1,19 @@
+{
+  "name": "kizuna-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "API proxy for Kizuna (ARCHITECTURE.md §7). Holds provider keys and prompts server-side; the iOS client names capabilities, never providers.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/index.ts",
+    "start": "node --env-file-if-exists=.env src/index.ts",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "fastify": "^5.2.0",
+    "jose": "^6.0.0"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "chat":     { "primary": "anthropic:claude-sonnet-4-6", "fallback": "openai:gpt-4.1-mini" },
+  "stt":      { "primary": "deepgram:nova-ja",            "fallback": "openai:whisper-1" },
+  "tts":      { "primary": "elevenlabs:voice_map",        "fallback": "openai:tts-1" },
+  "pron":     { "primary": "azure:ja-JP" },
+  "realtime": { "primary": "openai:realtime",             "fallback": "gemini:live" }
+}
