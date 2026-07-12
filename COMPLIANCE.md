@@ -7,8 +7,8 @@ Update this file whenever a provider is wired up or a data-handling setting is c
 
 | Provider | Purpose | Trains on API data? | Retention setting chosen | Terms version / date |
 |---|---|---|---|---|
-| Anthropic (Claude) | Director, evaluation, content gen | No (API default) | TBD at wiring | — |
-| OpenAI (Realtime, TTS fallback) | Roleplay voice | No (API default) | TBD at wiring | — |
+| Anthropic (Claude) | Director, evaluation, content gen | No (API default) | Default no-training; request ZDR when eligible. Messages API `anthropic-version` 2023-06-01; structured output via forced tool-use (not output_config.format, unsupported on sonnet-4-6). Model id from routing table. | 2023-06-01 |
+| OpenAI (Chat/TTS fallback) | Fallback chat + TTS | No (API default) | Default no-training; structured output via forced function tool_choice | — |
 | Deepgram (Nova ja) | Server STT | TBD — review at wiring | TBD | — |
 | Azure Speech | Pronunciation assessment | TBD — review at wiring | TBD | — |
 | ElevenLabs | Curriculum TTS | TBD — verify output storage/redistribution license | TBD | — |
