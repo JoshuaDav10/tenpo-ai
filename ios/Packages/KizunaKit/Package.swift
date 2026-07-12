@@ -9,7 +9,7 @@ let package = Package(
             name: "KizunaKit",
             targets: [
                 "CoreModels", "LearnerModel", "ContentKit", "SpeechKit",
-                "RealtimeKit", "ModeEngine", "LanguagePackCore", "JapanesePack",
+                "RealtimeKit", "ModeEngine", "Modes", "LanguagePackCore", "JapanesePack",
                 "Persistence", "SyncKit", "DesignSystem",
             ]
         ),
@@ -49,7 +49,14 @@ let package = Package(
         // LearningMode protocol + registry + SessionRunner (§4.6).
         .target(name: "ModeEngine", dependencies: [
             "CoreModels", "LearnerModel", "ContentKit", "SpeechKit",
-            "RealtimeKit", "LanguagePackCore",
+            "RealtimeKit", "LanguagePackCore", "Persistence",
+        ]),
+
+        // The learning modes (§4.6 launch set). Each mode is a plugin registered
+        // in the ModeRegistry; zero changes to core to add one.
+        .target(name: "Modes", dependencies: [
+            "ModeEngine", "CoreModels", "ContentKit", "SpeechKit",
+            "LearnerModel", "LanguagePackCore",
         ]),
 
         // Supabase sync (§4.7 sync rules).
@@ -64,6 +71,8 @@ let package = Package(
         .testTarget(name: "LearnerModelTests", dependencies: ["LearnerModel", "CoreModels", "Persistence"]),
         .testTarget(name: "SpeechKitTests", dependencies: ["SpeechKit", "CoreModels", "JapanesePack"]),
         .testTarget(name: "ContentKitTests", dependencies: ["ContentKit", "CoreModels", "Persistence"]),
-        .testTarget(name: "ModeEngineTests", dependencies: ["ModeEngine", "CoreModels"]),
+        .testTarget(name: "ModeEngineTests", dependencies: [
+            "ModeEngine", "Modes", "CoreModels", "Persistence", "JapanesePack", "ContentKit", "SyncKit",
+        ]),
     ]
 )

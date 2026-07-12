@@ -232,6 +232,21 @@ public struct SessionRow: Codable, FetchableRecord, PersistableRecord, Sendable 
         self.costUSD = session.costUSD
         self.pipeline = session.pipeline?.rawValue
     }
+
+    public func asSessionRecord() throws -> SessionRecord {
+        guard let uuid = UUID(uuidString: id) else {
+            throw PersistenceError.corruptRow(table: Self.databaseTableName, id: id)
+        }
+        return SessionRecord(
+            id: uuid, modeID: modeID,
+            scenarioID: scenarioID.map(ItemID.init(rawValue:)),
+            startedAt: startedAt, endedAt: endedAt,
+            status: status.flatMap(SessionStatus.init(rawValue:)),
+            score: try score.map(decodeJSON),
+            costUSD: costUSD,
+            pipeline: pipeline.flatMap(SessionPipeline.init(rawValue:))
+        )
+    }
 }
 
 // MARK: - transcript_turn
@@ -263,6 +278,16 @@ public struct TranscriptTurnRecord: Codable, FetchableRecord, PersistableRecord,
         self.audioRef = turn.audioRef
         self.directorJSON = try turn.directorJSON.map(encodeJSON)
         self.at = turn.at
+    }
+
+    public func asTranscriptTurn() throws -> TranscriptTurn {
+        guard let uuid = UUID(uuidString: sessionID), let role = TranscriptRole(rawValue: role) else {
+            throw PersistenceError.corruptRow(table: Self.databaseTableName, id: sessionID)
+        }
+        return TranscriptTurn(
+            sessionID: uuid, seq: seq, role: role, text: text,
+            audioRef: audioRef, directorJSON: try directorJSON.map(decodeJSON), at: at
+        )
     }
 }
 

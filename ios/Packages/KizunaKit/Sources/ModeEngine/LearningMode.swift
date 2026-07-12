@@ -111,7 +111,7 @@ public protocol LearningMode: Sendable {
     func makeSession(plan: SessionPlan) -> any ModeSession
 }
 
-public protocol ModeSession: AnyObject {
+public protocol ModeSession: AnyObject, Sendable {
     var events: AsyncStream<ModeEvent> { get }
     func start() async
     func handle(_ input: LearnerInput) async
