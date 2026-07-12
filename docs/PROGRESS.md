@@ -19,7 +19,7 @@ Last updated: 2026-07-12 (batch 5)
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **65** tests (`swift test`) — all green.
+- Swift: **68** tests (`swift test`) — all green.
 - Server: **7** tests (`npm test`) — all green.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)
@@ -65,6 +65,10 @@ proxy with auth/routing/cost-meter/stubs. App boots.
 - ✅ `SupabaseSyncService` (account-gated, injectable config) — full-table upsert push +
   LWW/append-only merge pull per §4.7; drop-in `SyncService` (`.live` uses `NoopSyncService`
   until a Supabase config exists). `SessionRunner` already fires `syncNow()` post-session.
+  NOW TESTED headlessly (URLProtocol stub, `SyncKitTests`): push injects `user_id`, LWW by
+  `last_review`, append-only insert-ignore. Testing caught + fixed a real bug — the pull URL
+  was building `skill_state?select=*` as a percent-encoded PATH (would 404 on live PostgREST);
+  now uses `URLComponents` query items.
 - ✅ Client cost caps (§4.3.6, R13): pure `CostGovernor` in CoreModels (soft $2.50→cheap
   mode, hard $5→drills only; manual toggle only tightens). `AppContainer.costPolicy()`
   reads metered spend; `RoleplayListView` gates STARTING (cheap-mode notice / drills-only

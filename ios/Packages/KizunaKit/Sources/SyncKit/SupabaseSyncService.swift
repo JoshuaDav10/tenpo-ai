@@ -67,7 +67,7 @@ public actor SupabaseSyncService: SyncService {
             objects.append(dict)
         }
         let body = try JSONSerialization.data(withJSONObject: objects)
-        var request = try await makeRequest(path: table, method: "POST")
+        var request = try await makeRequest(table: table, method: "POST")
         request.setValue("resolution=merge-duplicates", forHTTPHeaderField: "Prefer")
         request.httpBody = body
         _ = try await sendExpectingSuccess(request)
@@ -117,15 +117,21 @@ public actor SupabaseSyncService: SyncService {
     }
 
     private func fetchAll<R: Decodable>(table: String) async throws -> [R] {
-        let request = try await makeRequest(path: "\(table)?select=*", method: "GET")
+        let request = try await makeRequest(table: table, method: "GET", query: [URLQueryItem(name: "select", value: "*")])
         let data = try await sendExpectingSuccess(request)
         return try JSONDecoder().decode([R].self, from: data)
     }
 
     // MARK: - transport
 
-    private func makeRequest(path: String, method: String) async throws -> URLRequest {
-        var request = URLRequest(url: config.restURL.appendingPathComponent(path))
+    private func makeRequest(table: String, method: String, query: [URLQueryItem] = []) async throws -> URLRequest {
+        // Build via URLComponents so `?select=*` lands as a real query, not a
+        // percent-encoded path segment (PostgREST would 404 on the latter).
+        let url = config.restURL.appendingPathComponent(table)
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        if !query.isEmpty { components?.queryItems = query }
+        guard let finalURL = components?.url else { throw SyncError.badURL(table: table) }
+        var request = URLRequest(url: finalURL)
         request.httpMethod = method
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(config.anonKey, forHTTPHeaderField: "apikey")
@@ -147,4 +153,5 @@ public actor SupabaseSyncService: SyncService {
 
 public enum SyncError: Error, Sendable {
     case http(status: Int, body: String)
+    case badURL(table: String)
 }
