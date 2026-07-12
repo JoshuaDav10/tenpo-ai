@@ -4,7 +4,7 @@
 read this + `docs/ARCHITECTURE.md` (the spec) and can resume without reloading the
 whole history. Update it whenever a chunk is verifiably complete.
 
-Last updated: 2026-07-12
+Last updated: 2026-07-12 (batch 5)
 
 ## How to build & test (conventions)
 - Xcode 26.6 installed but `xcode-select` points at CommandLineTools → prefix Swift
@@ -19,7 +19,7 @@ Last updated: 2026-07-12
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **56** tests (`swift test`) — all green.
+- Swift: **60** tests (`swift test`) — all green.
 - Server: **7** tests (`npm test`) — all green.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)
@@ -44,7 +44,7 @@ proxy with auth/routing/cost-meter/stubs. App boots.
 - `GenericDrillSession`/`DrillConfig` + 5 modes: VocabIntro, EchoDrill (pron-graded),
   Production (EN→JP), Comprehension (JP→EN), Cloze (particle). `DrillView` with text + mic.
 
-### Phase 3 — Roleplay ✅ ENGINE + CHEAP-MODE CLIENT DONE / ⏳ LIVE-VOICE REMAINS
+### Phase 3 — Roleplay ✅ ENGINE + CHEAP-MODE CLIENT DONE / ⏳ LIVE-VOICE code-complete (needs proxy)
 - `Director.swift` — §4.4 verdict types (tolerant decode→safeContinue), Scenario types,
   `LiveDirectorService` (structured call, retry-then-safe-continue §11).
 - `RoleplayEngine` (actor) — code-enforced guardrails (D6): end_scene only when legal,
@@ -52,15 +52,20 @@ proxy with auth/routing/cost-meter/stubs. App boots.
   praise (R15), errors→SRS (R8). **Adversarial suite (R1/R3/R4) passes.**
 - `ActorService` + `LiveActorService`; `GuidedRoleplayMode` (cheap-mode text cascade);
   `RoleplayListView` + `GuidedRoleplayView` (goal HUD = honest scoring visible R1).
-- Server: `providers/{chat,stt,tts,pron}.ts`, `prompts/` (director_turn + content_gen), TTS cache.
-- **REMAINING:** RealtimeKit WSS live-voice Actor (Pipeline A) + server `/realtime` bridge;
-  `seed_weak_items` injection (moat loop); `actor_turn` server template.
+- Server: `providers/{chat,stt,tts,pron}.ts`, `prompts/` (director_turn + actor_turn + content_gen), TTS cache.
+- ✅ `seed_weak_items` injection (moat loop); `actor_turn` server template.
+- ✅ Live-voice plumbing CODE-COMPLETE: server `/realtime` WSS bridge (OpenAI Realtime,
+  closes gracefully w/o key) + client realtime provider. LIVE-VERIFY needs deployed proxy + key.
 
 ### Phase 4 — Sync / polish / compliance ⏳ PARTIAL
 - ✅ Compliance screens: `ConsentView` (§8.1 5.1.2i gate), `LicensesView` (§8.3),
   `SettingsView`+`DataManager` (account deletion + JSON export §8.2).
-- **REMAINING:** SupabaseSyncService (account-gated), client cost caps + cost display,
-  persona/voice picker (R16), `PrivacyInfo.xcprivacy` manifest, cheap-mode client switch.
+- ✅ Persona/voice picker (R16) in Settings; `PrivacyInfo.xcprivacy` manifest bundled;
+  local cost display on dashboard.
+- ✅ `SupabaseSyncService` (account-gated, injectable config) — full-table upsert push +
+  LWW/append-only merge pull per §4.7; drop-in `SyncService` (`.live` uses `NoopSyncService`
+  until a Supabase config exists). `SessionRunner` already fires `syncNow()` post-session.
+- **REMAINING:** client cost caps enforcement; cheap-mode client switch; modes 11.
 
 ### Phase 5 — Post-MVP (NOT this push, per spec §9)
 Pitch-accent drill (needs Kanjium data), FSRS weight optimization, scenario auto-gen UI,
