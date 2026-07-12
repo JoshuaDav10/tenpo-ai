@@ -33,6 +33,13 @@ struct HomeView: View {
                 .padding(.horizontal)
 
                 NavigationLink {
+                    RoleplayListView(container: container)
+                } label: {
+                    Label("Roleplay", systemImage: "bubble.left.and.bubble.right.fill")
+                }
+                .disabled(loading || contentCount == 0)
+
+                NavigationLink {
                     MasteryDashboardView(container: container)
                 } label: {
                     Label("Mastery dashboard", systemImage: "chart.bar.fill")

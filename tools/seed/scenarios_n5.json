@@ -1,5 +1,5 @@
 {
-  "_comment": "Kizuna starter roleplay scenarios — JLPT N5. Format follows ARCHITECTURE.md §4.4 (Director/Actor scenario definition). Stored as content_item kind=scenario; the whole object below becomes the payload, with band/id lifted to columns. target_items reference seed content ids so item_link(scenario uses-> item) edges resolve where the target exists.",
+  "_comment": "N5 roleplay scenarios (§4.4 format). goals[].target_items reference seed vocab/grammar ids; dangling refs are pruned by the importer. register: casual|polite|keigo.",
   "items": [
     {
       "id": "scenario:pharmacy_headache_v1",
@@ -9,9 +9,9 @@
       "setting": "Small pharmacy in Kyoto, evening.",
       "persona_hint": "middle-aged pharmacist, kind, speaks clearly",
       "goals": [
-        { "id": "g1", "required": true, "desc_en": "Explain that you have a headache", "target_items": ["vocab:頭"] },
-        { "id": "g2", "required": true, "desc_en": "Ask whether they have something for it", "target_items": ["grammar:arimasu"] },
-        { "id": "g3", "required": false, "desc_en": "Ask about the price", "target_items": ["grammar:question_words"] }
+        { "id": "g1", "required": true,  "desc_en": "Explain that you have a headache", "target_items": ["vocab:頭"] },
+        { "id": "g2", "required": true,  "desc_en": "Ask whether they have something for it", "target_items": ["vocab:薬"] },
+        { "id": "g3", "required": false, "desc_en": "Ask about the price", "target_items": ["vocab:いくら"] }
       ],
       "complication_pool": ["item out of stock", "pharmacist asks about allergies"],
       "seed_weak_items": true
@@ -20,15 +20,104 @@
       "id": "scenario:restaurant_order_v1",
       "title": "レストランで",
       "register": "polite",
-      "band": "N5.3",
-      "setting": "Casual family restaurant at lunchtime.",
-      "persona_hint": "cheerful young server, patient with beginners",
+      "band": "N5.2",
+      "setting": "A casual family restaurant at lunchtime.",
+      "persona_hint": "cheerful waiter, patient with beginners",
       "goals": [
-        { "id": "g1", "required": true, "desc_en": "Order a dish you want to eat", "target_items": ["grammar:tai", "vocab:食べる"] },
-        { "id": "g2", "required": true, "desc_en": "Ask for water", "target_items": ["vocab:水", "grammar:wo_object"] },
-        { "id": "g3", "required": false, "desc_en": "Ask where the toilet is", "target_items": ["grammar:question_words"] }
+        { "id": "g1", "required": true,  "desc_en": "Ask for a menu", "target_items": ["vocab:メニュー"] },
+        { "id": "g2", "required": true,  "desc_en": "Order a dish and a drink", "target_items": ["vocab:水"] },
+        { "id": "g3", "required": false, "desc_en": "Ask for the bill", "target_items": ["vocab:お願いします"] }
       ],
-      "complication_pool": ["dish sold out", "server recommends today's special"],
+      "complication_pool": ["dish sold out", "waiter recommends the special"],
+      "seed_weak_items": true
+    },
+    {
+      "id": "scenario:station_directions_v1",
+      "title": "駅で",
+      "register": "polite",
+      "band": "N5.3",
+      "setting": "A busy train station; you are lost.",
+      "persona_hint": "helpful station attendant",
+      "goals": [
+        { "id": "g1", "required": true,  "desc_en": "Ask how to get to Tokyo Station", "target_items": ["vocab:駅"] },
+        { "id": "g2", "required": true,  "desc_en": "Ask which platform", "target_items": ["vocab:何番"] },
+        { "id": "g3", "required": false, "desc_en": "Ask how much the ticket costs", "target_items": ["vocab:いくら"] }
+      ],
+      "complication_pool": ["line is delayed", "must transfer once"],
+      "seed_weak_items": true
+    },
+    {
+      "id": "scenario:konbini_v1",
+      "title": "コンビニで",
+      "register": "polite",
+      "band": "N5.2",
+      "setting": "A convenience store checkout.",
+      "persona_hint": "brisk but friendly clerk",
+      "goals": [
+        { "id": "g1", "required": true,  "desc_en": "Say you'd like to pay", "target_items": ["vocab:お願いします"] },
+        { "id": "g2", "required": true,  "desc_en": "Decline a bag", "target_items": ["vocab:いいえ"] },
+        { "id": "g3", "required": false, "desc_en": "Ask to heat the bento", "target_items": [] }
+      ],
+      "complication_pool": ["card reader is down; cash only"],
+      "seed_weak_items": false
+    },
+    {
+      "id": "scenario:self_intro_v1",
+      "title": "自己紹介",
+      "register": "polite",
+      "band": "N5.1",
+      "setting": "First day meeting a new classmate.",
+      "persona_hint": "friendly classmate your age",
+      "goals": [
+        { "id": "g1", "required": true,  "desc_en": "Introduce your name", "target_items": ["vocab:私"] },
+        { "id": "g2", "required": true,  "desc_en": "Say where you are from", "target_items": ["vocab:国"] },
+        { "id": "g3", "required": false, "desc_en": "Say what you like", "target_items": ["vocab:好き"] }
+      ],
+      "complication_pool": ["classmate is from the same country"],
+      "seed_weak_items": true
+    },
+    {
+      "id": "scenario:cafe_order_v1",
+      "title": "カフェで",
+      "register": "casual",
+      "band": "N5.2",
+      "setting": "Ordering at a small neighborhood cafe.",
+      "persona_hint": "laid-back barista, uses casual speech",
+      "goals": [
+        { "id": "g1", "required": true,  "desc_en": "Order a coffee", "target_items": ["vocab:コーヒー"] },
+        { "id": "g2", "required": true,  "desc_en": "Say hot or iced", "target_items": ["vocab:熱い"] },
+        { "id": "g3", "required": false, "desc_en": "Ask for the wifi password", "target_items": [] }
+      ],
+      "complication_pool": ["only decaf left"],
+      "seed_weak_items": false
+    },
+    {
+      "id": "scenario:ask_time_v1",
+      "title": "時間を聞く",
+      "register": "polite",
+      "band": "N5.2",
+      "setting": "On the street, you need to know the time.",
+      "persona_hint": "a passerby in a hurry but polite",
+      "goals": [
+        { "id": "g1", "required": true,  "desc_en": "Politely ask what time it is", "target_items": ["vocab:今"] },
+        { "id": "g2", "required": false, "desc_en": "Thank them", "target_items": ["vocab:ありがとう"] }
+      ],
+      "complication_pool": ["they aren't sure and guess"],
+      "seed_weak_items": false
+    },
+    {
+      "id": "scenario:clothes_shop_v1",
+      "title": "服屋で",
+      "register": "polite",
+      "band": "N5.3",
+      "setting": "A clothing shop; you want to try something on.",
+      "persona_hint": "attentive shop assistant",
+      "goals": [
+        { "id": "g1", "required": true,  "desc_en": "Ask to try it on", "target_items": ["vocab:着る"] },
+        { "id": "g2", "required": true,  "desc_en": "Ask for a different size", "target_items": ["vocab:大きい"] },
+        { "id": "g3", "required": false, "desc_en": "Ask the price", "target_items": ["vocab:いくら"] }
+      ],
+      "complication_pool": ["size not in stock", "assistant suggests another color"],
       "seed_weak_items": true
     }
   ]

@@ -12,6 +12,7 @@
 		5973C65F1565F233037AEDD7 /* seed in Resources */ = {isa = PBXBuildFile; fileRef = 471ECCED2807421DD2C7D9DF /* seed */; };
 		6725E154E2B1AC945734FA20 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 942369F6BB1406B2BE170AEF /* AppContainer.swift */; };
 		6D0ABC63F57923325C909C20 /* ContentBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB050824D8B2E836FEDC6670 /* ContentBootstrap.swift */; };
+		88FE9C57CA7403FB8C39B0B3 /* RoleplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665A81C30A3AE528C2C69375 /* RoleplayView.swift */; };
 		8C4166C370501BE7C327A44E /* MasteryDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */; };
 		955854218DFA78A56A07801B /* DrillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA25C06355708FC1E61153E /* DrillView.swift */; };
 		B840F5C5935B11972FFFC3F7 /* KizunaKit in Frameworks */ = {isa = PBXBuildFile; productRef = 316018456B31A50F1828C67E /* KizunaKit */; };
@@ -23,6 +24,7 @@
 		2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryDashboardView.swift; sourceTree = "<group>"; };
 		471ECCED2807421DD2C7D9DF /* seed */ = {isa = PBXFileReference; lastKnownFileType = folder; name = seed; path = ../tools/seed; sourceTree = SOURCE_ROOT; };
 		610D354D65D78B83F6244524 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		665A81C30A3AE528C2C69375 /* RoleplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleplayView.swift; sourceTree = "<group>"; };
 		7959ACC2A9C0556EE5AAC796 /* Kizuna.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Kizuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		942369F6BB1406B2BE170AEF /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		C628DD408B6527E92B9A77EC /* KizunaKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KizunaKit; path = Packages/KizunaKit; sourceTree = SOURCE_ROOT; };
@@ -77,6 +79,7 @@
 				610D354D65D78B83F6244524 /* HomeView.swift */,
 				21112E02A46B4490F41771D4 /* KizunaApp.swift */,
 				2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */,
+				665A81C30A3AE528C2C69375 /* RoleplayView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -178,6 +181,7 @@
 				4F065724937E8DD2275FD3D8 /* HomeView.swift in Sources */,
 				2AE3BFDE634992ED92B6CC17 /* KizunaApp.swift in Sources */,
 				8C4166C370501BE7C327A44E /* MasteryDashboardView.swift in Sources */,
+				88FE9C57CA7403FB8C39B0B3 /* RoleplayView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

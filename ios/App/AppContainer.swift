@@ -56,6 +56,29 @@ final class AppContainer {
         ModeContext(learner: learner, content: content, speech: speech, pack: pack)
     }
 
+    /// Context for the guided (cheap-mode) roleplay: Director + Actor over `chat`.
+    func roleplayContext() -> ModeContext {
+        ModeContext(
+            learner: learner, content: content, speech: speech, pack: pack,
+            director: LiveDirectorService(chat: chat),
+            actor: LiveActorService(chat: chat)
+        )
+    }
+
+    /// All roleplay scenarios in the content store.
+    func scenarios() async throws -> [ContentItem] {
+        try await content.items(kind: .scenario, band: nil, limit: 100)
+    }
+
+    /// A runner for a specific scenario. Returns the decoded Scenario for the HUD.
+    func makeRoleplaySession(_ item: ContentItem) -> (runner: SessionRunner, scenario: Scenario)? {
+        guard let scenario = Scenario(item) else { return nil }
+        let plan = SessionPlan(items: [item], scenarioID: item.id)
+        let mode = GuidedRoleplayMode(context: roleplayContext())
+        let runner = SessionRunner(mode: mode, plan: plan, store: store, learner: learner, sync: sync)
+        return (runner, scenario)
+    }
+
     /// Build a runner for today's session: pull the daily queue and run VocabIntro
     /// over it. (More modes join the rotation as they land.)
     func makeDailySession(count: Int = 10) async throws -> SessionRunner {
@@ -71,6 +94,7 @@ final class AppContainer {
         registry.register(ProductionMode.self)
         registry.register(ComprehensionMode.self)
         registry.register(ClozeMode.self)
+        registry.register(GuidedRoleplayMode.self)
     }
 
     static func live() throws -> AppContainer {
