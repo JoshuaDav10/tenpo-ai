@@ -57,9 +57,11 @@ final class AppContainer {
             content: LiveContentService(db: db),
             learner: LiveLearnerModelService(db: db),
             speech: LiveSpeechService(
-                stt: MockSTTProvider(),
+                onDeviceSTT: MockSTTProvider(),
+                serverSTT: MockSTTProvider(),
                 tts: MockTTSProvider(),
-                pronunciation: MockPronunciationAssessor()
+                pronunciation: MockPronunciationAssessor(),
+                pack: pack
             ),
             realtime: MockRealtimeVoiceProvider(),
             chat: MockChatProvider(),
@@ -71,15 +73,18 @@ final class AppContainer {
     /// Fully in-memory container for previews and UI tests.
     static func preview() throws -> AppContainer {
         let db = try DatabaseManager.inMemory()
+        let pack = JapanesePack()
         return AppContainer(
             db: db,
-            pack: JapanesePack(),
+            pack: pack,
             content: LiveContentService(db: db),
             learner: LiveLearnerModelService(db: db),
             speech: LiveSpeechService(
-                stt: MockSTTProvider(),
+                onDeviceSTT: MockSTTProvider(),
+                serverSTT: MockSTTProvider(),
                 tts: MockTTSProvider(),
-                pronunciation: MockPronunciationAssessor()
+                pronunciation: MockPronunciationAssessor(),
+                pack: pack
             ),
             realtime: MockRealtimeVoiceProvider(),
             chat: MockChatProvider(),

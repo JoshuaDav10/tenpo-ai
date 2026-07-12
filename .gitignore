@@ -24,3 +24,6 @@ tools/build/
 *.sqlite
 *.sqlite-wal
 *.sqlite-shm
+
+# Agent worktrees (isolated branches, not part of the tree)
+.claude/worktrees/
