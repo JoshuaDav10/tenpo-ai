@@ -1,4 +1,5 @@
 import Foundation
+import GRDB
 import CoreModels
 import Persistence
 import LearnerModel
@@ -65,6 +66,18 @@ final class AppContainer {
         )
     }
 
+    /// Sum of session cost recorded today (dogfood cost meter, §4.3.6). Local
+    /// sessions cost $0; this populates once the proxy records per-session cost.
+    func todaySpendUSD() async -> Double {
+        let startOfDay = Calendar.current.startOfDay(for: Date())
+        let value = try? await db.read { database in
+            try Double.fetchOne(database,
+                sql: "SELECT COALESCE(SUM(cost_usd), 0) FROM session WHERE started_at >= ?",
+                arguments: [startOfDay])
+        }
+        return (value ?? 0) ?? 0
+    }
+
     /// All roleplay scenarios in the content store.
     func scenarios() async throws -> [ContentItem] {
         try await content.items(kind: .scenario, band: nil, limit: 100)
@@ -74,7 +87,7 @@ final class AppContainer {
     func makeRoleplaySession(_ item: ContentItem) -> (runner: SessionRunner, scenario: Scenario)? {
         guard let scenario = Scenario(item) else { return nil }
         let plan = SessionPlan(items: [item], scenarioID: item.id)
-        let mode = GuidedRoleplayMode(context: roleplayContext())
+        let mode = GuidedRoleplayMode(context: roleplayContext(), persona: Preferences.persona)
         let runner = SessionRunner(mode: mode, plan: plan, store: store, learner: learner, sync: sync)
         return (runner, scenario)
     }

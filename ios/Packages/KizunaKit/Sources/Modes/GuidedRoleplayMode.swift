@@ -22,10 +22,18 @@ public struct GuidedRoleplayMode: LearningMode {
     )
 
     let context: ModeContext
-    public init(context: ModeContext) { self.context = context }
+    let persona: PersonaID
+    public init(context: ModeContext) {
+        self.context = context
+        self.persona = .warmTutor
+    }
+    public init(context: ModeContext, persona: PersonaID) {
+        self.context = context
+        self.persona = persona
+    }
 
     public func makeSession(plan: SessionPlan) -> any ModeSession {
-        GuidedRoleplaySession(plan: plan, context: context)
+        GuidedRoleplaySession(plan: plan, context: context, persona: persona)
     }
 }
 

@@ -9,12 +9,14 @@ struct MasteryDashboardView: View {
 
     @State private var summary: MasterySummary?
     @State private var dueCount = 0
+    @State private var todaySpend = 0.0
 
     var body: some View {
         List {
             Section {
                 LabeledContent("Due now", value: "\(dueCount)")
                 LabeledContent("Tracked skills", value: "\(summary?.total.total ?? 0)")
+                LabeledContent("Spent today", value: todaySpend.formatted(.currency(code: "USD")))
             }
 
             if let summary, !summary.dimensions.isEmpty {
@@ -41,6 +43,7 @@ struct MasteryDashboardView: View {
     private func load() async {
         summary = try? await container.learner.masteryCounts()
         dueCount = (try? await container.learner.dueCount(now: Date())) ?? 0
+        todaySpend = await container.todaySpendUSD()
     }
 }
 

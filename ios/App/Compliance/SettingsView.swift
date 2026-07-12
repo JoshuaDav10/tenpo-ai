@@ -11,8 +11,22 @@ struct SettingsView: View {
     @State private var busy = false
     @State private var deletedNote: String?
 
+    @State private var persona = Preferences.persona
+
     var body: some View {
         List {
+            Section("Roleplay partner") {
+                Picker("Voice & persona", selection: $persona) {
+                    ForEach(Preferences.personaChoices) { choice in
+                        Text(choice.name).tag(choice.persona)
+                    }
+                }
+                if let blurb = Preferences.personaChoices.first(where: { $0.persona == persona })?.blurb {
+                    Text(blurb).font(.caption).foregroundStyle(.secondary)
+                }
+            }
+            .onChange(of: persona) { _, new in Preferences.persona = new }
+
             Section("Privacy") {
                 NavigationLink {
                     ProvidersView(consentDate: compliance.consentDate)
