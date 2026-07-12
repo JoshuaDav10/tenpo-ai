@@ -118,6 +118,4 @@ public protocol ModeSession: AnyObject, Sendable {
     func finish() async -> ModeResult
 }
 
-/// Roleplay evaluation layer (§4.4). The structured-output Director call and its
-/// verdict schema land in Phase 3; the protocol exists now so ModeContext is stable.
-public protocol DirectorService: Sendable {}
+// DirectorService (§4.4) is defined in Director.swift.
