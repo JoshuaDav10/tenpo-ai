@@ -22,8 +22,8 @@ public actor SessionRunner {
     private let sync: any SyncService
     private let modeID: String
 
-    public let events: AsyncStream<ModeEvent>
-    private let continuation: AsyncStream<ModeEvent>.Continuation
+    public nonisolated let events: AsyncStream<ModeEvent>
+    private nonisolated let continuation: AsyncStream<ModeEvent>.Continuation
     private var pumpTask: Task<Void, Never>?
 
     public init(

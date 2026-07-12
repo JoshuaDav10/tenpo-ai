@@ -1,0 +1,17 @@
+{
+  "_comment": "Kizuna starter example sentences — JLPT N5, authored in-house (NOT from Tatoeba) so they can ship under the app's own terms. The real importer pulls band-filtered CC-BY sentences from Tatoeba; these seed rows exist so drills/reading modes have content today. Each entry: id (sentence:s_n5_NN), ja, reading (kana), en, band. Vocabulary is kept within the seed vocab list so item_link(sentence uses-> vocab) edges resolve.",
+  "items": [
+    { "id": "sentence:s_n5_01", "ja": "私は毎日日本語を勉強します。", "reading": "わたしはまいにちにほんごをべんきょうします。", "en": "I study Japanese every day.", "band": "N5.2" },
+    { "id": "sentence:s_n5_02", "ja": "友達と映画を見ました。", "reading": "ともだちとえいがをみました。", "en": "I watched a movie with a friend.", "band": "N5.3" },
+    { "id": "sentence:s_n5_03", "ja": "この店のパンは安いです。", "reading": "このみせのパンはやすいです。", "en": "The bread at this shop is cheap.", "band": "N5.3" },
+    { "id": "sentence:s_n5_04", "ja": "明日、学校へ行きます。", "reading": "あした、がっこうへいきます。", "en": "I will go to school tomorrow.", "band": "N5.2" },
+    { "id": "sentence:s_n5_05", "ja": "水を一杯ください。", "reading": "みずをいっぱいください。", "en": "A glass of water, please.", "band": "N5.3" },
+    { "id": "sentence:s_n5_06", "ja": "先生は今、教室にいます。", "reading": "せんせいはいま、きょうしつにいます。", "en": "The teacher is in the classroom now.", "band": "N5.3" },
+    { "id": "sentence:s_n5_07", "ja": "昨日は寒かったです。", "reading": "きのうはさむかったです。", "en": "It was cold yesterday.", "band": "N5.3" },
+    { "id": "sentence:s_n5_08", "ja": "お茶を飲みませんか。", "reading": "おちゃをのみませんか。", "en": "Won't you have some tea?", "band": "N5.3" },
+    { "id": "sentence:s_n5_09", "ja": "駅はどこですか。", "reading": "えきはどこですか。", "en": "Where is the station?", "band": "N5.2" },
+    { "id": "sentence:s_n5_10", "ja": "犬と猫が好きです。", "reading": "いぬとねこがすきです。", "en": "I like dogs and cats.", "band": "N5.3" },
+    { "id": "sentence:s_n5_11", "ja": "この本はとても面白いです。", "reading": "このほんはとてもおもしろいです。", "en": "This book is very interesting.", "band": "N5.3" },
+    { "id": "sentence:s_n5_12", "ja": "一緒にご飯を食べましょう。", "reading": "いっしょにごはんをたべましょう。", "en": "Let's eat a meal together.", "band": "N5.3" }
+  ]
+}

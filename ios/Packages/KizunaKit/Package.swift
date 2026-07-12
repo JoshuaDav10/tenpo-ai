@@ -49,7 +49,7 @@ let package = Package(
         // LearningMode protocol + registry + SessionRunner (§4.6).
         .target(name: "ModeEngine", dependencies: [
             "CoreModels", "LearnerModel", "ContentKit", "SpeechKit",
-            "RealtimeKit", "LanguagePackCore", "Persistence",
+            "RealtimeKit", "LanguagePackCore", "Persistence", "SyncKit",
         ]),
 
         // The learning modes (§4.6 launch set). Each mode is a plugin registered

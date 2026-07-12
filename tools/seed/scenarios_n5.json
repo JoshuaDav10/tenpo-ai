@@ -1,0 +1,35 @@
+{
+  "_comment": "Kizuna starter roleplay scenarios — JLPT N5. Format follows ARCHITECTURE.md §4.4 (Director/Actor scenario definition). Stored as content_item kind=scenario; the whole object below becomes the payload, with band/id lifted to columns. target_items reference seed content ids so item_link(scenario uses-> item) edges resolve where the target exists.",
+  "items": [
+    {
+      "id": "scenario:pharmacy_headache_v1",
+      "title": "薬局で",
+      "register": "polite",
+      "band": "N5.3",
+      "setting": "Small pharmacy in Kyoto, evening.",
+      "persona_hint": "middle-aged pharmacist, kind, speaks clearly",
+      "goals": [
+        { "id": "g1", "required": true, "desc_en": "Explain that you have a headache", "target_items": ["vocab:頭"] },
+        { "id": "g2", "required": true, "desc_en": "Ask whether they have something for it", "target_items": ["grammar:arimasu"] },
+        { "id": "g3", "required": false, "desc_en": "Ask about the price", "target_items": ["grammar:question_words"] }
+      ],
+      "complication_pool": ["item out of stock", "pharmacist asks about allergies"],
+      "seed_weak_items": true
+    },
+    {
+      "id": "scenario:restaurant_order_v1",
+      "title": "レストランで",
+      "register": "polite",
+      "band": "N5.3",
+      "setting": "Casual family restaurant at lunchtime.",
+      "persona_hint": "cheerful young server, patient with beginners",
+      "goals": [
+        { "id": "g1", "required": true, "desc_en": "Order a dish you want to eat", "target_items": ["grammar:tai", "vocab:食べる"] },
+        { "id": "g2", "required": true, "desc_en": "Ask for water", "target_items": ["vocab:水", "grammar:wo_object"] },
+        { "id": "g3", "required": false, "desc_en": "Ask where the toilet is", "target_items": ["grammar:question_words"] }
+      ],
+      "complication_pool": ["dish sold out", "server recommends today's special"],
+      "seed_weak_items": true
+    }
+  ]
+}

@@ -15,6 +15,11 @@ targets:
     platform: iOS
     sources:
       - path: App
+      # Bundle the committed starter curriculum (tools/seed/*.json) as a folder
+      # reference; ContentSeed loads it from subdirectory "seed" on first launch.
+      - path: ../tools/seed
+        type: folder
+        buildPhase: resources
     dependencies:
       - package: KizunaKit
         product: KizunaKit

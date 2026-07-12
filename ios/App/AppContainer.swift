@@ -6,6 +6,7 @@ import ContentKit
 import SpeechKit
 import RealtimeKit
 import ModeEngine
+import Modes
 import SyncKit
 import JapanesePack
 import LanguagePackCore
@@ -23,6 +24,7 @@ final class AppContainer {
     let realtime: any RealtimeVoiceService
     let chat: any ChatProvider
     let sync: any SyncService
+    let store: any SessionStore
     let modeRegistry: ModeRegistry
 
     init(
@@ -34,6 +36,7 @@ final class AppContainer {
         realtime: any RealtimeVoiceService,
         chat: any ChatProvider,
         sync: any SyncService,
+        store: any SessionStore,
         modeRegistry: ModeRegistry
     ) {
         self.db = db
@@ -44,13 +47,33 @@ final class AppContainer {
         self.realtime = realtime
         self.chat = chat
         self.sync = sync
+        self.store = store
         self.modeRegistry = modeRegistry
+    }
+
+    /// The context handed to non-realtime drill modes (§4.6).
+    func drillContext() -> ModeContext {
+        ModeContext(learner: learner, content: content, speech: speech, pack: pack)
+    }
+
+    /// Build a runner for today's session: pull the daily queue and run VocabIntro
+    /// over it. (More modes join the rotation as they land.)
+    func makeDailySession(count: Int = 10) async throws -> SessionRunner {
+        let items = try await learner.requestItems(count: count, dimension: nil)
+        let plan = SessionPlan(items: items)
+        let mode = VocabIntroMode(context: drillContext())
+        return SessionRunner(mode: mode, plan: plan, store: store, learner: learner, sync: sync)
+    }
+
+    private static func registerModes(_ registry: inout ModeRegistry) {
+        registry.register(VocabIntroMode.self)
     }
 
     static func live() throws -> AppContainer {
         let db = try DatabaseManager.appDefault()
         let pack = JapanesePack()
-        let registry = ModeRegistry() // modes register here starting Phase 2
+        var registry = ModeRegistry()
+        registerModes(&registry)
         return AppContainer(
             db: db,
             pack: pack,
@@ -66,6 +89,7 @@ final class AppContainer {
             realtime: MockRealtimeVoiceProvider(),
             chat: MockChatProvider(),
             sync: NoopSyncService(),
+            store: LiveSessionStore(db: db),
             modeRegistry: registry
         )
     }
@@ -74,6 +98,8 @@ final class AppContainer {
     static func preview() throws -> AppContainer {
         let db = try DatabaseManager.inMemory()
         let pack = JapanesePack()
+        var registry = ModeRegistry()
+        registerModes(&registry)
         return AppContainer(
             db: db,
             pack: pack,
@@ -89,7 +115,8 @@ final class AppContainer {
             realtime: MockRealtimeVoiceProvider(),
             chat: MockChatProvider(),
             sync: NoopSyncService(),
-            modeRegistry: ModeRegistry()
+            store: LiveSessionStore(db: db),
+            modeRegistry: registry
         )
     }
 }
