@@ -58,9 +58,11 @@ Provider API keys live only in `server/.env` (locally) / Fly secrets (deployed).
       MVP drill modes 1–5 (VocabIntro, Echo, Production, Comprehension, Cloze) on a
       shared engine, text + on-device voice capture wired into the drill UI
 - [~] Phase 3 — Director/Actor roleplay engine with code-enforced guardrails (R1/R3/R4
-      adversarial suite passing) + real Claude/Deepgram/ElevenLabs/Azure backend adapters,
-      Director prompt + §4.4 schema, TTS cache. Remaining: RealtimeKit WSS Actor client,
-      roleplay UI, scenario authoring, seed_weak_items wiring.
-- [ ] Phase 4 — Sync, cheap-mode pipeline, compliance screens
+      adversarial suite passing), GuidedRoleplayMode (cheap-mode) + goal-HUD UI + 8 N5
+      scenarios, real Claude/Deepgram/ElevenLabs/Azure backend adapters, Director prompt
+      + §4.4 schema, TTS cache. Remaining: RealtimeKit WSS live-voice Actor, seed_weak_items.
+- [~] Phase 4 — Compliance screens done (consent gate §8.1, Licenses & Sources §8.3,
+      account deletion + JSON export §8.2). Remaining: Supabase sync, cheap-mode cost caps
+      on the client, persona/voice selection.
 
-Tests: `swift test` (52, in `ios/Packages/KizunaKit`) + `npm test` (7, in `server`), all green.
+Tests: `swift test` (56, in `ios/Packages/KizunaKit`) + `npm test` (7, in `server`), all green.
