@@ -1,0 +1,45 @@
+name: Kizuna
+options:
+  bundleIdPrefix: com.joshuadavid
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+packages:
+  KizunaKit:
+    path: Packages/KizunaKit
+
+targets:
+  Kizuna:
+    type: application
+    platform: iOS
+    sources:
+      - path: App
+    dependencies:
+      - package: KizunaKit
+        product: KizunaKit
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.joshuadavid.kizuna
+        GENERATE_INFOPLIST_FILE: YES
+        CURRENT_PROJECT_VERSION: 1
+        MARKETING_VERSION: 0.1.0
+        SWIFT_VERSION: "6.0"
+        TARGETED_DEVICE_FAMILY: "1,2"          # universal iPhone + iPad (§1.1)
+        CODE_SIGN_STYLE: Automatic
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+        # §8.1 permission strings
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Kizuna records your voice during practice to transcribe and grade your speaking. Audio is processed by speech-recognition providers listed in Settings → Privacy."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Kizuna uses on-device speech recognition to grade your spoken answers instantly, without sending easy drills to a server."
+
+schemes:
+  Kizuna:
+    build:
+      targets:
+        Kizuna: all
+    run:
+      config: Debug
+    test:
+      config: Debug
