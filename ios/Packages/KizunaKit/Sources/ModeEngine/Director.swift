@@ -27,6 +27,14 @@ public struct ScenarioGoal: Codable, Sendable, Hashable, Identifiable {
         case descEN = "desc_en"
         case targetItems = "target_items"
     }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        required = try c.decode(Bool.self, forKey: .required)
+        descEN = try c.decode(String.self, forKey: .descEN)
+        targetItems = (try? c.decode([ItemID].self, forKey: .targetItems)) ?? []
+    }
 }
 
 public struct Scenario: Codable, Sendable, Hashable, Identifiable {
@@ -64,8 +72,34 @@ public struct Scenario: Codable, Sendable, Hashable, Identifiable {
         case seedWeakItems = "seed_weak_items"
     }
 
+    // Tolerant decoding: complication_pool and seed_weak_items are optional in a
+    // scenario file and default sensibly when absent.
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decode(String.self, forKey: .title)
+        register = try c.decode(String.self, forKey: .register)
+        band = try c.decode(String.self, forKey: .band)
+        setting = try c.decode(String.self, forKey: .setting)
+        personaHint = try c.decode(String.self, forKey: .personaHint)
+        goals = try c.decode([ScenarioGoal].self, forKey: .goals)
+        complicationPool = (try? c.decode([String].self, forKey: .complicationPool)) ?? []
+        seedWeakItems = (try? c.decode(Bool.self, forKey: .seedWeakItems)) ?? false
+    }
+
     public var requiredGoalIDs: Set<String> {
         Set(goals.filter(\.required).map(\.id))
+    }
+
+    /// Decode a `Scenario` from a `content_item` of kind `scenario` (payload holds
+    /// the §4.4 scenario JSON verbatim).
+    public init?(_ item: ContentItem) {
+        guard item.kind == .scenario,
+              let data = try? JSONEncoder().encode(item.payload),
+              let scenario = try? JSONDecoder().decode(Scenario.self, from: data) else {
+            return nil
+        }
+        self = scenario
     }
 }
 

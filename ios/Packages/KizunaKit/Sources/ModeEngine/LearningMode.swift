@@ -49,6 +49,9 @@ public enum ModeEvent: Sendable {
     case heard(Transcription)
     case verdict(itemID: ItemID, grade: ReviewGrade, diff: String?)
     case progress(current: Int, total: Int)
+    /// Roleplay goal HUD: how many required goals the Director has confirmed (R1 —
+    /// makes honest scoring visible). Drill modes never emit this.
+    case goalProgress(completed: Int, total: Int)
     case info(String)
     case finished
 }
@@ -90,11 +93,13 @@ public struct ModeContext: Sendable {
     public let realtime: (any RealtimeVoiceService)?
     public let pack: any LanguagePack
     public let director: (any DirectorService)?
+    public let actor: (any ActorService)?
 
     public init(
         learner: any LearnerModelService, content: any ContentService,
         speech: any SpeechService, realtime: (any RealtimeVoiceService)? = nil,
-        pack: any LanguagePack, director: (any DirectorService)? = nil
+        pack: any LanguagePack, director: (any DirectorService)? = nil,
+        actor: (any ActorService)? = nil
     ) {
         self.learner = learner
         self.content = content
@@ -102,6 +107,7 @@ public struct ModeContext: Sendable {
         self.realtime = realtime
         self.pack = pack
         self.director = director
+        self.actor = actor
     }
 }
 

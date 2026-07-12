@@ -83,6 +83,8 @@ final class DrillViewModel: ObservableObject {
             info = text
         case .progress(let current, let total):
             progress = (current, total)
+        case .goalProgress:
+            break   // roleplay HUD only; drills don't emit this
         case .verdict(_, let grade, let diff):
             lastVerdict = VerdictBadge(grade: grade, diff: diff)
             reviewedCount += 1

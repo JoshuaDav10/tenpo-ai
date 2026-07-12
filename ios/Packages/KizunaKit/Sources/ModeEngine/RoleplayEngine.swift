@@ -134,6 +134,15 @@ public actor RoleplayEngine {
 
     public func currentBandAssessment() -> DirectorVerdict.BandAssessment { currentBand }
 
+    /// Required-goal progress for the HUD (R1 — honest scoring visible).
+    public func progress() -> (completed: Int, total: Int) {
+        let required = scenario.goals.filter(\.required)
+        let done = required.filter { goalStatus[$0.id] == .completed }.count
+        return (done, required.count)
+    }
+
+    public func transcriptMessages() -> [ChatMessage] { transcript }
+
     // MARK: - Finalization
 
     /// Post-session evaluation → categorized errors, per-item review grades, focus
