@@ -52,7 +52,14 @@ Provider API keys live only in `server/.env` (locally) / Fly secrets (deployed).
 ## Status
 
 - [x] Phase 0 — Skeleton: SPM workspace, GRDB schema, DI + mock providers, proxy stubs
-- [ ] Phase 1 — Learner spine: FSRS-6, daily queue, content import, dashboard
-- [ ] Phase 2 — Drill modes + honest grading
-- [ ] Phase 3 — Roleplay engine (Director/Actor)
+- [x] Phase 1 — Learner spine: FSRS-6 scheduler, §4.5 daily queue, content import +
+      N5 seed curriculum (196 items), mastery dashboard
+- [~] Phase 2 — Honest grading (§4.3.4, dual-threshold, R6-provable) + SessionRunner +
+      VocabIntroMode + text-answer drill UI. Remaining: on-device mic capture wired to
+      grader; modes EchoDrill/Comprehension/Production/Cloze (2–5).
+- [~] Phase 3 — Backend ready: real Claude/Deepgram/ElevenLabs/Azure adapters, Director
+      prompt + §4.4 schema, TTS cache. Remaining: RealtimeKit WSS client, DirectorService,
+      guardrails, roleplay UI.
 - [ ] Phase 4 — Sync, cheap-mode pipeline, compliance screens
+
+Tests: `swift test` (38, in `ios/Packages/KizunaKit`) + `npm test` (7, in `server`), all green.
