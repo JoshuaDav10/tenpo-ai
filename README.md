@@ -53,13 +53,14 @@ Provider API keys live only in `server/.env` (locally) / Fly secrets (deployed).
 
 - [x] Phase 0 — Skeleton: SPM workspace, GRDB schema, DI + mock providers, proxy stubs
 - [x] Phase 1 — Learner spine: FSRS-6 scheduler, §4.5 daily queue, content import +
-      N5 seed curriculum (196 items), mastery dashboard
-- [~] Phase 2 — Honest grading (§4.3.4, dual-threshold, R6-provable) + SessionRunner +
-      VocabIntroMode + text-answer drill UI. Remaining: on-device mic capture wired to
-      grader; modes EchoDrill/Comprehension/Production/Cloze (2–5).
-- [~] Phase 3 — Backend ready: real Claude/Deepgram/ElevenLabs/Azure adapters, Director
-      prompt + §4.4 schema, TTS cache. Remaining: RealtimeKit WSS client, DirectorService,
-      guardrails, roleplay UI.
+      N5 seed curriculum (208 items), mastery dashboard
+- [x] Phase 2 — Honest grading (§4.3.4, dual-threshold, R6-provable), SessionRunner,
+      MVP drill modes 1–5 (VocabIntro, Echo, Production, Comprehension, Cloze) on a
+      shared engine, text + on-device voice capture wired into the drill UI
+- [~] Phase 3 — Director/Actor roleplay engine with code-enforced guardrails (R1/R3/R4
+      adversarial suite passing) + real Claude/Deepgram/ElevenLabs/Azure backend adapters,
+      Director prompt + §4.4 schema, TTS cache. Remaining: RealtimeKit WSS Actor client,
+      roleplay UI, scenario authoring, seed_weak_items wiring.
 - [ ] Phase 4 — Sync, cheap-mode pipeline, compliance screens
 
-Tests: `swift test` (38, in `ios/Packages/KizunaKit`) + `npm test` (7, in `server`), all green.
+Tests: `swift test` (52, in `ios/Packages/KizunaKit`) + `npm test` (7, in `server`), all green.
