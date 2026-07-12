@@ -29,6 +29,7 @@ public enum ContentSeed {
         FileSpec(resource: "kanji_n5", kind: .kanji, source: "Kizuna seed (N5)"),
         FileSpec(resource: "grammar_n5", kind: .grammar, source: "Kizuna seed (N5)"),
         FileSpec(resource: "sentences_n5", kind: .sentence, source: "Kizuna seed (N5)"),
+        FileSpec(resource: "cloze_n5", kind: .sentence, source: "Kizuna seed (N5)"),
         FileSpec(resource: "scenarios_n5", kind: .scenario, source: "Kizuna seed (N5)"),
     ]
 

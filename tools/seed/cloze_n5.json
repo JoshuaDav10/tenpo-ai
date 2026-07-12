@@ -1,0 +1,17 @@
+{
+  "_comment": "N5 cloze items (kind=sentence, id=cloze:*) — one particle/form blanked (＿). Answer is the exact fill. Loaded by ClozeMode.",
+  "items": [
+    { "id": "cloze:gakko_ni_ikimasu", "prompt": "がっこう＿いきます。", "answer": "に", "hint": "direction/goal particle", "full": "がっこうにいきます。", "en": "I go to school.", "band": "N5.2" },
+    { "id": "cloze:pan_wo_tabemasu", "prompt": "パン＿たべます。", "answer": "を", "hint": "direct-object particle", "full": "パンをたべます。", "en": "I eat bread.", "band": "N5.2" },
+    { "id": "cloze:watashi_wa_gakusei", "prompt": "わたし＿がくせいです。", "answer": "は", "hint": "topic particle", "full": "わたしはがくせいです。", "en": "I am a student.", "band": "N5.1" },
+    { "id": "cloze:densha_de_ikimasu", "prompt": "でんしゃ＿いきます。", "answer": "で", "hint": "means/method particle", "full": "でんしゃでいきます。", "en": "I go by train.", "band": "N5.3" },
+    { "id": "cloze:tomodachi_to_ikimasu", "prompt": "ともだち＿いきます。", "answer": "と", "hint": "with (accompaniment)", "full": "ともだちといきます。", "en": "I go with a friend.", "band": "N5.3" },
+    { "id": "cloze:nihon_no_kuruma", "prompt": "にほん＿くるま", "answer": "の", "hint": "possessive/linking particle", "full": "にほんのくるま", "en": "a Japanese car", "band": "N5.1" },
+    { "id": "cloze:koohii_ga_suki", "prompt": "コーヒー＿すきです。", "answer": "が", "hint": "subject of liking", "full": "コーヒーがすきです。", "en": "I like coffee.", "band": "N5.3" },
+    { "id": "cloze:mizu_wo_nomimasu", "prompt": "みず＿のみます。", "answer": "を", "hint": "direct-object particle", "full": "みずをのみます。", "en": "I drink water.", "band": "N5.2" },
+    { "id": "cloze:ku_ji_ni_okimasu", "prompt": "くじ＿おきます。", "answer": "に", "hint": "point-in-time particle", "full": "くじにおきます。", "en": "I wake up at nine.", "band": "N5.3" },
+    { "id": "cloze:heya_ni_imasu", "prompt": "へや＿います。", "answer": "に", "hint": "location of existence (います)", "full": "へやにいます。", "en": "I am in the room.", "band": "N5.3" },
+    { "id": "cloze:tabemashita_past", "prompt": "きのう すし＿たべました。", "answer": "を", "hint": "direct-object particle", "full": "きのう すしをたべました。", "en": "I ate sushi yesterday.", "band": "N5.4" },
+    { "id": "cloze:eki_made", "prompt": "えき＿あるきます。", "answer": "まで", "hint": "up to / as far as", "full": "えきまであるきます。", "en": "I walk as far as the station.", "band": "N5.4" }
+  ]
+}

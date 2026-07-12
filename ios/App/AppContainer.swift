@@ -67,6 +67,10 @@ final class AppContainer {
 
     private static func registerModes(_ registry: inout ModeRegistry) {
         registry.register(VocabIntroMode.self)
+        registry.register(EchoDrillMode.self)
+        registry.register(ProductionMode.self)
+        registry.register(ComprehensionMode.self)
+        registry.register(ClozeMode.self)
     }
 
     static func live() throws -> AppContainer {

@@ -304,6 +304,7 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
     kanji = _load_seed_file(seed_dir, "kanji_n5.json")
     grammar = _load_seed_file(seed_dir, "grammar_n5.json")
     sentences = _load_seed_file(seed_dir, "sentences_n5.json")
+    cloze = _load_seed_file(seed_dir, "cloze_n5.json")
     scenarios = _load_seed_file(seed_dir, "scenarios_n5.json")
 
     # --- kanji ---
@@ -372,6 +373,20 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
             if lemma and lemma in s["ja"]:
                 upsert_link(conn, s["id"], vid, "uses")
 
+    # --- cloze sentences (kind=sentence, id=cloze:*; carry prompt/answer payload) ---
+    for c in cloze:
+        payload = {
+            "prompt": c["prompt"],
+            "answer": c["answer"],
+            "hint": c.get("hint"),
+            "full": c.get("full"),
+            "en": c.get("en"),
+        }
+        upsert_content_item(
+            conn, item_id=c["id"], kind="sentence", payload=payload,
+            band=c.get("band"), source=SEED_SOURCE, license_=SEED_LICENSE,
+        )
+
     # --- scenarios (+ scenario->target "uses" links) ---
     for sc in scenarios:
         upsert_content_item(
@@ -400,8 +415,8 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
         log.info("pruned %d item_link rows pointing at absent targets", len(dangling))
     conn.commit()
     log.info(
-        "seed loaded: %d vocab, %d kanji, %d grammar, %d sentence, %d scenario",
-        len(vocab), len(kanji), len(grammar), len(sentences), len(scenarios),
+        "seed loaded: %d vocab, %d kanji, %d grammar, %d sentence (+%d cloze), %d scenario",
+        len(vocab), len(kanji), len(grammar), len(sentences), len(cloze), len(scenarios),
     )
 
 
