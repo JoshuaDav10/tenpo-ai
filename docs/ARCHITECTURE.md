@@ -113,6 +113,14 @@ These are not decoration; they are engineering constraints:
 
 Category norms: $10–25/mo subscriptions, loud resentment at weekly billing and bait paywalls. When launching: free tier = all offline drills + N SRS items + 1 short roleplay/day on the cheap pipeline; paid ($12.99/mo, $79.99/yr) = unlimited realtime voice, pitch-accent suite, unlimited scenario generation. No lifetime tier (COGS is per-minute). All of R14 applies.
 
+**Unit economics — TBD from research.** The pricing above is a planning posture, not a
+verified P&L. Real per-session COGS is dominated by real-time voice, whose price shifts
+quarterly (and has cheaper tiers now than when this was written). Before setting shipping
+cost caps or committing to the $12.99/$79.99 points, run the deep-research prompt in
+`docs/COSTING_RESEARCH.md` and ingest its findings there; then update the price table
+(`server/src/pricing.ts`), cap defaults (`server/src/costMeter.ts`,
+`CostGovernor.swift`), and this section.
+
 ---
 
 # 4. System Architecture
