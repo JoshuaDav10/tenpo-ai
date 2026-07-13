@@ -19,7 +19,7 @@ Last updated: 2026-07-12 (batch 5)
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **68** tests (`swift test`) — all green.
+- Swift: **73** tests (`swift test`) — all green.
 - Server: **8** tests (`npm test`) — all green.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)
@@ -28,7 +28,15 @@ Last updated: 2026-07-12 (batch 5)
 SPM workspace (§4.2), GRDB schema (§4.7), AppContainer DI + mock providers, Fastify
 proxy with auth/routing/cost-meter/stubs. App boots.
 
-### Phase 1 — Learner spine ✅ DONE
+### Phase 1 — Learner spine ✅ DONE (+ why-due inspector §3.1)
+- ✅ FSRS "why is this due?" inspector: additive `dueExplanations(now:limit:)` query
+  (retrievability + stability + reps/lapses + plain-English `reason()`), most-forgotten
+  first; `WhyDueView` drills in from the dashboard "Due now" row with a recall meter.
+  5 unit tests. NB: fixing this surfaced + fixed a latent data race in
+  `MockLearnerModelService` — config vars were written unsynchronized but read under the
+  lock (`@unchecked Sendable` race); now backed by locked storage. Made `seedWeakItems…`
+  test deterministic (it had been passing by timing luck).
+
 - `FSRS.swift` — FSRS-6 port (21 weights, recall/lapse, R(t)+interval), pure/Sendable.
 - `LiveLearnerModelService` — report() schedules FSRS; §4.5 daily queue builder
   (due-by-retrievability + freq-ordered new, no-two-consecutive-kind, production bias),

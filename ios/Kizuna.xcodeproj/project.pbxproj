@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		02E783B65995792CE5B4B0D6 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C92493684F300B89117A1E /* Preferences.swift */; };
+		2A38CDB4206AF36B5290F042 /* WhyDueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A6EF9A1DC72F0E6890BB63 /* WhyDueView.swift */; };
 		2AE3BFDE634992ED92B6CC17 /* KizunaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21112E02A46B4490F41771D4 /* KizunaApp.swift */; };
 		3CEA838B2C3B73F7BCE946DF /* ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F15CE3B44C024990767128 /* ConsentView.swift */; };
 		4F065724937E8DD2275FD3D8 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 610D354D65D78B83F6244524 /* HomeView.swift */; };
@@ -39,6 +40,7 @@
 		66E60CA0ACA0246D0C17D425 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		7959ACC2A9C0556EE5AAC796 /* Kizuna.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Kizuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		942369F6BB1406B2BE170AEF /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
+		97A6EF9A1DC72F0E6890BB63 /* WhyDueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhyDueView.swift; sourceTree = "<group>"; };
 		A6C92493684F300B89117A1E /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		C628DD408B6527E92B9A77EC /* KizunaKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KizunaKit; path = Packages/KizunaKit; sourceTree = SOURCE_ROOT; };
 		CE745533B0F3928EEBC99EB7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				636B61F43C61A6C59CDE946F /* PrivacyInfo.xcprivacy */,
 				E872766497B5B4740E76C391 /* ReaderView.swift */,
 				665A81C30A3AE528C2C69375 /* RoleplayView.swift */,
+				97A6EF9A1DC72F0E6890BB63 /* WhyDueView.swift */,
 				1174DF051784752E462D7C82 /* Compliance */,
 			);
 			path = App;
@@ -222,6 +225,7 @@
 				5F5CAC76CD194E2712ADDD4D /* ReaderView.swift in Sources */,
 				88FE9C57CA7403FB8C39B0B3 /* RoleplayView.swift in Sources */,
 				5C03E6AED6488994677D6027 /* SettingsView.swift in Sources */,
+				2A38CDB4206AF36B5290F042 /* WhyDueView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

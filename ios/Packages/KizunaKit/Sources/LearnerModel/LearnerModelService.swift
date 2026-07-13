@@ -22,6 +22,9 @@ public protocol LearnerModelService: Sendable {
     /// Due/weak items in a JLPT band, most-overdue first — for `seed_weak_items`
     /// scenario seeding (§3.2 moat loop: yesterday's errors shape today's scene).
     func weakItems(bandPrefix: String?, count: Int) async throws -> [ContentItem]
+    /// Dashboard "why is this due?" inspector (§3.1 Anki-trust): due items with their
+    /// current FSRS state and a plain-English reason, most-forgotten first.
+    func dueExplanations(now: Date, limit: Int) async throws -> [DueExplanation]
 }
 
 // MARK: - Dashboard summary types
@@ -63,6 +66,49 @@ public struct MasterySummary: Codable, Sendable, Hashable {
     public init(dimensions: [DimensionMastery], total: MasteryBandCounts) {
         self.dimensions = dimensions
         self.total = total
+    }
+}
+
+/// One row of the "why is this due?" inspector (§3.1). Exposes the FSRS state
+/// verbatim — no black box — so the learner can see and trust the schedule.
+public struct DueExplanation: Sendable, Hashable, Identifiable {
+    public var itemID: ItemID
+    public var dimension: SkillDimension
+    /// Current recall probability (0…1) from FSRS retrievability at `now`.
+    public var retrievability: Double
+    /// Memory stability in days (how slowly this is being forgotten).
+    public var stability: Double
+    public var due: Date
+    public var reps: Int
+    public var lapses: Int
+    /// Plain-English reason this item surfaced now.
+    public var headline: String
+
+    public var id: String { "\(itemID.rawValue):\(dimension.rawValue)" }
+
+    public init(itemID: ItemID, dimension: SkillDimension, retrievability: Double,
+                stability: Double, due: Date, reps: Int, lapses: Int, headline: String) {
+        self.itemID = itemID
+        self.dimension = dimension
+        self.retrievability = retrievability
+        self.stability = stability
+        self.due = due
+        self.reps = reps
+        self.lapses = lapses
+        self.headline = headline
+    }
+
+    /// Pure, honest explanation from the FSRS state. Recall % is the lede (the
+    /// scheduler targets ~90% retention); lapses and maturity add context.
+    public static func reason(retrievability: Double, stability: Double, lapses: Int) -> String {
+        let pct = Int((retrievability * 100).rounded())
+        if lapses >= 1 {
+            return "About \(pct)% recall now — you've slipped on it \(lapses)× before, so it comes back sooner."
+        } else if stability >= 21 {
+            return "About \(pct)% recall — a mature item due for its scheduled check-in."
+        } else {
+            return "About \(pct)% recall now, below the ~90% target — time to reinforce it."
+        }
     }
 }
 
@@ -337,6 +383,35 @@ public final class LiveLearnerModelService: LearnerModelService {
         return try records.map { try $0.asContentItem() }
     }
 
+    public func dueExplanations(now: Date, limit: Int) async throws -> [DueExplanation] {
+        guard limit > 0 else { return [] }
+        let records = try await db.read { db in
+            try SkillStateRecord.fetchAll(
+                db,
+                sql: """
+                    SELECT * FROM skill_state
+                    WHERE suspended = 0 AND due IS NOT NULL AND due <= ?
+                      AND stability IS NOT NULL AND last_review IS NOT NULL
+                    """,
+                arguments: [now]
+            )
+        }
+        let scheduler = fsrs
+        let explained: [DueExplanation] = records.compactMap { r in
+            guard let dim = SkillDimension(rawValue: r.dimension),
+                  let stability = r.stability, let last = r.lastReview, let due = r.due else { return nil }
+            let elapsed = max(0, now.timeIntervalSince(last) / 86_400)
+            let ret = scheduler.retrievability(elapsedDays: elapsed, stability: stability)
+            return DueExplanation(
+                itemID: ItemID(rawValue: r.itemID), dimension: dim,
+                retrievability: ret, stability: stability, due: due, reps: r.reps, lapses: r.lapses,
+                headline: DueExplanation.reason(retrievability: ret, stability: stability, lapses: r.lapses)
+            )
+        }
+        // Most-forgotten (lowest retrievability) first — the inspector's natural order.
+        return Array(explained.sorted { $0.retrievability < $1.retrievability }.prefix(limit))
+    }
+
     // MARK: - Queue helpers
 
     private struct QueueEntry {
@@ -416,9 +491,28 @@ public final class MockLearnerModelService: LearnerModelService, @unchecked Send
         MasterySummary(dimensions: [], total: MasteryBandCounts())
     }
 
-    public var weakItemsToReturn: [ContentItem] = []
+    // Config knobs read inside `weakItems`/`dueExplanations` on an async executor
+    // thread. They MUST be written under the same lock they're read under —
+    // otherwise the unsynchronized write may not be visible to the reader thread
+    // (an @unchecked-Sendable data race). Backed by locked storage, not bare vars.
+    private var _weakItemsToReturn: [ContentItem] = []
+    public var weakItemsToReturn: [ContentItem] {
+        get { synced { _weakItemsToReturn } }
+        set { synced { _weakItemsToReturn = newValue } }
+    }
+
+    private var _dueExplanationsToReturn: [DueExplanation] = []
+    public var dueExplanationsToReturn: [DueExplanation] {
+        get { synced { _dueExplanationsToReturn } }
+        set { synced { _dueExplanationsToReturn = newValue } }
+    }
+
+    public func dueExplanations(now: Date, limit: Int) async throws -> [DueExplanation] {
+        synced { Array(_dueExplanationsToReturn.prefix(limit)) }
+    }
+
     public func weakItems(bandPrefix: String?, count: Int) async throws -> [ContentItem] {
-        synced { Array(weakItemsToReturn.prefix(count)) }
+        synced { Array(_weakItemsToReturn.prefix(count)) }
     }
 
     private func synced<T>(_ body: () -> T) -> T {

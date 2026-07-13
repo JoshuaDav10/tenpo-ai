@@ -14,7 +14,16 @@ struct MasteryDashboardView: View {
     var body: some View {
         List {
             Section {
-                LabeledContent("Due now", value: "\(dueCount)")
+                if dueCount > 0 {
+                    // §3.1 Anki-trust: tap through to see WHY each item is due.
+                    NavigationLink {
+                        WhyDueView(container: container)
+                    } label: {
+                        LabeledContent("Due now", value: "\(dueCount)")
+                    }
+                } else {
+                    LabeledContent("Due now", value: "\(dueCount)")
+                }
                 LabeledContent("Tracked skills", value: "\(summary?.total.total ?? 0)")
                 LabeledContent("Spent today", value: todaySpend.formatted(.currency(code: "USD")))
             }
