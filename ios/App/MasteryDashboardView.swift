@@ -74,7 +74,7 @@ struct MasteryDashboardView: View {
     private func load() async {
         summary = try? await container.learner.masteryCounts()
         dueCount = (try? await container.learner.dueCount(now: Date())) ?? 0
-        todaySpend = await container.todaySpendUSD()
+        todaySpend = await container.displaySpendUSD()
         grid = try? await container.learner.weakAreaGrid()
         forecast = try? await container.learner.dueForecast(now: Date(), days: 14)
     }

@@ -57,4 +57,38 @@ public struct CostGovernor: Sendable, Equatable {
         if forceCheapMode || spend >= caps.softUSD { return .cheapMode }
         return .full
     }
+
+    /// Resolve the policy from the PROXY's authoritative meter (§4.3.6). The proxy
+    /// owns the real spend + price table, so its cap flags win over any local guess;
+    /// the manual toggle still only tightens.
+    public func policy(serverUsage u: ServerUsage) -> CostPolicy {
+        if u.overHardCap { return .drillsOnly }
+        if forceCheapMode || u.overSoftCap { return .cheapMode }
+        return .full
+    }
+}
+
+/// The proxy's per-user daily meter (mirrors the server `GET /usage` payload, §4.3.6).
+/// The proxy — not the client — is the source of truth for spend, since API keys and
+/// the price table live server-side; local session `cost_usd` is ~$0 for on-device work.
+public struct ServerUsage: Sendable, Equatable, Codable {
+    public var spentUSD: Double
+    public var softCapUSD: Double
+    public var hardCapUSD: Double
+    public var overSoftCap: Bool
+    public var overHardCap: Bool
+
+    public init(spentUSD: Double, softCapUSD: Double, hardCapUSD: Double, overSoftCap: Bool, overHardCap: Bool) {
+        self.spentUSD = spentUSD
+        self.softCapUSD = softCapUSD
+        self.hardCapUSD = hardCapUSD
+        self.overSoftCap = overSoftCap
+        self.overHardCap = overHardCap
+    }
+}
+
+/// Fetches the proxy's `GET /usage`. Returns nil when the proxy is unconfigured or
+/// unreachable (offline dogfooding) so callers fall back to the local meter.
+public protocol UsageSource: Sendable {
+    func todayUsage() async -> ServerUsage?
 }

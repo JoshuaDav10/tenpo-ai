@@ -84,4 +84,27 @@ import Foundation
         #expect(CostPolicy.cheapMode.roleplayPipeline == .cascade)
         #expect(CostPolicy.drillsOnly.roleplayPipeline == .cascade)
     }
+
+    @Test func serverUsageDrivesPolicyFromProxyFlags() {
+        let gov = CostGovernor(caps: caps, forceCheapMode: false)
+        let under = ServerUsage(spentUSD: 1.0, softCapUSD: 2.5, hardCapUSD: 5, overSoftCap: false, overHardCap: false)
+        let soft = ServerUsage(spentUSD: 3.0, softCapUSD: 2.5, hardCapUSD: 5, overSoftCap: true, overHardCap: false)
+        let hard = ServerUsage(spentUSD: 6.0, softCapUSD: 2.5, hardCapUSD: 5, overSoftCap: true, overHardCap: true)
+        #expect(gov.policy(serverUsage: under) == .full)
+        #expect(gov.policy(serverUsage: soft) == .cheapMode)
+        #expect(gov.policy(serverUsage: hard) == .drillsOnly)
+        // Manual toggle still only tightens.
+        #expect(CostGovernor(caps: caps, forceCheapMode: true).policy(serverUsage: under) == .cheapMode)
+    }
+
+    @Test func serverUsageDecodesFromProxyJSONShape() throws {
+        // Exactly the payload shape the server's GET /usage returns (extra keys ignored).
+        let json = Data("""
+        {"userId":"dev","day":"2026-07-12","spentUSD":3.25,"softCapUSD":2.5,"hardCapUSD":5.0,"overSoftCap":true,"overHardCap":false}
+        """.utf8)
+        let usage = try JSONDecoder().decode(ServerUsage.self, from: json)
+        #expect(usage.spentUSD == 3.25)
+        #expect(usage.overSoftCap == true)
+        #expect(usage.overHardCap == false)
+    }
 }

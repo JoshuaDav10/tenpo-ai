@@ -153,3 +153,29 @@ public struct ProxyPronunciationAssessor: PronunciationAssessor {
         )
     }
 }
+
+/// Reads the proxy's authoritative cost meter (`GET /usage`, §4.3.6). Any failure
+/// (unconfigured, offline, non-2xx, bad JSON) returns nil so the caller falls back
+/// to the local meter — cost transparency must never block the app.
+public struct ProxyUsageService: UsageSource {
+    let config: ProxyConfig
+    let session: URLSession
+
+    public init(config: ProxyConfig, session: URLSession = .shared) {
+        self.config = config
+        self.session = session
+    }
+
+    public func todayUsage() async -> ServerUsage? {
+        var request = URLRequest(url: config.baseURL.appendingPathComponent("usage"))
+        request.httpMethod = "GET"
+        if let token = await config.authToken() {
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        guard let (data, response) = try? await session.data(for: request),
+              let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode),
+              let usage = try? JSONDecoder().decode(ServerUsage.self, from: data)
+        else { return nil }
+        return usage
+    }
+}

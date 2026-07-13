@@ -27,6 +27,9 @@ final class AppContainer {
     let sync: any SyncService
     let store: any SessionStore
     let modeRegistry: ModeRegistry
+    /// Proxy cost meter (§4.3.6). nil until the Fly.io proxy URL exists — then the
+    /// client reads authoritative server spend instead of the ~$0 local meter.
+    let usage: (any UsageSource)?
 
     init(
         db: DatabaseManager,
@@ -38,7 +41,8 @@ final class AppContainer {
         chat: any ChatProvider,
         sync: any SyncService,
         store: any SessionStore,
-        modeRegistry: ModeRegistry
+        modeRegistry: ModeRegistry,
+        usage: (any UsageSource)? = nil
     ) {
         self.db = db
         self.pack = pack
@@ -50,6 +54,7 @@ final class AppContainer {
         self.sync = sync
         self.store = store
         self.modeRegistry = modeRegistry
+        self.usage = usage
     }
 
     /// The context handed to non-realtime drill modes (§4.6).
@@ -80,10 +85,21 @@ final class AppContainer {
 
     /// Resolve today's cost policy (§4.3.6, R13): reads metered spend + the manual
     /// cheap-mode toggle and decides whether realtime voice / new roleplays may start.
+    /// The proxy's meter is the source of truth (it owns the price table); the local
+    /// meter is only a fallback when the proxy is unconfigured/offline.
     func costPolicy() async -> CostPolicy {
-        let spend = await todaySpendUSD()
         let gov = CostGovernor(caps: .dogfoodDefault, forceCheapMode: Preferences.forceCheapMode)
-        return gov.policy(todaySpendUSD: spend)
+        if let usage, let server = await usage.todayUsage() {
+            return gov.policy(serverUsage: server)
+        }
+        return gov.policy(todaySpendUSD: await todaySpendUSD())
+    }
+
+    /// Spend to show on the dashboard: the proxy's authoritative figure when available,
+    /// else the local sum (≈ $0 for on-device work).
+    func displaySpendUSD() async -> Double {
+        if let usage, let server = await usage.todayUsage() { return server.spentUSD }
+        return await todaySpendUSD()
     }
 
     /// All roleplay scenarios in the content store.

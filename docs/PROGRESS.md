@@ -19,7 +19,7 @@ Last updated: 2026-07-12 (batch 5)
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **80** tests (`swift test`) — all green.
+- Swift: **82** tests (`swift test`) — all green.
 - Server: **8** tests (`npm test`) — all green.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)
@@ -99,9 +99,21 @@ proxy with auth/routing/cost-meter/stubs. App boots.
   register/word-order) with surface→expected diffs, "queued for tomorrow's review" note. Data
   path (Director verdict → errors → ModeResult) is unit-proven; the *populated* visual needs
   the live Director (offline mocks emit no roleplay errors).
-- **REMAINING (MVP, all account-gated verification):** stand up Supabase + Fly.io, then
-  live-verify sync resume + realtime voice. No un-blocked client code remains for Phase 0–4.
-  (Mode 11 PitchAccentDrill and mode 9 FreeRoleplay are Phase 5 per §9/§4.6 — deferred.)
+- ✅ Realtime error-frame contract fix: `RealtimeEvent.proxyRefused` + pure `mapEvent()`
+  distinguishing the proxy's bare-string `error` codes (cost_cheap_mode, unauthorized…)
+  from OpenAI's `{message}` object. Was mis-parsing every proxy refusal as generic error.
+  `RealtimeKitTests` (5).
+- ✅ Client reads the proxy's authoritative meter: `ServerUsage` + `UsageSource` +
+  `CostGovernor.policy(serverUsage:)`; `ProxyUsageService` GETs `/usage`; `costPolicy()` and
+  the dashboard "Spent today" prefer server truth, fall back to the local (~$0) meter offline.
+  Closes a real gap — the client cost governance had been driven by local `cost_usd` that
+  never moves. Wired via injectable `AppContainer.usage` (nil until the proxy URL exists).
+  Unit-tested incl. the exact server JSON shape.
+- **REMAINING (MVP):** only account-gated LIVE verification — stand up Supabase + Fly.io,
+  set `AppContainer.usage`/sync config + provider keys, then verify sync resume, realtime
+  voice, and that the cost meter reflects real proxy spend. (Mode 11 PitchAccentDrill and
+  mode 9 FreeRoleplay are Phase 5 per §9/§4.6 — deferred. R18 latency debug screen is the
+  last spec-named client item but its metrics only exist on the live pipeline.)
 
 ### Phase 5 — Post-MVP (NOT this push, per spec §9)
 Pitch-accent drill (needs Kanjium data), FSRS weight optimization, scenario auto-gen UI,
