@@ -19,7 +19,7 @@ Last updated: 2026-07-12 (batch 5)
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **75** tests (`swift test`) — all green.
+- Swift: **80** tests (`swift test`) — all green.
 - Server: **8** tests (`npm test`) — all green.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)

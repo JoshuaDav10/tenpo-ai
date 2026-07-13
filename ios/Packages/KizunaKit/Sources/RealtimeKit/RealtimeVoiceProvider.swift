@@ -22,6 +22,12 @@ public enum RealtimeEvent: Sendable {
     case assistantTranscript(String)
     case turnEnded(role: TranscriptRole)
     case error(String)
+    /// The PROXY refused/closed the session for a policy reason — its frames carry a
+    /// bare string `error` code (not OpenAI's `{message}` object). `code` is e.g.
+    /// `cost_cheap_mode`, `cost_hard_cap`, `unauthorized`, `provider_not_configured`.
+    /// `cheapModeFallback` is true when the caller should retry on the cheap cascade
+    /// pipeline (§4.3.6 soft cap) rather than surface a hard error.
+    case proxyRefused(code: String, cheapModeFallback: Bool)
 }
 
 // §4.3.2 — implement exactly these.

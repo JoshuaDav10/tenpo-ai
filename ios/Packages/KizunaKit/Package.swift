@@ -75,5 +75,6 @@ let package = Package(
             "ModeEngine", "Modes", "CoreModels", "Persistence", "JapanesePack", "ContentKit", "SyncKit",
         ]),
         .testTarget(name: "SyncKitTests", dependencies: ["SyncKit", "CoreModels", "Persistence"]),
+        .testTarget(name: "RealtimeKitTests", dependencies: ["RealtimeKit", "CoreModels"]),
     ]
 )

@@ -123,32 +123,41 @@ final class ProxyRealtimeSession: RealtimeSession, @unchecked Sendable {
         }
     }
 
-    /// Map OpenAI Realtime events to our provider-agnostic `RealtimeEvent`s.
     private func handle(_ text: String) {
         guard let data = text.data(using: .utf8),
               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let type = obj["type"] as? String else { return }
+              let event = Self.mapEvent(obj) else { return }
+        continuation.yield(event)
+    }
 
+    /// Map an inbound frame to a provider-agnostic `RealtimeEvent`. Handles BOTH the
+    /// upstream OpenAI Realtime events AND the proxy's own control frames, whose
+    /// `error` is a bare string code rather than OpenAI's `{message}` object (§7).
+    /// Pure and static so it is unit-testable without a live socket.
+    static func mapEvent(_ obj: [String: Any]) -> RealtimeEvent? {
+        guard let type = obj["type"] as? String else { return nil }
         switch type {
         case "response.audio.delta", "response.output_audio.delta":
-            if let b64 = obj["delta"] as? String, let audio = Data(base64Encoded: b64) {
-                continuation.yield(.assistantAudio(AudioBuffer(data: audio, encoding: .pcm16, sampleRate: 24000)))
-            }
+            guard let b64 = obj["delta"] as? String, let audio = Data(base64Encoded: b64) else { return nil }
+            return .assistantAudio(AudioBuffer(data: audio, encoding: .pcm16, sampleRate: 24000))
         case "response.audio_transcript.delta", "response.output_audio_transcript.delta":
-            if let delta = obj["delta"] as? String {
-                continuation.yield(.assistantTranscript(delta))
-            }
+            guard let delta = obj["delta"] as? String else { return nil }
+            return .assistantTranscript(delta)
         case "conversation.item.input_audio_transcription.completed":
-            if let transcript = obj["transcript"] as? String {
-                continuation.yield(.partialTranscript(role: .learner, text: transcript))
-            }
+            guard let transcript = obj["transcript"] as? String else { return nil }
+            return .partialTranscript(role: .learner, text: transcript)
         case "response.done", "response.output_audio.done":
-            continuation.yield(.turnEnded(role: .actor))
+            return .turnEnded(role: .actor)
         case "error":
+            // Proxy control frame: `error` is a bare code string.
+            if let code = obj["error"] as? String {
+                return .proxyRefused(code: code, cheapModeFallback: code == "cost_cheap_mode")
+            }
+            // Upstream OpenAI error: `error` is an object with a message.
             let message = (obj["error"] as? [String: Any])?["message"] as? String ?? "realtime error"
-            continuation.yield(.error(message))
+            return .error(message)
         default:
-            break
+            return nil
         }
     }
 }
