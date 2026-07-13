@@ -206,6 +206,14 @@ struct GuidedRoleplayView: View {
         }
         .navigationTitle(scenario.title)
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button { dismiss() } label: {
+                    Label("Exit", systemImage: "chevron.left")
+                }
+            }
+        }
         .task { await model.start() }
     }
 

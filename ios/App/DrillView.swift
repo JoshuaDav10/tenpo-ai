@@ -139,6 +139,18 @@ struct DrillView: View {
         .padding()
         .navigationTitle("Session")
         .navigationBarTitleDisplayMode(.inline)
+        // Always offer a way out — sessions persist per-turn (R12), so leaving
+        // mid-session is safe (it's just abandoned) and never loses committed reviews.
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    Label("Exit", systemImage: "chevron.left")
+                }
+            }
+        }
         .task { await model.start() }
     }
 
