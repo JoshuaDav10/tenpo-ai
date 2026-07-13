@@ -11,6 +11,7 @@ struct MasteryDashboardView: View {
     @State private var dueCount = 0
     @State private var todaySpend = 0.0
     @State private var grid: WeakAreaGrid?
+    @State private var forecast: DueForecast?
 
     var body: some View {
         List {
@@ -48,6 +49,16 @@ struct MasteryDashboardView: View {
                         Text("Where you're strong vs. still building, by level band and skill. Greener = better retained.")
                     }
                 }
+
+                if let forecast, forecast.total > 0 {
+                    Section {
+                        ForgettingForecast(forecast: forecast)
+                    } header: {
+                        Text("Forgetting forecast")
+                    } footer: {
+                        Text("Reviews coming due over the next two weeks. Steady, not spiky — no cramming required.")
+                    }
+                }
             } else {
                 ContentUnavailableView(
                     "No reviews yet",
@@ -65,6 +76,43 @@ struct MasteryDashboardView: View {
         dueCount = (try? await container.learner.dueCount(now: Date())) ?? 0
         todaySpend = await container.todaySpendUSD()
         grid = try? await container.learner.weakAreaGrid()
+        forecast = try? await container.learner.dueForecast(now: Date(), days: 14)
+    }
+}
+
+/// The forgetting forecast (§4.7): a mini bar chart of reviews coming due over the
+/// next two weeks. Deliberately calm — surfaces load without streak/urgency pressure (R17).
+private struct ForgettingForecast: View {
+    let forecast: DueForecast
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .bottom, spacing: 3) {
+                ForEach(forecast.days) { day in
+                    VStack(spacing: 3) {
+                        RoundedRectangle(cornerRadius: 2)
+                            .fill(day.dayOffset == 0 ? Color.accentColor : Color.blue.opacity(0.55))
+                            .frame(height: barHeight(day.count))
+                        Text(dayLabel(day.dayOffset))
+                            .font(.system(size: 8)).foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            .frame(height: 74, alignment: .bottom)
+            Text("\(forecast.total) reviews due in the next \(forecast.days.count) days")
+                .font(.caption2).foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func barHeight(_ count: Int) -> CGFloat {
+        let peak = max(forecast.peak, 1)
+        return max(2, 60 * CGFloat(count) / CGFloat(peak))
+    }
+
+    private func dayLabel(_ offset: Int) -> String {
+        offset == 0 ? "now" : "\(offset)"
     }
 }
 

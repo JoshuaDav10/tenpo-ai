@@ -108,3 +108,33 @@ import Persistence
         #expect(grid.cell(band: "N5.1", dimension: .productionSpoken) == nil)
     }
 }
+
+@Suite struct DueForecastTests {
+    private func putState(_ db: DatabaseManager, id: String, due: Date) async throws {
+        let s = SkillState(itemID: ItemID(rawValue: id), dimension: .recognitionReading, stability: 5,
+                           difficulty: 5, due: due, lastReview: Date(), reps: 1, lapses: 0, suspended: false)
+        try await db.write { try SkillStateRecord(s).insert($0) }
+    }
+
+    @Test func bucketsByDayAndFoldsOverdueIntoToday() async throws {
+        let db = try DatabaseManager.inMemory()
+        let cal = Calendar.current
+        let now = Date()
+        let noon = cal.date(bySettingHour: 12, minute: 0, second: 0, of: now)!
+        // Two overdue (5 and 1 days ago) → both today; one tomorrow; one in 3 days;
+        // one far out (10 days) beyond the 7-day window → excluded.
+        try await putState(db, id: "a", due: cal.date(byAdding: .day, value: -5, to: noon)!)
+        try await putState(db, id: "b", due: cal.date(byAdding: .day, value: -1, to: noon)!)
+        try await putState(db, id: "c", due: cal.date(byAdding: .day, value: 1, to: noon)!)
+        try await putState(db, id: "d", due: cal.date(byAdding: .day, value: 3, to: noon)!)
+        try await putState(db, id: "e", due: cal.date(byAdding: .day, value: 10, to: noon)!)
+
+        let forecast = try await LiveLearnerModelService(db: db).dueForecast(now: now, days: 7)
+        #expect(forecast.days.count == 7)
+        #expect(forecast.days[0].count == 2) // both overdue folded into today
+        #expect(forecast.days[1].count == 1) // tomorrow
+        #expect(forecast.days[3].count == 1) // in 3 days
+        #expect(forecast.total == 4)          // the 10-day-out item is outside the window
+        #expect(forecast.peak == 2)
+    }
+}

@@ -27,6 +27,8 @@ public protocol LearnerModelService: Sendable {
     func dueExplanations(now: Date, limit: Int) async throws -> [DueExplanation]
     /// Dashboard weak-area heatmap (§3.3): mastery mix per (JLPT sub-band × dimension).
     func weakAreaGrid() async throws -> WeakAreaGrid
+    /// Dashboard forgetting forecast (§4.7): due-item counts for the next `days` days.
+    func dueForecast(now: Date, days: Int) async throws -> DueForecast
 }
 
 // MARK: - Dashboard summary types
@@ -69,6 +71,30 @@ public struct MasterySummary: Codable, Sendable, Hashable {
         self.dimensions = dimensions
         self.total = total
     }
+}
+
+/// One day of the forgetting forecast (§4.7 dashboard): how many tracked items
+/// come due that day. Overdue items are folded into day 0 (today).
+public struct DayDue: Sendable, Hashable, Identifiable {
+    public var dayOffset: Int   // 0 = today
+    public var date: Date
+    public var count: Int
+    public var id: Int { dayOffset }
+
+    public init(dayOffset: Int, date: Date, count: Int) {
+        self.dayOffset = dayOffset
+        self.date = date
+        self.count = count
+    }
+}
+
+/// The forgetting forecast: due-item counts over the next N days, so the learner
+/// can see the review load coming (R17 gentle motivation, no streak anxiety).
+public struct DueForecast: Sendable, Hashable {
+    public var days: [DayDue]
+    public init(days: [DayDue]) { self.days = days }
+    public var peak: Int { days.map(\.count).max() ?? 0 }
+    public var total: Int { days.reduce(0) { $0 + $1.count } }
 }
 
 /// One cell of the weak-area heatmap (§3.3 / §4.7 dashboard): mastery mix for a
@@ -484,6 +510,29 @@ public final class LiveLearnerModelService: LearnerModelService {
         }
     }
 
+    public func dueForecast(now: Date, days: Int) async throws -> DueForecast {
+        guard days > 0 else { return DueForecast(days: []) }
+        let cal = Calendar.current
+        let startOfToday = cal.startOfDay(for: now)
+        let dueDates = try await db.read { db in
+            try Date.fetchAll(
+                db,
+                sql: "SELECT due FROM skill_state WHERE suspended = 0 AND due IS NOT NULL"
+            )
+        }
+        var counts = [Int](repeating: 0, count: days)
+        for due in dueDates {
+            let dayStart = cal.startOfDay(for: due)
+            let offset = cal.dateComponents([.day], from: startOfToday, to: dayStart).day ?? 0
+            let bucket = max(0, offset)          // overdue → today
+            if bucket < days { counts[bucket] += 1 }
+        }
+        let out = counts.enumerated().map { i, c in
+            DayDue(dayOffset: i, date: cal.date(byAdding: .day, value: i, to: startOfToday) ?? startOfToday, count: c)
+        }
+        return DueForecast(days: out)
+    }
+
     // MARK: - Queue helpers
 
     private struct QueueEntry {
@@ -590,6 +639,15 @@ public final class MockLearnerModelService: LearnerModelService, @unchecked Send
     }
     public func weakAreaGrid() async throws -> WeakAreaGrid {
         synced { _weakAreaGridToReturn }
+    }
+
+    private var _dueForecastToReturn = DueForecast(days: [])
+    public var dueForecastToReturn: DueForecast {
+        get { synced { _dueForecastToReturn } }
+        set { synced { _dueForecastToReturn = newValue } }
+    }
+    public func dueForecast(now: Date, days: Int) async throws -> DueForecast {
+        synced { _dueForecastToReturn }
     }
 
     public func weakItems(bandPrefix: String?, count: Int) async throws -> [ContentItem] {
