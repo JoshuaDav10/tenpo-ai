@@ -9,15 +9,30 @@ struct KizunaApp: App {
         WindowGroup {
             switch bootstrap.result {
             case .success(let container):
-                // §8.1: block practice behind explicit third-party-AI consent.
-                if compliance.hasConsented {
-                    HomeView(container: container, compliance: compliance)
+                #if DEBUG
+                // Dev-only screenshot/preview routing: `-e KIZUNA_ROUTE dashboard|roleplay|
+                // settings|drill` jumps straight to a screen (bypasses nav taps). Never ships.
+                if let route = ProcessInfo.processInfo.environment["KIZUNA_ROUTE"] {
+                    DebugRoute(route: route, container: container, compliance: compliance)
                 } else {
-                    ConsentView(store: compliance)
+                    rootView(container)
                 }
+                #else
+                rootView(container)
+                #endif
             case .failure(let error):
                 BootFailureView(error: error)
             }
+        }
+    }
+
+    @ViewBuilder
+    private func rootView(_ container: AppContainer) -> some View {
+        // §8.1: block practice behind explicit third-party-AI consent.
+        if compliance.hasConsented {
+            HomeView(container: container, compliance: compliance)
+        } else {
+            ConsentView(store: compliance)
         }
     }
 }

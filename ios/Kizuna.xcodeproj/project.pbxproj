@@ -21,6 +21,7 @@
 		6D0ABC63F57923325C909C20 /* ContentBootstrap.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB050824D8B2E836FEDC6670 /* ContentBootstrap.swift */; };
 		88FE9C57CA7403FB8C39B0B3 /* RoleplayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665A81C30A3AE528C2C69375 /* RoleplayView.swift */; };
 		8C4166C370501BE7C327A44E /* MasteryDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */; };
+		8E4EA7F949B011B6C90162A9 /* DebugRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BA851A018A5CFC81E43926 /* DebugRoute.swift */; };
 		955854218DFA78A56A07801B /* DrillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA25C06355708FC1E61153E /* DrillView.swift */; };
 		B840F5C5935B11972FFFC3F7 /* KizunaKit in Frameworks */ = {isa = PBXBuildFile; productRef = 316018456B31A50F1828C67E /* KizunaKit */; };
 		DD20C5A10B977BD132A8B3D7 /* ComplianceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD28F0B31979AFA8F076322 /* ComplianceStore.swift */; };
@@ -44,6 +45,7 @@
 		A6C92493684F300B89117A1E /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		C628DD408B6527E92B9A77EC /* KizunaKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KizunaKit; path = Packages/KizunaKit; sourceTree = SOURCE_ROOT; };
 		CE745533B0F3928EEBC99EB7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		E7BA851A018A5CFC81E43926 /* DebugRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugRoute.swift; sourceTree = "<group>"; };
 		E872766497B5B4740E76C391 /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
 		FAF79D2EFF80F05D29F073E0 /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		FB050824D8B2E836FEDC6670 /* ContentBootstrap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBootstrap.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 			children = (
 				942369F6BB1406B2BE170AEF /* AppContainer.swift */,
 				FB050824D8B2E836FEDC6670 /* ContentBootstrap.swift */,
+				E7BA851A018A5CFC81E43926 /* DebugRoute.swift */,
 				1AA25C06355708FC1E61153E /* DrillView.swift */,
 				610D354D65D78B83F6244524 /* HomeView.swift */,
 				21112E02A46B4490F41771D4 /* KizunaApp.swift */,
@@ -216,6 +219,7 @@
 				3CEA838B2C3B73F7BCE946DF /* ConsentView.swift in Sources */,
 				6D0ABC63F57923325C909C20 /* ContentBootstrap.swift in Sources */,
 				6277871AEA3EAA8F88411BA8 /* DataManager.swift in Sources */,
+				8E4EA7F949B011B6C90162A9 /* DebugRoute.swift in Sources */,
 				955854218DFA78A56A07801B /* DrillView.swift in Sources */,
 				4F065724937E8DD2275FD3D8 /* HomeView.swift in Sources */,
 				2AE3BFDE634992ED92B6CC17 /* KizunaApp.swift in Sources */,
