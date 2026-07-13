@@ -77,3 +77,34 @@ import Persistence
         #expect(out.count == 3)
     }
 }
+
+@Suite struct WeakAreaGridTests {
+    private func putContent(_ db: DatabaseManager, id: String, band: String) async throws {
+        let item = ContentItem(id: ItemID(rawValue: id), language: .japanese, kind: .vocab,
+                               payload: .object([:]), band: band)
+        try await db.write { try ContentItemRecord(item).insert($0) }
+    }
+    private func putState(_ db: DatabaseManager, id: String, dim: SkillDimension, stability: Double) async throws {
+        let s = SkillState(itemID: ItemID(rawValue: id), dimension: dim, stability: stability,
+                           difficulty: 5, due: Date(), lastReview: Date(), reps: 1, lapses: 0, suspended: false)
+        try await db.write { try SkillStateRecord(s).insert($0) }
+    }
+
+    @Test func aggregatesByBandAndDimensionIntoMasteryBuckets() async throws {
+        let db = try DatabaseManager.inMemory()
+        // N5.1 reading: one learning (stability 1) + one mature (stability 30).
+        try await putContent(db, id: "a", band: "N5.1"); try await putState(db, id: "a", dim: .recognitionReading, stability: 1)
+        try await putContent(db, id: "b", band: "N5.1"); try await putState(db, id: "b", dim: .recognitionReading, stability: 30)
+        // N5.2 spoken: one young (stability 10).
+        try await putContent(db, id: "c", band: "N5.2"); try await putState(db, id: "c", dim: .productionSpoken, stability: 10)
+
+        let grid = try await LiveLearnerModelService(db: db).weakAreaGrid()
+        #expect(grid.bands == ["N5.1", "N5.2"])
+        let n51reading = grid.cell(band: "N5.1", dimension: .recognitionReading)
+        #expect(n51reading?.counts.learning == 1)
+        #expect(n51reading?.counts.mature == 1)
+        #expect(grid.cell(band: "N5.2", dimension: .productionSpoken)?.counts.young == 1)
+        // No spoken state in N5.1 → empty cell.
+        #expect(grid.cell(band: "N5.1", dimension: .productionSpoken) == nil)
+    }
+}

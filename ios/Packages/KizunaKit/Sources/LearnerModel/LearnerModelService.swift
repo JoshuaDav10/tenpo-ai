@@ -25,6 +25,8 @@ public protocol LearnerModelService: Sendable {
     /// Dashboard "why is this due?" inspector (§3.1 Anki-trust): due items with their
     /// current FSRS state and a plain-English reason, most-forgotten first.
     func dueExplanations(now: Date, limit: Int) async throws -> [DueExplanation]
+    /// Dashboard weak-area heatmap (§3.3): mastery mix per (JLPT sub-band × dimension).
+    func weakAreaGrid() async throws -> WeakAreaGrid
 }
 
 // MARK: - Dashboard summary types
@@ -66,6 +68,39 @@ public struct MasterySummary: Codable, Sendable, Hashable {
     public init(dimensions: [DimensionMastery], total: MasteryBandCounts) {
         self.dimensions = dimensions
         self.total = total
+    }
+}
+
+/// One cell of the weak-area heatmap (§3.3 / §4.7 dashboard): mastery mix for a
+/// single (JLPT sub-band × skill dimension) intersection.
+public struct AreaCell: Sendable, Hashable {
+    public var band: String
+    public var dimension: SkillDimension
+    public var counts: MasteryBandCounts
+
+    public init(band: String, dimension: SkillDimension, counts: MasteryBandCounts) {
+        self.band = band
+        self.dimension = dimension
+        self.counts = counts
+    }
+}
+
+/// The weak-area heatmap grid: which JLPT sub-bands are still shaky, per skill
+/// dimension. Bands/dimensions list only those actually tracked, so the grid is
+/// dense. `cell(band:dimension:)` returns nil where nothing is tracked yet.
+public struct WeakAreaGrid: Sendable, Hashable {
+    public var bands: [String]
+    public var dimensions: [SkillDimension]
+    public var cells: [AreaCell]
+
+    public init(bands: [String], dimensions: [SkillDimension], cells: [AreaCell]) {
+        self.bands = bands
+        self.dimensions = dimensions
+        self.cells = cells
+    }
+
+    public func cell(band: String, dimension: SkillDimension) -> AreaCell? {
+        cells.first { $0.band == band && $0.dimension == dimension }
     }
 }
 
@@ -412,6 +447,43 @@ public final class LiveLearnerModelService: LearnerModelService {
         return Array(explained.sorted { $0.retrievability < $1.retrievability }.prefix(limit))
     }
 
+    public func weakAreaGrid() async throws -> WeakAreaGrid {
+        // Aggregate inside the read (GRDB `Row` isn't Sendable, so it can't escape).
+        // Buckets reuse the §3.3 learning/young/mature thresholds (< 2d / < 21d / ≥ 21d).
+        try await db.read { db in
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT content_item.band AS band, skill_state.dimension AS dim, skill_state.stability AS stability
+                FROM skill_state
+                JOIN content_item ON content_item.id = skill_state.item_id
+                WHERE skill_state.stability IS NOT NULL AND content_item.band IS NOT NULL
+                """)
+            var agg: [String: [SkillDimension: MasteryBandCounts]] = [:]
+            var bandsSeen = Set<String>()
+            var dimsSeen = Set<SkillDimension>()
+            for row in rows {
+                guard let band = row["band"] as String?,
+                      let dimRaw = row["dim"] as String?,
+                      let dim = SkillDimension(rawValue: dimRaw) else { continue }
+                let stability = (row["stability"] as Double?) ?? 0
+                bandsSeen.insert(band); dimsSeen.insert(dim)
+                var counts = agg[band]?[dim] ?? MasteryBandCounts()
+                if stability < 2 { counts.learning += 1 }
+                else if stability < 21 { counts.young += 1 }
+                else { counts.mature += 1 }
+                agg[band, default: [:]][dim] = counts
+            }
+            let bands = bandsSeen.sorted()
+            let dimensions = SkillDimension.allCases.filter { dimsSeen.contains($0) }
+            let cells = bands.flatMap { band in
+                dimensions.compactMap { dim -> AreaCell? in
+                    guard let counts = agg[band]?[dim] else { return nil }
+                    return AreaCell(band: band, dimension: dim, counts: counts)
+                }
+            }
+            return WeakAreaGrid(bands: bands, dimensions: dimensions, cells: cells)
+        }
+    }
+
     // MARK: - Queue helpers
 
     private struct QueueEntry {
@@ -509,6 +581,15 @@ public final class MockLearnerModelService: LearnerModelService, @unchecked Send
 
     public func dueExplanations(now: Date, limit: Int) async throws -> [DueExplanation] {
         synced { Array(_dueExplanationsToReturn.prefix(limit)) }
+    }
+
+    private var _weakAreaGridToReturn = WeakAreaGrid(bands: [], dimensions: [], cells: [])
+    public var weakAreaGridToReturn: WeakAreaGrid {
+        get { synced { _weakAreaGridToReturn } }
+        set { synced { _weakAreaGridToReturn = newValue } }
+    }
+    public func weakAreaGrid() async throws -> WeakAreaGrid {
+        synced { _weakAreaGridToReturn }
     }
 
     public func weakItems(bandPrefix: String?, count: Int) async throws -> [ContentItem] {
