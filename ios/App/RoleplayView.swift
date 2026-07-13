@@ -112,6 +112,7 @@ final class RoleplayViewModel: ObservableObject {
     @Published var answer = ""
     @Published var finished = false
     @Published var summary: String?
+    @Published var errors: [ErrorEvent] = []
     @Published var isRecording = false
 
     private let runner: SessionRunner
@@ -166,6 +167,7 @@ final class RoleplayViewModel: ObservableObject {
             let result = await runner.finish()
             finished = true
             summary = Self.summary(for: result)
+            errors = result.errors // R8: categorized error list for the post-session breakdown
             consume?.cancel()
         case .verdict, .progress, .choices:
             break
@@ -250,6 +252,9 @@ struct GuidedRoleplayView: View {
                             .padding()
                             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
                     }
+                    if model.finished && !model.errors.isEmpty {
+                        ErrorTaxonomyView(errors: model.errors)
+                    }
                     Color.clear.frame(height: 1).id("bottom")
                 }
                 .padding()
@@ -285,6 +290,84 @@ struct GuidedRoleplayView: View {
         Button("Done") { dismiss() }
             .buttonStyle(.borderedProminent)
             .padding()
+    }
+}
+
+/// R8 post-session error taxonomy: the Director's categorized error list, grouped
+/// by category (vocab / grammar / particle / pronunciation / register). Each error
+/// is a drillable item already enrolled in tomorrow's review (R8 → SRS, R7).
+private struct ErrorTaxonomyView: View {
+    let errors: [ErrorEvent]
+
+    private var grouped: [(category: ErrorCategory, items: [ErrorEvent])] {
+        ErrorCategory.allCases.compactMap { cat in
+            let items = errors.filter { $0.category == cat }
+            return items.isEmpty ? nil : (cat, items)
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("What to firm up")
+                .font(.headline)
+            ForEach(grouped, id: \.category) { group in
+                VStack(alignment: .leading, spacing: 6) {
+                    Label(group.category.displayName, systemImage: group.category.icon)
+                        .font(.subheadline).bold()
+                        .foregroundStyle(.secondary)
+                    ForEach(group.items, id: \.id) { err in
+                        ErrorRow(err: err)
+                    }
+                }
+            }
+            Text("These are queued for tomorrow's review.")
+                .font(.caption2).foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
+private struct ErrorRow: View {
+    let err: ErrorEvent
+    var body: some View {
+        HStack(spacing: 8) {
+            if let surface = err.surface, let expected = err.expected {
+                Text(surface).strikethrough().foregroundStyle(.red)
+                Image(systemName: "arrow.right").font(.caption2).foregroundStyle(.tertiary)
+                Text(expected).foregroundStyle(.green)
+            } else if let surface = err.surface {
+                Text(surface)
+            } else if let expected = err.expected {
+                Text(expected)
+            }
+            Spacer(minLength: 0)
+        }
+        .font(.callout)
+    }
+}
+
+private extension ErrorCategory {
+    var displayName: String {
+        switch self {
+        case .vocab: return "Vocabulary"
+        case .grammar: return "Grammar"
+        case .particle: return "Particles"
+        case .pronunciation: return "Pronunciation"
+        case .register: return "Politeness / register"
+        case .wordOrder: return "Word order"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .vocab: return "character.book.closed"
+        case .grammar: return "text.badge.checkmark"
+        case .particle: return "link"
+        case .pronunciation: return "waveform"
+        case .register: return "person.2"
+        case .wordOrder: return "arrow.left.arrow.right"
+        }
     }
 }
 

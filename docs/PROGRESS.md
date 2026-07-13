@@ -76,7 +76,14 @@ proxy with auth/routing/cost-meter/stubs. App boots.
   active session (R13). 5 unit tests.
 - ✅ Cheap-mode client switch: `Preferences.forceCheapMode` + "Save on voice costs" Settings
   toggle → governor forces cascade regardless of budget.
-- **REMAINING:** mode 11 (last deferred drill mode).
+- ✅ R8 post-session error taxonomy UI: `ErrorTaxonomyView` in the roleplay finished screen
+  renders `ModeResult.errors` grouped by category (vocab/grammar/particle/pronunciation/
+  register/word-order) with surface→expected diffs, "queued for tomorrow's review" note. Data
+  path (Director verdict → errors → ModeResult) is unit-proven; the *populated* visual needs
+  the live Director (offline mocks emit no roleplay errors).
+- **REMAINING (MVP, all account-gated verification):** stand up Supabase + Fly.io, then
+  live-verify sync resume + realtime voice. No un-blocked client code remains for Phase 0–4.
+  (Mode 11 PitchAccentDrill and mode 9 FreeRoleplay are Phase 5 per §9/§4.6 — deferred.)
 
 ### Phase 5 — Post-MVP (NOT this push, per spec §9)
 Pitch-accent drill (needs Kanjium data), FSRS weight optimization, scenario auto-gen UI,
