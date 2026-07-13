@@ -4,6 +4,7 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildApp } from "../src/app.ts";
+import { recordCost, usage, realtimeAdmission } from "../src/costMeter.ts";
 import type { ProviderFactories, ProviderSpec, AdapterDeps } from "../src/providers/index.ts";
 
 // All tests are hermetic: providers are injected, so no network and no real keys.
@@ -118,4 +119,22 @@ test("usage returns per-user meter with caps", async () => {
   assert.equal(body.overHardCap, false);
   assert.ok(body.softCapUSD > 0);
   await app.close();
+});
+
+test("realtimeAdmission gates the expensive Pipeline A by daily spend (§4.3.6)", () => {
+  // Unique users so the process-global meter doesn't collide with other tests.
+  const fresh = `rt-fresh-${Math.random()}`;
+  const soft = `rt-soft-${Math.random()}`;
+  const hard = `rt-hard-${Math.random()}`;
+
+  // Below the soft cap: realtime voice is allowed.
+  assert.deepEqual(realtimeAdmission(usage(fresh)), { allow: true });
+
+  // At/over the soft cap (default $2.50): refuse realtime → client uses cheap cascade.
+  recordCost(soft, 3.0);
+  assert.deepEqual(realtimeAdmission(usage(soft)), { allow: false, reason: "cost_cheap_mode" });
+
+  // At/over the hard cap (default $5.00): refuse with the drills-only reason.
+  recordCost(hard, 6.0);
+  assert.deepEqual(realtimeAdmission(usage(hard)), { allow: false, reason: "cost_hard_cap" });
 });

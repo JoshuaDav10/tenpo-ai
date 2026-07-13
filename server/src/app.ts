@@ -104,9 +104,10 @@ export function buildApp(opts: AppOptions = {}): FastifyInstance {
           note: "Daily hard cap reached; only drill work permitted. Active sessions are never interrupted (R13).",
         });
       }
-      // TODO(§4.3.6 cheap-mode): when u.overSoftCap, roleplay should switch to
-      // Pipeline B cheap mode (STT→Claude→cached-voice TTS). The /chat text path
-      // does not yet need cheap-mode switching — hook lands with RealtimeKit.
+      // Cheap-mode (§4.3.6): past the soft cap, roleplays drop from realtime voice
+      // to the cascade. That switch is enforced where the expensive path opens — the
+      // /realtime WS bridge refuses over the soft cap (see realtimeAdmission). The
+      // /chat text path is already the cheap pipeline, so it needs no soft-cap gate.
 
       let rendered;
       try {

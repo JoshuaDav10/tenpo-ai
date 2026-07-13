@@ -41,3 +41,17 @@ export function usage(userId: string): UsageSummary {
     overHardCap: spentUSD >= HARD_CAP,
   };
 }
+
+// Whether a NEW realtime-voice (Pipeline A) session may open (§4.3.6). Realtime is
+// the expensive path, so it is allowed only below the soft cap: past the soft cap
+// roleplays drop to the cheap cascade (client falls back), past the hard cap only
+// drills remain. Refusal never touches an active session (R13) — it only gates open.
+export type RealtimeDecision =
+  | { allow: true }
+  | { allow: false; reason: "cost_cheap_mode" | "cost_hard_cap" };
+
+export function realtimeAdmission(u: UsageSummary): RealtimeDecision {
+  if (u.overHardCap) return { allow: false, reason: "cost_hard_cap" };
+  if (u.overSoftCap) return { allow: false, reason: "cost_cheap_mode" };
+  return { allow: true };
+}

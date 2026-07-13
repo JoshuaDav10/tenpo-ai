@@ -20,7 +20,7 @@ Last updated: 2026-07-12 (batch 5)
 
 ## Current test counts
 - Swift: **68** tests (`swift test`) — all green.
-- Server: **7** tests (`npm test`) — all green.
+- Server: **8** tests (`npm test`) — all green.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)
 
@@ -56,6 +56,10 @@ proxy with auth/routing/cost-meter/stubs. App boots.
 - ✅ `seed_weak_items` injection (moat loop); `actor_turn` server template.
 - ✅ Live-voice plumbing CODE-COMPLETE: server `/realtime` WSS bridge (OpenAI Realtime,
   closes gracefully w/o key) + client realtime provider. LIVE-VERIFY needs deployed proxy + key.
+- ✅ Server cost enforcement (§4.3.6): `/chat` hard-cap gate + pure `realtimeAdmission()`
+  now gates the expensive `/realtime` bridge — refuses to OPEN past the soft cap
+  (client → cheap cascade) or hard cap (drills only), never interrupting an active
+  session (R13). `/usage` endpoint feeds the client meter. Unit-tested (server 8).
 
 ### Phase 4 — Sync / polish / compliance ⏳ PARTIAL
 - ✅ Compliance screens: `ConsentView` (§8.1 5.1.2i gate), `LicensesView` (§8.3),

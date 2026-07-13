@@ -4,6 +4,7 @@ import WebSocket from "ws";
 import { jwtVerify, createRemoteJWKSet } from "jose";
 import { route } from "./providerRouter.ts";
 import { getRealtimeInstructions } from "./prompts/index.ts";
+import { usage, realtimeAdmission } from "./costMeter.ts";
 
 // WS /realtime (§4.3.1 Pipeline A, §7): bridges client <-> OpenAI Realtime.
 // The proxy injects the Actor system prompt (never on the client), streams audio
@@ -46,6 +47,22 @@ export async function registerRealtime(app: FastifyInstance): Promise<void> {
     const userId = await verifyToken(url.searchParams.get("token") ?? undefined);
     if (!userId) {
       send({ type: "error", error: "unauthorized" });
+      clientSock.close();
+      return;
+    }
+
+    // Cost caps (§4.3.6): realtime is the expensive Pipeline A. Past the soft cap
+    // the client must fall back to the cheap cascade; past the hard cap only drills
+    // remain. Refuse to OPEN — active sessions are never interrupted (R13).
+    const admission = realtimeAdmission(usage(userId));
+    if (!admission.allow) {
+      send({
+        type: "error",
+        error: admission.reason,
+        note: admission.reason === "cost_hard_cap"
+          ? "Daily hard cap reached; roleplays are paused. Drills remain available (R13)."
+          : "Daily voice budget used up; continue this roleplay in cheap text mode (R13).",
+      });
       clientSock.close();
       return;
     }
