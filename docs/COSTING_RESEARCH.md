@@ -84,7 +84,42 @@ defaults or set the shipping cost caps from memory — drive them from this rese
 
 ## Ingested findings
 
-_(empty — paste the research results here when they arrive; then update the cost-table
+_(partial — full report still pending; when it lands, update the cost-table
 defaults in `server/src/pricing.ts`, the cap defaults in `server/src/costMeter.ts`
 (`DAILY_SOFT_CAP_USD` / `DAILY_HARD_CAP_USD`) and `CostCaps.dogfoodDefault` in
 `CoreModels/CostGovernor.swift`, and §3.4 / §4.3.6 of the spec.)_
+
+### Fragment 1 (pasted by Joshua, 2026-07-18): the "$100 curriculum" — one-time TTS pre-generation
+
+> The mechanic: TTS bills per character generated, once. Anything you synthesize
+> ahead of time and store plays back forever at $0. So all predictable audio —
+> vocabulary, example sentences, drill prompts, grammar pattern models, minimal
+> pairs, pitch-accent demonstrations — converts from a metered cost into a
+> one-time capital expense.
+>
+> What $100 buys, one-time:
+> | Provider | Chars for $100 | ≈ Audio | ≈ Japanese sentences (~30 chars avg) |
+> |---|---|---|---|
+> | ElevenLabs v3 ($0.10/1K) | 1M | ~42 hrs | ~33,000 |
+> | OpenAI mini-tts (~$15/M) | 6.7M | ~280 hrs | ~220,000 |
+> | Azure Neural ($16/M) | 6.25M | ~260 hrs | ~210,000 |
+> | Gemini Flash TTS batch ($5/M audio tokens, 50% off) | — | ~550 hrs | ~450,000 |
+
+**Implications for us (recorded at ingest):**
+- This kills the metered cost of the *reusable* voice surface (drills, curriculum
+  audio, pattern models — the 60–80%). It does NOT apply to live conversation:
+  realtime speech is generated per-session and stays metered — that's what the
+  §4.3.6 caps govern.
+- Scale check against today's content: the current seed curriculum (214 items,
+  worst case a few thousand sentences of prompt/example audio) is **~$2–3 at
+  ElevenLabs rates, under $1 at OpenAI/Azure rates** — the $100 figure is for a
+  full multi-level curriculum (tens of thousands of sentences). Correct move:
+  build the batch pre-gen pipeline now, run it for pocket change, and the same
+  pipeline absorbs the $100-scale run when the curriculum grows.
+- Pipeline shape: batch job (tools/) walks content items → synthesizes via the
+  proxy's TTS provider adapters → stores in Supabase Storage keyed by content
+  hash → client cache-first lookup (server request-time TTS cache already exists;
+  this adds the *ahead-of-time* layer + client-side bundle/cache).
+- `server/src/pricing.ts` note: our elevenlabs rate (0.0003/char) vs the
+  fragment's v3 rate ($0.10/1K = 0.0001/char) disagree — reconcile when the full
+  report + chosen plan land.
