@@ -5,7 +5,7 @@
 	<!-- Deployment endpoints. These are PUBLIC values (the anon key ships in every
 	     Supabase client app); provider secrets live only in Fly. Blank = use mocks. -->
 	<key>PROXY_URL</key>
-	<string></string>
+	<string>https://tenpo-proxy.fly.dev</string>
 	<key>SUPABASE_URL</key>
 	<string>https://qcnhwwyomzzfgvxboban.supabase.co</string>
 	<key>SUPABASE_ANON_KEY</key>
