@@ -1,4 +1,4 @@
-# Kizuna — Build Progress (resumable status)
+# Tenpo — Build Progress (resumable status)
 
 **This file is the single source of truth for build state.** A fresh session should
 read this + `docs/ARCHITECTURE.md` (the spec) and can resume without reloading the
@@ -9,8 +9,8 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
 ## How to build & test (conventions)
 - Xcode 26.6 installed but `xcode-select` points at CommandLineTools → prefix Swift
   commands: `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
-- Package tests (macOS): `cd ios/Packages/KizunaKit && DEVELOPER_DIR=... swift test`.
-- App build: `cd ios && xcodegen generate && DEVELOPER_DIR=... xcodebuild -project Kizuna.xcodeproj -scheme Kizuna -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build`.
+- Package tests (macOS): `cd ios/Packages/TenpoKit && DEVELOPER_DIR=... swift test`.
+- App build: `cd ios && xcodegen generate && DEVELOPER_DIR=... xcodebuild -project Tenpo.xcodeproj -scheme Tenpo -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build`.
 - Regenerate the Xcode project (`xcodegen generate`) whenever you ADD a Swift file to `ios/App`.
 - Server (Node 22+, runs .ts directly): `cd server && npm test`.
 - Swift 6.3 gotchas: no `NSLock.lock()` inside `async` fns (use a `synced {}` helper);
@@ -40,8 +40,8 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
 - ✅ **ProxyChatProvider** (SpeechKit): the client-side `/chat` adapter (Director/
   Actor had only the mock). Structured calls decode the server's `structured`
   field; the schema stays server-side in the template (§7).
-- ✅ **Live config wiring**: `ios/App/Config/KizunaConfig.plist` (committed, blank,
-  public values only) → `KizunaConfig` loader → `AppContainer.live()` swaps in
+- ✅ **Live config wiring**: `ios/App/Config/TenpoConfig.plist` (committed, blank,
+  public values only) → `TenpoConfig` loader → `AppContainer.live()` swaps in
   Proxy{STT,TTS,Pron,Chat,Usage,Realtime} + auth when URLs are present; blank keeps
   mocks so the app always boots. `DynamicSyncService` consults AuthManager per
   syncNow(), so sign-in/out flips sync without a restart.
@@ -140,7 +140,7 @@ proxy with auth/routing/cost-meter/stubs. App boots.
   Unit-tested incl. the exact server JSON shape.
 - **REMAINING (MVP):**
   1. Account-gated LIVE verification — create Supabase (run `supabase/schema.sql`) +
-     deploy Fly + fill `KizunaConfig.plist`, then verify: sign-in, sync resume,
+     deploy Fly + fill `TenpoConfig.plist`, then verify: sign-in, sync resume,
      realtime voice, live Director → error taxonomy, cost meter = real proxy spend.
   2. Remote purge on account deletion (see Batch 6 NB) — required by §8.2.
   3. Joshua's call on modes 6/7/10 (listening/rapid-fire/reading): spec §9 puts them

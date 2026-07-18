@@ -20,7 +20,7 @@ Update this file whenever a provider is wired up or a data-handling setting is c
 
 ## App Store checklist (§8.1) — complete before TestFlight
 
-- [x] Third-party AI consent screen (Guideline 5.1.2(i)) naming all providers; consent record stored — `App/Compliance/ConsentView.swift`, blocking gate in `KizunaApp.swift`, re-prompts if provider set changes (`ComplianceStore`)
+- [x] Third-party AI consent screen (Guideline 5.1.2(i)) naming all providers; consent record stored — `App/Compliance/ConsentView.swift`, blocking gate in `TenpoApp.swift`, re-prompts if provider set changes (`ComplianceStore`)
 - [ ] Age rating questionnaire — target 13+, declare AI chatbot functionality (done at submission in App Store Connect)
 - [ ] `PrivacyInfo.xcprivacy` manifest (audio, user content, identifiers) + dependency audit
 - [ ] Privacy nutrition label matches reality (done at submission)

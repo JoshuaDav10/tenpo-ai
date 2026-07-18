@@ -18,7 +18,7 @@ struct HomeView: View {
             VStack(spacing: 24) {
                 Spacer()
 
-                PromptCard(title: "絆 Kizuna", subtitle: "Voice-first Japanese practice")
+                PromptCard(title: "絆 Tenpo", subtitle: "Voice-first Japanese practice")
                     .padding(.horizontal)
 
                 Button {
@@ -63,7 +63,7 @@ struct HomeView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .navigationTitle("Kizuna")
+            .navigationTitle("Tenpo")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     NavigationLink {

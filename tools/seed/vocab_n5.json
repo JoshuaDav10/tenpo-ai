@@ -1,5 +1,5 @@
 {
-  "_comment": "Kizuna starter vocabulary — JLPT N5, roughly frequency/pedagogically ordered. Authored for the app (not machine-extracted); readings and glosses hand-checked. Pitch-accent is intentionally omitted here and is attached at import time from Kanjium (accents.txt). Each entry: id, lemma (kanji or kana headword), kana (hiragana/katakana reading), romaji (Hepburn), glosses (English), pos, band (N5.1..N5.6), frequency_rank.",
+  "_comment": "Tenpo starter vocabulary — JLPT N5, roughly frequency/pedagogically ordered. Authored for the app (not machine-extracted); readings and glosses hand-checked. Pitch-accent is intentionally omitted here and is attached at import time from Kanjium (accents.txt). Each entry: id, lemma (kanji or kana headword), kana (hiragana/katakana reading), romaji (Hepburn), glosses (English), pos, band (N5.1..N5.6), frequency_rank.",
   "items": [
     { "id": "vocab:私", "lemma": "私", "kana": "わたし", "romaji": "watashi", "glosses": ["I", "me"], "pos": "pronoun", "band": "N5.1", "frequency_rank": 1 },
     { "id": "vocab:あなた", "lemma": "あなた", "kana": "あなた", "romaji": "anata", "glosses": ["you"], "pos": "pronoun", "band": "N5.1", "frequency_rank": 2 },

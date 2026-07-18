@@ -1,9 +1,9 @@
 {
-  "name": "kizuna-proxy",
+  "name": "tenpo-proxy",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "API proxy for Kizuna (ARCHITECTURE.md §7). Holds provider keys and prompts server-side; the iOS client names capabilities, never providers.",
+  "description": "API proxy for Tenpo (ARCHITECTURE.md §7). Holds provider keys and prompts server-side; the iOS client names capabilities, never providers.",
   "engines": {
     "node": ">=22.18"
   },

@@ -1,4 +1,4 @@
--- Kizuna — Supabase schema (§4.7: single schema, SQLite locally = Postgres here).
+-- Tenpo — Supabase schema (§4.7: single schema, SQLite locally = Postgres here).
 -- Run once in the Supabase dashboard → SQL Editor (or `supabase db push`).
 --
 -- Mirrors the five tables SupabaseSyncService syncs, plus a `user_id` owner column

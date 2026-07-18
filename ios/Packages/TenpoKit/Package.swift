@@ -2,11 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "KizunaKit",
+    name: "TenpoKit",
     platforms: [.iOS(.v17), .macOS(.v14)],
     products: [
         .library(
-            name: "KizunaKit",
+            name: "TenpoKit",
             targets: [
                 "CoreModels", "LearnerModel", "ContentKit", "SpeechKit",
                 "RealtimeKit", "ModeEngine", "Modes", "LanguagePackCore", "JapanesePack",

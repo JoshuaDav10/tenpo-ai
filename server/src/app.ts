@@ -82,7 +82,7 @@ export function buildApp(opts: AppOptions = {}): FastifyInstance {
     return reply.code(502).send({ error: "provider_error", capability: cap });
   }
 
-  app.get("/healthz", async () => ({ status: "ok", service: "kizuna-proxy", version: "0.1.0" }));
+  app.get("/healthz", async () => ({ status: "ok", service: "tenpo-proxy", version: "0.1.0" }));
 
   app.register(async (authed) => {
     authed.addHook("preHandler", authenticate);

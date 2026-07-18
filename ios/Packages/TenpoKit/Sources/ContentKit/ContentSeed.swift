@@ -25,12 +25,12 @@ public enum ContentSeed {
 
     /// The seed files shipped with the app, in load order.
     public static let manifest: [FileSpec] = [
-        FileSpec(resource: "vocab_n5", kind: .vocab, source: "Kizuna seed (N5)"),
-        FileSpec(resource: "kanji_n5", kind: .kanji, source: "Kizuna seed (N5)"),
-        FileSpec(resource: "grammar_n5", kind: .grammar, source: "Kizuna seed (N5)"),
-        FileSpec(resource: "sentences_n5", kind: .sentence, source: "Kizuna seed (N5)"),
-        FileSpec(resource: "cloze_n5", kind: .sentence, source: "Kizuna seed (N5)"),
-        FileSpec(resource: "scenarios_n5", kind: .scenario, source: "Kizuna seed (N5)"),
+        FileSpec(resource: "vocab_n5", kind: .vocab, source: "Tenpo seed (N5)"),
+        FileSpec(resource: "kanji_n5", kind: .kanji, source: "Tenpo seed (N5)"),
+        FileSpec(resource: "grammar_n5", kind: .grammar, source: "Tenpo seed (N5)"),
+        FileSpec(resource: "sentences_n5", kind: .sentence, source: "Tenpo seed (N5)"),
+        FileSpec(resource: "cloze_n5", kind: .sentence, source: "Tenpo seed (N5)"),
+        FileSpec(resource: "scenarios_n5", kind: .scenario, source: "Tenpo seed (N5)"),
     ]
 
     public enum SeedError: Error, Sendable {

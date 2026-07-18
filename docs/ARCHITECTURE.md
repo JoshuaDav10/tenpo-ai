@@ -1,4 +1,4 @@
-# KIZUNA (working title) — Complete Architecture & Implementation Handoff Document
+# TENPO (working title) — Complete Architecture & Implementation Handoff Document
 ## Voice-First AI Japanese Learning App — iOS First, Multi-Language Ready
 
 **Document version:** 2.0 (Final Handoff)
@@ -156,7 +156,7 @@ Project layout (Swift Package Manager workspace, one app target):
 
 ```
 App/
-  KizunaApp.swift            # entry, DI container
+  TenpoApp.swift            # entry, DI container
 Packages/
   CoreModels/                # value types: ContentItem, ReviewEvent, ErrorEvent…
   LearnerModel/              # FSRS engine, mastery queries, error ingestion
@@ -463,7 +463,7 @@ Endpoints (all authed via Supabase JWT): `POST /chat` (Director + content gen; s
 - **Age rating:** complete Apple's updated age-rating questionnaire (new 13+/16+/18+ tiers). An app with generative AI chat should self-rate conservatively — target **13+**; declare AI chatbot functionality honestly. Not a Kids Category app.
 - **Privacy manifest:** ship `PrivacyInfo.xcprivacy` declaring: audio data (app functionality), user content (app functionality), identifiers (account). Audit every SPM dependency for its own manifest (Xcode → Product → Generate Privacy Report before every submission). Required-reason APIs (UserDefaults etc.) must be declared.
 - **Privacy nutrition label** must match reality: Data Linked to You → contact info (email via Supabase auth), user content (recordings/transcripts), usage data.
-- **Mic permission string** (`NSMicrophoneUsageDescription`): "Kizuna records your voice during practice to transcribe and grade your speaking. Audio is processed by speech-recognition providers listed in Settings → Privacy." Speech recognition permission (`NSSpeechRecognitionUsageDescription`) similarly.
+- **Mic permission string** (`NSMicrophoneUsageDescription`): "Tenpo records your voice during practice to transcribe and grade your speaking. Audio is processed by speech-recognition providers listed in Settings → Privacy." Speech recognition permission (`NSSpeechRecognitionUsageDescription`) similarly.
 - **Subscriptions (Guideline 3.1.2):** StoreKit 2; paywall shows price, period, renewal terms before purchase; functional Restore Purchases button; Settings link to manage/cancel (R14). No pricing hidden behind trial start.
 - Build with the current required SDK (Xcode 26 / iOS 26 SDK required from April 2026).
 
@@ -531,7 +531,7 @@ General rules: work strictly in order; each milestone has a Definition of Done (
 
 1. Exact provider pricing/model names — verify at build time; routing table makes changes trivial.
 2. Whether to expose FSRS parameters to the user — default: read-only inspector now, tuning later.
-3. App name/branding — placeholder "Kizuna."
+3. App name/branding — placeholder "Tenpo."
 4. Launch pricing — §3.4 defaults stand until real usage data exists.
 
 — End of document —

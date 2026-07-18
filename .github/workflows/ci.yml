@@ -15,14 +15,14 @@ jobs:
         with:
           xcode-version: latest-stable
       - name: Package tests
-        working-directory: ios/Packages/KizunaKit
+        working-directory: ios/Packages/TenpoKit
         run: swift test
       - name: App build (simulator, unsigned)
         working-directory: ios
         run: |
           brew install xcodegen
           xcodegen generate
-          xcodebuild -project Kizuna.xcodeproj -scheme Kizuna \
+          xcodebuild -project Tenpo.xcodeproj -scheme Tenpo \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO build | tail -5
 

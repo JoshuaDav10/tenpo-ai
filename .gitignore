@@ -2,8 +2,8 @@
 .DS_Store
 
 # Xcode / Swift
-ios/Kizuna.xcodeproj/xcuserdata/
-ios/Kizuna.xcodeproj/project.xcworkspace/xcuserdata/
+ios/Tenpo.xcodeproj/xcuserdata/
+ios/Tenpo.xcodeproj/project.xcworkspace/xcuserdata/
 DerivedData/
 .build/
 .swiftpm/

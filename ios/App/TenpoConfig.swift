@@ -4,19 +4,19 @@ import SpeechKit
 import SyncKit
 import RealtimeKit
 
-/// Deployment endpoints, read from the bundled `KizunaConfig.plist`. All values are
+/// Deployment endpoints, read from the bundled `TenpoConfig.plist`. All values are
 /// PUBLIC identifiers (the Supabase anon key is designed to ship in clients; secrets
 /// live only in Fly). Blank values mean "not deployed yet" — the container then keeps
 /// the corresponding mock/no-op provider, so the app always boots.
-struct KizunaConfig {
+struct TenpoConfig {
     /// https://<app>.fly.dev — the deployed proxy. Blank → mock speech/chat/realtime.
     let proxyURL: URL?
     /// https://<ref>.supabase.co — the Supabase project. Blank → no auth, no sync.
     let supabaseURL: URL?
     let supabaseAnonKey: String?
 
-    static func load(bundle: Bundle = .main) -> KizunaConfig {
-        let dict = bundle.url(forResource: "KizunaConfig", withExtension: "plist")
+    static func load(bundle: Bundle = .main) -> TenpoConfig {
+        let dict = bundle.url(forResource: "TenpoConfig", withExtension: "plist")
             .flatMap { NSDictionary(contentsOf: $0) as? [String: String] } ?? [:]
         func url(_ key: String) -> URL? {
             guard let raw = dict[key]?.trimmingCharacters(in: .whitespaces), !raw.isEmpty else { return nil }
@@ -26,7 +26,7 @@ struct KizunaConfig {
             guard let raw = dict[key]?.trimmingCharacters(in: .whitespaces), !raw.isEmpty else { return nil }
             return raw
         }
-        return KizunaConfig(
+        return TenpoConfig(
             proxyURL: url("PROXY_URL"),
             supabaseURL: url("SUPABASE_URL"),
             supabaseAnonKey: string("SUPABASE_ANON_KEY")

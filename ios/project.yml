@@ -1,4 +1,4 @@
-name: Kizuna
+name: Tenpo
 options:
   bundleIdPrefix: com.joshuadavid
   deploymentTarget:
@@ -6,11 +6,11 @@ options:
   createIntermediateGroups: true
 
 packages:
-  KizunaKit:
-    path: Packages/KizunaKit
+  TenpoKit:
+    path: Packages/TenpoKit
 
 targets:
-  Kizuna:
+  Tenpo:
     type: application
     platform: iOS
     sources:
@@ -21,11 +21,11 @@ targets:
         type: folder
         buildPhase: resources
     dependencies:
-      - package: KizunaKit
-        product: KizunaKit
+      - package: TenpoKit
+        product: TenpoKit
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.joshuadavid.kizuna
+        PRODUCT_BUNDLE_IDENTIFIER: com.joshuadavid.tenpo
         GENERATE_INFOPLIST_FILE: YES
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 0.1.0
@@ -36,14 +36,14 @@ targets:
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone: "UIInterfaceOrientationPortrait"
         INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
         # §8.1 permission strings
-        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Kizuna records your voice during practice to transcribe and grade your speaking. Audio is processed by speech-recognition providers listed in Settings → Privacy."
-        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Kizuna uses on-device speech recognition to grade your spoken answers instantly, without sending easy drills to a server."
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Tenpo records your voice during practice to transcribe and grade your speaking. Audio is processed by speech-recognition providers listed in Settings → Privacy."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Tenpo uses on-device speech recognition to grade your spoken answers instantly, without sending easy drills to a server."
 
 schemes:
-  Kizuna:
+  Tenpo:
     build:
       targets:
-        Kizuna: all
+        Tenpo: all
     run:
       config: Debug
     test:

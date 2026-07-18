@@ -7,7 +7,7 @@ import CoreModels
 /// tests validate the ACTUAL shipped curriculum, not a fixture.
 private func seedDir() -> URL {
     var url = URL(fileURLWithPath: #filePath)
-    // .../ios/Packages/KizunaKit/Tests/ContentKitTests/ContentSeedTests.swift → repo root
+    // .../ios/Packages/TenpoKit/Tests/ContentKitTests/ContentSeedTests.swift → repo root
     for _ in 0..<6 { url.deleteLastPathComponent() }
     return url.appendingPathComponent("tools/seed", isDirectory: true)
 }

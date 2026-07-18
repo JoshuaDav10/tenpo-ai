@@ -30,7 +30,7 @@ enum DataManager {
         encoder.dateEncodingStrategy = .iso8601
         let data = try encoder.encode(bundle)
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("kizuna-export-\(Int(Date().timeIntervalSince1970)).json")
+            .appendingPathComponent("tenpo-export-\(Int(Date().timeIntervalSince1970)).json")
         try data.write(to: url)
         return url
     }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct KizunaApp: App {
+struct TenpoApp: App {
     private let bootstrap = AppBootstrap()
     @StateObject private var compliance = ComplianceStore()
 
@@ -10,9 +10,9 @@ struct KizunaApp: App {
             switch bootstrap.result {
             case .success(let container):
                 #if DEBUG
-                // Dev-only screenshot/preview routing: `-e KIZUNA_ROUTE dashboard|roleplay|
+                // Dev-only screenshot/preview routing: `-e TENPO_ROUTE dashboard|roleplay|
                 // settings|drill` jumps straight to a screen (bypasses nav taps). Never ships.
-                if let route = ProcessInfo.processInfo.environment["KIZUNA_ROUTE"] {
+                if let route = ProcessInfo.processInfo.environment["TENPO_ROUTE"] {
                     DebugRoute(route: route, container: container, compliance: compliance)
                 } else {
                     rootView(container)

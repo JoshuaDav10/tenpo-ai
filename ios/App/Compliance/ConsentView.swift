@@ -13,7 +13,7 @@ struct ConsentView: View {
                     Text("Before you start")
                         .font(.largeTitle).bold()
 
-                    Text("Kizuna uses AI services to understand and grade your Japanese. When you practice, your **voice recordings and conversation text** are sent to the providers below for processing.")
+                    Text("Tenpo uses AI services to understand and grade your Japanese. When you practice, your **voice recordings and conversation text** are sent to the providers below for processing.")
                         .font(.body)
 
                     VStack(alignment: .leading, spacing: 12) {

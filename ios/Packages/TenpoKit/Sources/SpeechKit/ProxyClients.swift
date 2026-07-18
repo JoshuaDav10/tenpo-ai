@@ -1,7 +1,7 @@
 import Foundation
 import CoreModels
 
-/// Configuration for talking to the Kizuna proxy (§7). The auth token is fetched
+/// Configuration for talking to the Tenpo proxy (§7). The auth token is fetched
 /// lazily so it can refresh (Supabase JWT) without rebuilding the clients.
 public struct ProxyConfig: Sendable {
     public var baseURL: URL

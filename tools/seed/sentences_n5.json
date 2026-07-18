@@ -1,5 +1,5 @@
 {
-  "_comment": "Kizuna starter example sentences — JLPT N5, authored in-house (NOT from Tatoeba) so they can ship under the app's own terms. The real importer pulls band-filtered CC-BY sentences from Tatoeba; these seed rows exist so drills/reading modes have content today. Each entry: id (sentence:s_n5_NN), ja, reading (kana), en, band. Vocabulary is kept within the seed vocab list so item_link(sentence uses-> vocab) edges resolve.",
+  "_comment": "Tenpo starter example sentences — JLPT N5, authored in-house (NOT from Tatoeba) so they can ship under the app's own terms. The real importer pulls band-filtered CC-BY sentences from Tatoeba; these seed rows exist so drills/reading modes have content today. Each entry: id (sentence:s_n5_NN), ja, reading (kana), en, band. Vocabulary is kept within the seed vocab list so item_link(sentence uses-> vocab) edges resolve.",
   "items": [
     { "id": "sentence:s_n5_01", "ja": "私は毎日日本語を勉強します。", "reading": "わたしはまいにちにほんごをべんきょうします。", "en": "I study Japanese every day.", "band": "N5.2" },
     { "id": "sentence:s_n5_02", "ja": "友達と映画を見ました。", "reading": "ともだちとえいがをみました。", "en": "I watched a movie with a friend.", "band": "N5.3" },

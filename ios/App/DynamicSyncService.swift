@@ -9,12 +9,12 @@ import Persistence
 /// app restart.
 actor DynamicSyncService: SyncService {
     private let db: DatabaseManager
-    private let config: KizunaConfig
+    private let config: TenpoConfig
     private let auth: AuthManager
     private var live: (userID: String, service: SupabaseSyncService)?
     private(set) var lastSyncedAt: Date?
 
-    init(db: DatabaseManager, config: KizunaConfig, auth: AuthManager) {
+    init(db: DatabaseManager, config: TenpoConfig, auth: AuthManager) {
         self.db = db
         self.config = config
         self.auth = auth

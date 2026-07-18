@@ -35,7 +35,7 @@ struct LicensesView: View {
     var body: some View {
         List {
             Section {
-                Text("Kizuna is built on open Japanese-language data. We're grateful to these projects and honor their licences.")
+                Text("Tenpo is built on open Japanese-language data. We're grateful to these projects and honor their licences.")
                     .font(.footnote).foregroundStyle(.secondary)
             }
             ForEach(sources) { source in

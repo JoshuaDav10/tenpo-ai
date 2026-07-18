@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Kizuna content importer — builds the shipped SQLite curriculum DB (§4.7, §5, §9 Phase 1.3).
+"""Tenpo content importer — builds the shipped SQLite curriculum DB (§4.7, §5, §9 Phase 1.3).
 
 This script produces (or fills) the `content_item` / `item_link` tables that the iOS
 app (GRDB/SQLite) opens read-only. The output schema is byte-for-byte the one created
 by the Swift migration in
-`ios/Packages/KizunaKit/Sources/Persistence/DatabaseManager.swift` (migration id
+`ios/Packages/TenpoKit/Sources/Persistence/DatabaseManager.swift` (migration id
 "v1_schema"). A fresh DB built here also writes GRDB's `grdb_migrations` marker so the
 app treats the file as already-migrated and does not try to recreate the tables.
 
@@ -50,8 +50,8 @@ DATA SOURCES, DOWNLOAD URLS, AND LICENSES  (surfaced on the app's Licenses scree
              --> kind=sentence, source = "Tatoeba", license = "CC BY 2.0 FR"
 
 The committed starter curriculum under tools/seed/ (loaded by --seed) is authored
-in-house for Kizuna and ships under the app's own terms
-(source = "Kizuna seed", license = "Proprietary - Kizuna"); it is deliberately NOT
+in-house for Tenpo and ships under the app's own terms
+(source = "Tenpo seed", license = "Proprietary - Tenpo"); it is deliberately NOT
 derived from the CC BY-SA dictionary data so the share-alike obligation stays scoped
 to real imported dictionary tables (§8.3).
 
@@ -59,10 +59,10 @@ to real imported dictionary tables (§8.3).
 USAGE
 --------------------------------------------------------------------------------
     # Default path the app uses today — no downloads needed:
-    python3 tools/import_content.py --seed --out tools/build/kizuna_seed.sqlite
+    python3 tools/import_content.py --seed --out tools/build/tenpo_seed.sqlite
 
     # Real sources (any subset; absent files are skipped with a log line):
-    python3 tools/import_content.py --out tools/build/kizuna_full.sqlite \\
+    python3 tools/import_content.py --out tools/build/tenpo_full.sqlite \\
         --jmdict data/jmdict-eng.json \\
         --kanjidic data/kanjidic2.xml \\
         --kanjium-accents data/accents.txt \\
@@ -88,8 +88,8 @@ log = logging.getLogger("import_content")
 LANGUAGE = "ja"
 GRDB_MIGRATION_ID = "v1_schema"
 
-SEED_SOURCE = "Kizuna seed"
-SEED_LICENSE = "Proprietary - Kizuna"
+SEED_SOURCE = "Tenpo seed"
+SEED_LICENSE = "Proprietary - Tenpo"
 
 # --------------------------------------------------------------------------------
 # Schema  (mirrors DatabaseManager.migrator "v1_schema" exactly; IF NOT EXISTS so this
@@ -647,11 +647,11 @@ def report_counts(conn: sqlite3.Connection) -> dict[str, int]:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="import_content.py",
-        description="Build the Kizuna curriculum SQLite DB (content_item / item_link).",
+        description="Build the Tenpo curriculum SQLite DB (content_item / item_link).",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=(
             "Examples:\n"
-            "  python3 tools/import_content.py --seed --out tools/build/kizuna_seed.sqlite\n"
+            "  python3 tools/import_content.py --seed --out tools/build/tenpo_seed.sqlite\n"
             "  python3 tools/import_content.py --out tools/build/full.sqlite \\\n"
             "      --jmdict data/jmdict-eng.json --kanjidic data/kanjidic2.xml \\\n"
             "      --kanjium-accents data/accents.txt --tatoeba data/jpn_sentences.tsv\n"

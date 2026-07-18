@@ -31,7 +31,7 @@ final class AppContainer {
     /// Proxy cost meter (§4.3.6). nil until the Fly.io proxy URL exists — then the
     /// client reads authoritative server spend instead of the ~$0 local meter.
     let usage: (any UsageSource)?
-    /// Sign-in state (AuthKit). nil until KizunaConfig.plist names a Supabase project.
+    /// Sign-in state (AuthKit). nil until TenpoConfig.plist names a Supabase project.
     let auth: AuthManager?
 
     init(
@@ -150,9 +150,9 @@ final class AppContainer {
         var registry = ModeRegistry()
         registerModes(&registry)
 
-        // Deployment endpoints from KizunaConfig.plist. Anything blank keeps its
+        // Deployment endpoints from TenpoConfig.plist. Anything blank keeps its
         // mock so the app boots and works local-first at every stage of setup.
-        let config = KizunaConfig.load()
+        let config = TenpoConfig.load()
         let auth = config.authConfig.map {
             AuthManager(client: SupabaseAuthClient(config: $0), store: KeychainSessionStore())
         }

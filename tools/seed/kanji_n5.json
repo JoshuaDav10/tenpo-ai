@@ -1,5 +1,5 @@
 {
-  "_comment": "Kizuna starter kanji — JLPT N5, common characters. Authored/hand-checked (mirrors KANJIDIC2 field conventions: on'yomi in katakana, kun'yomi in hiragana with okurigana after '.'; stroke counts verified). Each entry: id, literal, meanings (English), on (on'yomi), kun (kun'yomi), strokes, band, frequency_rank. At import time the seed importer emits item_link(kanji contains-> vocab) edges wherever a kanji literal appears in a vocab lemma.",
+  "_comment": "Tenpo starter kanji — JLPT N5, common characters. Authored/hand-checked (mirrors KANJIDIC2 field conventions: on'yomi in katakana, kun'yomi in hiragana with okurigana after '.'; stroke counts verified). Each entry: id, literal, meanings (English), on (on'yomi), kun (kun'yomi), strokes, band, frequency_rank. At import time the seed importer emits item_link(kanji contains-> vocab) edges wherever a kanji literal appears in a vocab lemma.",
   "items": [
     { "id": "kanji:一", "literal": "一", "meanings": ["one"], "on": ["イチ", "イツ"], "kun": ["ひと.つ"], "strokes": 1, "band": "N5.1", "frequency_rank": 1 },
     { "id": "kanji:二", "literal": "二", "meanings": ["two"], "on": ["ニ"], "kun": ["ふた.つ"], "strokes": 2, "band": "N5.1", "frequency_rank": 2 },

@@ -97,7 +97,7 @@ struct SettingsView: View {
             Section {
                 LabeledContent("Version", value: "0.1.0")
             } footer: {
-                Text("Kizuna keeps your audio only long enough to grade it, then deletes it, unless you turn on saved recordings. Learner data stays on your device.")
+                Text("Tenpo keeps your audio only long enough to grade it, then deletes it, unless you turn on saved recordings. Learner data stays on your device.")
             }
         }
         .navigationTitle("Settings")

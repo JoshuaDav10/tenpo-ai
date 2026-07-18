@@ -22,13 +22,13 @@ public final class DatabaseManager: Sendable {
         return try DatabaseManager(writer: pool)
     }
 
-    /// Standard app database location (Application Support/Kizuna/kizuna.sqlite).
+    /// Standard app database location (Application Support/Tenpo/tenpo.sqlite).
     public static func appDefault() throws -> DatabaseManager {
         let dir = try FileManager.default.url(
             for: .applicationSupportDirectory, in: .userDomainMask,
             appropriateFor: nil, create: true
-        ).appendingPathComponent("Kizuna", isDirectory: true)
-        return try onDisk(at: dir.appendingPathComponent("kizuna.sqlite"))
+        ).appendingPathComponent("Tenpo", isDirectory: true)
+        return try onDisk(at: dir.appendingPathComponent("tenpo.sqlite"))
     }
 
     /// In-memory database for tests.

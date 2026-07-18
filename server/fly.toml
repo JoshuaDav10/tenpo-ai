@@ -2,7 +2,7 @@
 #   fly launch --copy-config --no-deploy   (creates the app)
 #   fly secrets set SUPABASE_JWKS_URL=... ANTHROPIC_API_KEY=... (etc.)
 #   fly deploy
-app = "kizuna-proxy"
+app = "tenpo-proxy"
 primary_region = "sjc"
 
 [build]

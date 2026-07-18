@@ -9,7 +9,7 @@ public struct KeychainSessionStore: AuthSessionStore {
     private let service: String
     private let account: String
 
-    public init(service: String = "app.kizuna.auth", account: String = "session") {
+    public init(service: String = "app.tenpo.auth", account: String = "session") {
         self.service = service
         self.account = account
     }

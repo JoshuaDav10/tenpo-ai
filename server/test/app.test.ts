@@ -84,7 +84,7 @@ test("missing provider key → 503 provider_not_configured (primary named)", asy
 
 test("/tts is cache-first: identical requests hit the provider once", async () => {
   let calls = 0;
-  const cacheDir = mkdtempSync(join(tmpdir(), "kizuna-tts-"));
+  const cacheDir = mkdtempSync(join(tmpdir(), "tenpo-tts-"));
   const tts: ProviderFactories["tts"] = (spec: ProviderSpec) => ({
     provider: spec.provider,
     async synthesize() {

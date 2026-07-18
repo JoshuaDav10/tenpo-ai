@@ -5,7 +5,7 @@ import ContentKit
 import ModeEngine
 
 /// Dev-only deep-route for screenshots/dogfooding. Not compiled into release builds.
-/// Launch with e.g. `xcrun simctl launch <dev> <bundle> KIZUNA_ROUTE dashboard` (env).
+/// Launch with e.g. `xcrun simctl launch <dev> <bundle> TENPO_ROUTE dashboard` (env).
 struct DebugRoute: View {
     let route: String
     let container: AppContainer
