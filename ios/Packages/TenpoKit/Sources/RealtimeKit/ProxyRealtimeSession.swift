@@ -148,6 +148,10 @@ final class ProxyRealtimeSession: RealtimeSession, @unchecked Sendable {
             return .partialTranscript(role: .learner, text: transcript)
         case "response.done", "response.output_audio.done":
             return .turnEnded(role: .actor)
+        case "input_audio_buffer.speech_started":
+            return .userSpeechStarted
+        case "input_audio_buffer.speech_stopped":
+            return .userSpeechStopped
         case "error":
             // Proxy control frame: `error` is a bare code string.
             if let code = obj["error"] as? String {

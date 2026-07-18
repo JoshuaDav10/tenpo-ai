@@ -21,6 +21,11 @@ public enum RealtimeEvent: Sendable {
     case assistantAudio(AudioBuffer)
     case assistantTranscript(String)
     case turnEnded(role: TranscriptRole)
+    /// Server VAD detected the learner's voice (OpenAI `input_audio_buffer.speech_started`).
+    /// Arriving while assistant audio is playing, this is the barge-in trigger.
+    case userSpeechStarted
+    /// Server VAD detected end-of-utterance — the "auto endpoint" of the voice loop.
+    case userSpeechStopped
     case error(String)
     /// The PROXY refused/closed the session for a policy reason — its frames carry a
     /// bare string `error` code (not OpenAI's `{message}` object). `code` is e.g.
