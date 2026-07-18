@@ -102,6 +102,9 @@ export async function registerRealtime(app: FastifyInstance): Promise<void> {
                 audio: { output: { voice: "alloy" } },
               },
             }));
+            // The Actor opens the scene (SESSION_DESIGN Act 1): without an
+            // explicit response.create the model waits silently for the user.
+            upstream.send(JSON.stringify({ type: "response.create" }));
           });
         } catch {
           send({ type: "error", error: "bad_init" });
