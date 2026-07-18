@@ -4,7 +4,7 @@
 read this + `docs/ARCHITECTURE.md` (the spec) and can resume without reloading the
 whole history. Update it whenever a chunk is verifiably complete.
 
-Last updated: 2026-07-12 (batch 5)
+Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring, CI)
 
 ## How to build & test (conventions)
 - Xcode 26.6 installed but `xcode-select` points at CommandLineTools → prefix Swift
@@ -19,8 +19,37 @@ Last updated: 2026-07-12 (batch 5)
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **82** tests (`swift test`) — all green.
+- Swift: **89** tests (`swift test`) — all green.
 - Server: **8** tests (`npm test`) — all green.
+- CI: `.github/workflows/ci.yml` runs both suites + an unsigned app build per push.
+
+## Batch 6 (2026-07-18) — closed the audit gaps
+- ✅ **Supabase schema + RLS** (`supabase/schema.sql`): the five synced tables as
+  Postgres DDL, `user_id uuid default auth.uid()` on every row, composite PKs
+  including user_id, per-table RLS (`user_id = auth.uid()` for all ops). Run it in
+  the dashboard SQL Editor when the project exists.
+- ✅ **SyncKit ISO-8601 dates** (`PostgRESTCoding`): sync traffic had been encoding
+  `Date` as Foundation reference-date doubles, which Postgres `timestamptz` would
+  reject — now ISO-8601 out, tolerant decode (fractional + plain) in. 2 new tests.
+- ✅ **AuthKit** (new module): Supabase GoTrue email one-time-code sign-in
+  (`/otp` → `/verify`), refresh-token rotation with 60s expiry leeway, Keychain
+  session store (`KeychainSessionStore`; protocol is `AuthSessionStore` — plain
+  `SessionStore` collides with ModeEngine's). Chosen over Sign in with Apple
+  because SIWA requires the paid Apple program; email OTP works on a free-team
+  sideload. 5 tests (URLProtocol stub).
+- ✅ **ProxyChatProvider** (SpeechKit): the client-side `/chat` adapter (Director/
+  Actor had only the mock). Structured calls decode the server's `structured`
+  field; the schema stays server-side in the template (§7).
+- ✅ **Live config wiring**: `ios/App/Config/KizunaConfig.plist` (committed, blank,
+  public values only) → `KizunaConfig` loader → `AppContainer.live()` swaps in
+  Proxy{STT,TTS,Pron,Chat,Usage,Realtime} + auth when URLs are present; blank keeps
+  mocks so the app always boots. `DynamicSyncService` consults AuthManager per
+  syncNow(), so sign-in/out flips sync without a restart.
+- ✅ **Sign-in UI**: Settings → Account (email → 6-digit code → signed in/sign out),
+  honest "Sync is off in this build" footer when unconfigured. Verified on sim.
+- NB: **account deletion is local-only right now** — `DataManager` purges the local
+  tables, but a signed-in user's Supabase rows must also be deleted (and §8.2
+  requires it). Wire remote purge during live verification.
 
 ## Phase status (MVP = through Phase 4; Phase 5 is post-MVP)
 
@@ -109,11 +138,17 @@ proxy with auth/routing/cost-meter/stubs. App boots.
   Closes a real gap — the client cost governance had been driven by local `cost_usd` that
   never moves. Wired via injectable `AppContainer.usage` (nil until the proxy URL exists).
   Unit-tested incl. the exact server JSON shape.
-- **REMAINING (MVP):** only account-gated LIVE verification — stand up Supabase + Fly.io,
-  set `AppContainer.usage`/sync config + provider keys, then verify sync resume, realtime
-  voice, and that the cost meter reflects real proxy spend. (Mode 11 PitchAccentDrill and
-  mode 9 FreeRoleplay are Phase 5 per §9/§4.6 — deferred. R18 latency debug screen is the
-  last spec-named client item but its metrics only exist on the live pipeline.)
+- **REMAINING (MVP):**
+  1. Account-gated LIVE verification — create Supabase (run `supabase/schema.sql`) +
+     deploy Fly + fill `KizunaConfig.plist`, then verify: sign-in, sync resume,
+     realtime voice, live Director → error taxonomy, cost meter = real proxy spend.
+  2. Remote purge on account deletion (see Batch 6 NB) — required by §8.2.
+  3. Joshua's call on modes 6/7/10 (listening/rapid-fire/reading): spec §9 puts them
+     in Phase 4, current builds treat them as Phase 5. Modes 6/7 have implementations
+     registered; reading (10) has ReaderView. Decide + verify or formally defer.
+  4. App icon / asset catalog (none exists) — needed by TestFlight, not by sideload.
+  (Mode 11 PitchAccentDrill and mode 9 FreeRoleplay are Phase 5 per §9/§4.6. R18
+  latency debug screen: build during live verification, its metrics only exist there.)
 
 ### Phase 5 — Post-MVP (NOT this push, per spec §9)
 Pitch-accent drill (needs Kanjium data), FSRS weight optimization, scenario auto-gen UI,
@@ -127,7 +162,7 @@ Pitch-accent drill (needs Kanjium data), FSRS weight optimization, scenario auto
 3. **Provider API keys** (Anthropic, OpenAI, Deepgram, Azure, ElevenLabs) → Fly secrets.
 4. **Apple**: age-rating questionnaire, privacy nutrition label, signing — at submission.
 
-## Not yet pushed to GitHub (remote `JoshuaDav10/tenpo-ai` exists, empty). Local `main` has all commits.
+## Pushed to GitHub: `JoshuaDav10/tenpo-ai` (main). CI runs on every push.
 
 ## Definition of "100% for this push"
 All Phase 0–4 code that does NOT require Joshua's accounts is complete, built, and

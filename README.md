@@ -49,20 +49,43 @@ npm test
 Provider API keys live only in `server/.env` (locally) / Fly secrets (deployed).
 **Keys never ship in the iOS client** — non-negotiable (§7).
 
+## Going live (deploy + device testing)
+
+The app runs fully offline against mocks until endpoints are configured; each of
+these steps independently turns on a real capability.
+
+1. **Supabase (auth + sync, free tier).** Create a project at supabase.com, then in
+   the dashboard's SQL Editor run [`supabase/schema.sql`](supabase/schema.sql)
+   (tables + row-level security). Email one-time-code sign-in works out of the box
+   (Authentication → Providers → Email, keep "Email OTP" enabled).
+2. **Proxy on Fly.io (Director, STT/TTS/pron, realtime voice, cost meter).**
+   In `server/`, follow the three commands at the top of `fly.toml`:
+   `fly launch --copy-config --no-deploy`, then `fly secrets set` with
+   `SUPABASE_JWKS_URL=https://<ref>.supabase.co/auth/v1/.well-known/jwks.json` and the
+   provider keys (`OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, and optionally
+   `DEEPGRAM_API_KEY`, `AZURE_SPEECH_KEY`+`AZURE_SPEECH_REGION`, `ELEVENLABS_API_KEY`),
+   then `fly deploy`. Missing keys degrade gracefully per capability.
+3. **Point the app at it.** Fill `ios/App/Config/KizunaConfig.plist`: `PROXY_URL`
+   (https://<app>.fly.dev), `SUPABASE_URL`, `SUPABASE_ANON_KEY`. These are public
+   client values — safe to commit. Blank values keep the mocks.
+4. **Run on your iPhone (no paid Apple account needed).** In Xcode: Settings →
+   Accounts → add your Apple ID (creates a free Personal Team). Open the project,
+   select the Kizuna target → Signing & Capabilities → choose the Personal Team.
+   Plug in the phone, select it as the run destination, hit Run. On the phone:
+   Settings → General → VPN & Device Management → trust the developer certificate.
+   Free-team builds expire after 7 days — re-run from Xcode to refresh. (The $99
+   Apple Developer Program is only needed for TestFlight / App Store.)
+5. **Sign in on the phone** (app Settings → Account) — that turns on sync and
+   authenticates voice/Director calls against your daily cost caps.
+
 ## Status
 
-- [x] Phase 0 — Skeleton: SPM workspace, GRDB schema, DI + mock providers, proxy stubs
-- [x] Phase 1 — Learner spine: FSRS-6 scheduler, §4.5 daily queue, content import +
-      N5 seed curriculum (208 items), mastery dashboard
-- [x] Phase 2 — Honest grading (§4.3.4, dual-threshold, R6-provable), SessionRunner,
-      MVP drill modes 1–5 (VocabIntro, Echo, Production, Comprehension, Cloze) on a
-      shared engine, text + on-device voice capture wired into the drill UI
-- [~] Phase 3 — Director/Actor roleplay engine with code-enforced guardrails (R1/R3/R4
-      adversarial suite passing), GuidedRoleplayMode (cheap-mode) + goal-HUD UI + 8 N5
-      scenarios, real Claude/Deepgram/ElevenLabs/Azure backend adapters, Director prompt
-      + §4.4 schema, TTS cache. Remaining: RealtimeKit WSS live-voice Actor, seed_weak_items.
-- [~] Phase 4 — Compliance screens done (consent gate §8.1, Licenses & Sources §8.3,
-      account deletion + JSON export §8.2). Remaining: Supabase sync, cheap-mode cost caps
-      on the client, persona/voice selection.
+Phases 0–4 (the MVP surface) are code-complete and tested, including FSRS + the
+full §4.7 dashboard, 5 drill modes, the guardrailed roleplay engine (adversarial
+suite passing), compliance screens, email-code auth, Supabase sync, and two-sided
+cost governance. What remains is live verification against a deployed backend
+(realtime voice, live Director grading, sync resume, real cost metering) and App
+Store submission work. `docs/PROGRESS.md` tracks the detailed state.
 
-Tests: `swift test` (56, in `ios/Packages/KizunaKit`) + `npm test` (7, in `server`), all green.
+Tests: `swift test` (89, in `ios/Packages/KizunaKit`) + `npm test` (8, in `server`),
+all green; CI runs both plus an unsigned app build on every push.
