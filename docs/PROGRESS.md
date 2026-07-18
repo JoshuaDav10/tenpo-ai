@@ -19,7 +19,32 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **89** tests (`swift test`) — all green.
+- Swift: **98** tests (`swift test`) — all green.
+
+## Batch 7 (2026-07-18, daytime) — the voice loop (SESSION_DESIGN.md §1)
+- ✅ Backend LIVE: Supabase (schema run, RLS verified) + Fly `tenpo-proxy`
+  (healthz ok, JWT-gated). `TenpoConfig.plist` carries all three real values.
+- ✅ Renamed Kizuna→Tenpo everywhere (fc6456d); bundle id com.joshuadavid.tenpo.
+- ✅ Realtime model bugfix: `openai:realtime` requested a nonexistent model
+  literally named "realtime"; now `openai:gpt-realtime-mini` (≈¼ the cost).
+- ✅ `VoiceLoop` (RealtimeKit): pure conversation state machine — listening →
+  thinking (server VAD `speech_stopped`) → speaking (first audio delta) →
+  listening; **barge-in** (speech_started during speaking/thinking → flush +
+  cancel); soft-cap refusal → cascade fallback action. 9 headless tests incl.
+  latency meter (R18: endpoint→first-audio, p50) and PCM16 round-trip.
+- ✅ `RealtimeAudioEngine` (iOS): continuous ~100ms 24kHz mono PCM16 mic chunks
+  via AVAudioConverter; gapless delta playback; `.voiceChat` echo cancellation
+  (else the mic barge-ins on the AI's own voice). NB: AVFAudio's own
+  `AudioBuffer` collides with CoreModels' — qualify as `CoreModels.AudioBuffer`.
+- ✅ `VoiceSessionView` (app): orb UI (listening/thinking/speaking), ambient
+  transcript, DEBUG latency chip, End; mic-permission + friendly failure copy.
+  RoleplayListView routes full-budget → voice, cheap-mode → text cascade, and
+  a mid-open soft-cap refusal into the same scenario's text session.
+- App builds; on-device voice E2E still UNVERIFIED (needs OPENAI_API_KEY in
+  Fly, which Joshua was setting up). First live talk = next session's opener.
+- NOT yet done from SESSION_DESIGN: Director worker on the voice transcript
+  (grading during voice sessions), session persistence for voice turns (R12),
+  Acts 1–4 orchestration, flavors B/C, TTS pre-gen.
 - Server: **8** tests (`npm test`) — all green.
 - CI: `.github/workflows/ci.yml` runs both suites + an unsigned app build per push.
 
