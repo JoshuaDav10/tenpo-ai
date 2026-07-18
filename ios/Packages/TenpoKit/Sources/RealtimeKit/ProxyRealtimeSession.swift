@@ -159,6 +159,9 @@ final class ProxyRealtimeSession: RealtimeSession, @unchecked Sendable {
             }
             // Upstream OpenAI error: `error` is an object with a message.
             let message = (obj["error"] as? [String: Any])?["message"] as? String ?? "realtime error"
+            // Benign: our barge-in cancel can race the server's own auto-cancel;
+            // "nothing to cancel" must not kill the session.
+            if message.localizedCaseInsensitiveContains("no active response") { return nil }
             return .error(message)
         default:
             return nil

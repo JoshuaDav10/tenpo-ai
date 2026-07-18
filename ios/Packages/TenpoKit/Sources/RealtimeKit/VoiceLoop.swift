@@ -47,7 +47,9 @@ extension VoiceLoopAction {
 /// (barge-in). Pure state machine over `RealtimeEvent`s; every decision is a returned
 /// `VoiceLoopAction`, so the whole loop is unit-testable with no socket and no mic.
 public struct VoiceLoop: Sendable {
-    public private(set) var state: VoiceLoopState = .listening
+    /// Starts in `.thinking`: the Actor opens every scene (SESSION_DESIGN Act 1),
+    /// so the session begins waiting for the AI's greeting, not for the user.
+    public private(set) var state: VoiceLoopState = .thinking
     /// Accumulates assistant transcript deltas for the current turn.
     private var assistantTurnText = ""
 

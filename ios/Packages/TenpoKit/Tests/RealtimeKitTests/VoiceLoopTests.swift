@@ -9,26 +9,35 @@ private func pcm(_ byte: UInt8) -> AudioBuffer {
 
 struct VoiceLoopTests {
 
-    @Test func fullTurnCycle_listen_think_speak_listen() {
+    @Test func fullTurnCycle_greeting_listen_think_speak_listen() {
         var loop = VoiceLoop()
-        #expect(loop.state == .listening)
+        // The Actor opens the scene, so the loop starts waiting for the greeting.
+        #expect(loop.state == .thinking)
+
+        // Greeting audio arrives → speaking; done → learner's turn.
+        #expect(loop.handle(.assistantAudio(pcm(9))) == [.state(.speaking), .play(pcm(9))])
+        _ = loop.handle(.assistantTranscript("こんにちは"))
+        #expect(loop.handle(.turnEnded(role: .actor)) == [.assistantSaid("こんにちは"), .state(.listening)])
 
         // Learner talks, server VAD endpoints → thinking.
+        _ = loop.handle(.userSpeechStarted)
         #expect(loop.handle(.userSpeechStopped) == [.state(.thinking)])
 
         // First audio delta → speaking + play; later deltas just play.
         #expect(loop.handle(.assistantAudio(pcm(1))) == [.state(.speaking), .play(pcm(1))])
         #expect(loop.handle(.assistantAudio(pcm(2))) == [.play(pcm(2))])
+        #expect(loop.handle(.turnEnded(role: .actor)) == [.state(.listening)])
+    }
 
-        // Reply finished → transcript surfaced, floor back to the learner.
-        _ = loop.handle(.assistantTranscript("こんにちは"))
-        #expect(loop.handle(.turnEnded(role: .actor)) == [.assistantSaid("こんにちは"), .state(.listening)])
-        #expect(loop.state == .listening)
+    @Test func userTalkingBeforeGreeting_takesTheFloor() {
+        var loop = VoiceLoop()
+        // Eager learner speaks during the opening wait → treat like barge-in.
+        #expect(loop.handle(.userSpeechStarted) == [.stopPlayback, .state(.listening)])
+        #expect(loop.handle(.userSpeechStopped) == [.state(.thinking)])
     }
 
     @Test func bargeIn_whileSpeaking_stopsPlaybackImmediately() {
         var loop = VoiceLoop()
-        _ = loop.handle(.userSpeechStopped)
         _ = loop.handle(.assistantAudio(pcm(1)))
         #expect(loop.state == .speaking)
 
@@ -43,10 +52,24 @@ struct VoiceLoopTests {
 
     @Test func bargeIn_whileThinking_alsoCancels() {
         var loop = VoiceLoop()
-        _ = loop.handle(.userSpeechStopped)
         #expect(loop.state == .thinking)
         // Learner resumes before the reply starts (changed their mind, kept talking).
         #expect(loop.handle(.userSpeechStarted) == [.stopPlayback, .state(.listening)])
+    }
+
+    @Test func benignCancelRaceError_isIgnoredNotFatal() {
+        // Field bug: our barge-in cancel raced OpenAI's auto-cancel; the resulting
+        // "Cancellation failed: no active response found" killed the session.
+        let frame: [String: Any] = [
+            "type": "error",
+            "error": ["message": "Cancellation failed: no active response found"],
+        ]
+        #expect(ProxyRealtimeSession.mapEvent(frame) == nil)
+        // Real errors still map.
+        let fatal: [String: Any] = ["type": "error", "error": ["message": "session expired"]]
+        if case .error = ProxyRealtimeSession.mapEvent(fatal)! {} else {
+            Issue.record("real errors must still surface")
+        }
     }
 
     @Test func softCapRefusal_fallsBackToCascade() {

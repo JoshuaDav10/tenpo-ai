@@ -15,7 +15,7 @@ final class VoiceSessionModel: ObservableObject {
         var text: String
     }
 
-    @Published var state: VoiceLoopState = .listening
+    @Published var state: VoiceLoopState = .thinking // scene opens with the AI's greeting
     @Published var lines: [Line] = []
     @Published var latencyMS: Int?
     @Published var failure: String?
@@ -256,8 +256,8 @@ struct VoiceSessionView: View {
 
     private var statusText: String {
         switch model.state {
-        case .listening: return "Listening — just talk. You can interrupt any time."
-        case .thinking: return "…"
+        case .listening: return "Your turn — just talk. You can interrupt any time."
+        case .thinking: return model.lines.isEmpty ? "Starting the conversation…" : "…"
         case .speaking: return "" // the voice itself is the feedback
         case .ended: return "Session ended."
         }
