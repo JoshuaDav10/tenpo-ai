@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		02E783B65995792CE5B4B0D6 /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6C92493684F300B89117A1E /* Preferences.swift */; };
+		11265CCF184547F8CE30E023 /* KizunaConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = 98D65F2402A40149D8E2E506 /* KizunaConfig.plist */; };
+		189846105746D84E24595CB5 /* DynamicSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C863F84DF9BBD93E42320AD /* DynamicSyncService.swift */; };
 		2A38CDB4206AF36B5290F042 /* WhyDueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97A6EF9A1DC72F0E6890BB63 /* WhyDueView.swift */; };
 		2AE3BFDE634992ED92B6CC17 /* KizunaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21112E02A46B4490F41771D4 /* KizunaApp.swift */; };
 		3CEA838B2C3B73F7BCE946DF /* ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04F15CE3B44C024990767128 /* ConsentView.swift */; };
@@ -23,6 +25,8 @@
 		8C4166C370501BE7C327A44E /* MasteryDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */; };
 		8E4EA7F949B011B6C90162A9 /* DebugRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7BA851A018A5CFC81E43926 /* DebugRoute.swift */; };
 		955854218DFA78A56A07801B /* DrillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA25C06355708FC1E61153E /* DrillView.swift */; };
+		AD952BBF56487000E1260980 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 260826C0C310419C5EE27F33 /* AccountView.swift */; };
+		B3BBA8128F29AC28C6753021 /* KizunaConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8752EEBFECB352DDC8A83389 /* KizunaConfig.swift */; };
 		B840F5C5935B11972FFFC3F7 /* KizunaKit in Frameworks */ = {isa = PBXBuildFile; productRef = 316018456B31A50F1828C67E /* KizunaKit */; };
 		DD20C5A10B977BD132A8B3D7 /* ComplianceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD28F0B31979AFA8F076322 /* ComplianceStore.swift */; };
 		EBE9349439B5A3494A44D647 /* LicensesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAF79D2EFF80F05D29F073E0 /* LicensesView.swift */; };
@@ -33,15 +37,19 @@
 		0DD28F0B31979AFA8F076322 /* ComplianceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceStore.swift; sourceTree = "<group>"; };
 		1AA25C06355708FC1E61153E /* DrillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillView.swift; sourceTree = "<group>"; };
 		21112E02A46B4490F41771D4 /* KizunaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KizunaApp.swift; sourceTree = "<group>"; };
+		260826C0C310419C5EE27F33 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryDashboardView.swift; sourceTree = "<group>"; };
 		471ECCED2807421DD2C7D9DF /* seed */ = {isa = PBXFileReference; lastKnownFileType = folder; name = seed; path = ../tools/seed; sourceTree = SOURCE_ROOT; };
 		610D354D65D78B83F6244524 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		636B61F43C61A6C59CDE946F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		665A81C30A3AE528C2C69375 /* RoleplayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleplayView.swift; sourceTree = "<group>"; };
 		66E60CA0ACA0246D0C17D425 /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
+		6C863F84DF9BBD93E42320AD /* DynamicSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DynamicSyncService.swift; sourceTree = "<group>"; };
 		7959ACC2A9C0556EE5AAC796 /* Kizuna.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Kizuna.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8752EEBFECB352DDC8A83389 /* KizunaConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KizunaConfig.swift; sourceTree = "<group>"; };
 		942369F6BB1406B2BE170AEF /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		97A6EF9A1DC72F0E6890BB63 /* WhyDueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhyDueView.swift; sourceTree = "<group>"; };
+		98D65F2402A40149D8E2E506 /* KizunaConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = KizunaConfig.plist; sourceTree = "<group>"; };
 		A6C92493684F300B89117A1E /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		C628DD408B6527E92B9A77EC /* KizunaKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = KizunaKit; path = Packages/KizunaKit; sourceTree = SOURCE_ROOT; };
 		CE745533B0F3928EEBC99EB7 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -94,6 +102,14 @@
 			);
 			sourceTree = "<group>";
 		};
+		35D59033BBBAD172D5C391DD /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				98D65F2402A40149D8E2E506 /* KizunaConfig.plist */,
+			);
+			path = Config;
+			sourceTree = "<group>";
+		};
 		455E0ED25D843608020785A4 /* tools */ = {
 			isa = PBXGroup;
 			children = (
@@ -105,12 +121,15 @@
 		60669A04732ECBD7677EB50A /* App */ = {
 			isa = PBXGroup;
 			children = (
+				260826C0C310419C5EE27F33 /* AccountView.swift */,
 				942369F6BB1406B2BE170AEF /* AppContainer.swift */,
 				FB050824D8B2E836FEDC6670 /* ContentBootstrap.swift */,
 				E7BA851A018A5CFC81E43926 /* DebugRoute.swift */,
 				1AA25C06355708FC1E61153E /* DrillView.swift */,
+				6C863F84DF9BBD93E42320AD /* DynamicSyncService.swift */,
 				610D354D65D78B83F6244524 /* HomeView.swift */,
 				21112E02A46B4490F41771D4 /* KizunaApp.swift */,
+				8752EEBFECB352DDC8A83389 /* KizunaConfig.swift */,
 				2C1B9AFC9BE8BBF6FF06320D /* MasteryDashboardView.swift */,
 				A6C92493684F300B89117A1E /* Preferences.swift */,
 				636B61F43C61A6C59CDE946F /* PrivacyInfo.xcprivacy */,
@@ -118,6 +137,7 @@
 				665A81C30A3AE528C2C69375 /* RoleplayView.swift */,
 				97A6EF9A1DC72F0E6890BB63 /* WhyDueView.swift */,
 				1174DF051784752E462D7C82 /* Compliance */,
+				35D59033BBBAD172D5C391DD /* Config */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -202,6 +222,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				11265CCF184547F8CE30E023 /* KizunaConfig.plist in Resources */,
 				65C9C396D2683790BC5FF10F /* PrivacyInfo.xcprivacy in Resources */,
 				5973C65F1565F233037AEDD7 /* seed in Resources */,
 			);
@@ -214,6 +235,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AD952BBF56487000E1260980 /* AccountView.swift in Sources */,
 				6725E154E2B1AC945734FA20 /* AppContainer.swift in Sources */,
 				DD20C5A10B977BD132A8B3D7 /* ComplianceStore.swift in Sources */,
 				3CEA838B2C3B73F7BCE946DF /* ConsentView.swift in Sources */,
@@ -221,8 +243,10 @@
 				6277871AEA3EAA8F88411BA8 /* DataManager.swift in Sources */,
 				8E4EA7F949B011B6C90162A9 /* DebugRoute.swift in Sources */,
 				955854218DFA78A56A07801B /* DrillView.swift in Sources */,
+				189846105746D84E24595CB5 /* DynamicSyncService.swift in Sources */,
 				4F065724937E8DD2275FD3D8 /* HomeView.swift in Sources */,
 				2AE3BFDE634992ED92B6CC17 /* KizunaApp.swift in Sources */,
+				B3BBA8128F29AC28C6753021 /* KizunaConfig.swift in Sources */,
 				EBE9349439B5A3494A44D647 /* LicensesView.swift in Sources */,
 				8C4166C370501BE7C327A44E /* MasteryDashboardView.swift in Sources */,
 				02E783B65995792CE5B4B0D6 /* Preferences.swift in Sources */,

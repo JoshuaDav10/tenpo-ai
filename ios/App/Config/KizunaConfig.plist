@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Deployment endpoints. These are PUBLIC values (the anon key ships in every
+	     Supabase client app); provider secrets live only in Fly. Blank = use mocks. -->
+	<key>PROXY_URL</key>
+	<string></string>
+	<key>SUPABASE_URL</key>
+	<string></string>
+	<key>SUPABASE_ANON_KEY</key>
+	<string></string>
+</dict>
+</plist>

@@ -13,9 +13,35 @@ struct SettingsView: View {
 
     @State private var persona = Preferences.persona
     @State private var forceCheap = Preferences.forceCheapMode
+    @State private var signedInEmail: String?
 
     var body: some View {
         List {
+            Section {
+                if let auth = container.auth {
+                    NavigationLink {
+                        AccountView(auth: auth)
+                    } label: {
+                        if let signedInEmail {
+                            Label(signedInEmail, systemImage: "person.crop.circle.badge.checkmark")
+                        } else {
+                            Label("Sign in for sync & voice", systemImage: "person.crop.circle")
+                        }
+                    }
+                }
+            } header: {
+                Text("Account")
+            } footer: {
+                if container.auth == nil {
+                    Text("Sync is off in this build (no backend configured). Everything stays on this device.")
+                }
+            }
+            .task {
+                if let auth = container.auth, await auth.isSignedIn {
+                    signedInEmail = await auth.email ?? "Signed in"
+                }
+            }
+
             Section("Roleplay partner") {
                 Picker("Voice & persona", selection: $persona) {
                     ForEach(Preferences.personaChoices) { choice in

@@ -9,6 +9,7 @@ import RealtimeKit
 import ModeEngine
 import Modes
 import SyncKit
+import AuthKit
 import JapanesePack
 import LanguagePackCore
 
@@ -30,6 +31,8 @@ final class AppContainer {
     /// Proxy cost meter (§4.3.6). nil until the Fly.io proxy URL exists — then the
     /// client reads authoritative server spend instead of the ~$0 local meter.
     let usage: (any UsageSource)?
+    /// Sign-in state (AuthKit). nil until KizunaConfig.plist names a Supabase project.
+    let auth: AuthManager?
 
     init(
         db: DatabaseManager,
@@ -42,7 +45,8 @@ final class AppContainer {
         sync: any SyncService,
         store: any SessionStore,
         modeRegistry: ModeRegistry,
-        usage: (any UsageSource)? = nil
+        usage: (any UsageSource)? = nil,
+        auth: AuthManager? = nil
     ) {
         self.db = db
         self.pack = pack
@@ -55,6 +59,7 @@ final class AppContainer {
         self.store = store
         self.modeRegistry = modeRegistry
         self.usage = usage
+        self.auth = auth
     }
 
     /// The context handed to non-realtime drill modes (§4.6).
@@ -144,26 +149,46 @@ final class AppContainer {
         let pack = JapanesePack()
         var registry = ModeRegistry()
         registerModes(&registry)
+
+        // Deployment endpoints from KizunaConfig.plist. Anything blank keeps its
+        // mock so the app boots and works local-first at every stage of setup.
+        let config = KizunaConfig.load()
+        let auth = config.authConfig.map {
+            AuthManager(client: SupabaseAuthClient(config: $0), store: KeychainSessionStore())
+        }
+        let token: @Sendable () async -> String? = { [auth] in await auth?.validAccessToken() }
+        let proxy = config.proxyConfig(authToken: token)
+
+        let realtime: any RealtimeVoiceService
+        if let realtimeConfig = config.realtimeConfig(authToken: token) {
+            realtime = ProxyRealtimeVoiceProvider(config: realtimeConfig)
+        } else {
+            realtime = MockRealtimeVoiceProvider()
+        }
+        let chat: any ChatProvider = proxy.map { ProxyChatProvider(config: $0) } ?? MockChatProvider()
+        let sync: any SyncService = auth.map { DynamicSyncService(db: db, config: config, auth: $0) } ?? NoopSyncService()
+
         return AppContainer(
             db: db,
             pack: pack,
             content: LiveContentService(db: db),
             learner: LiveLearnerModelService(db: db),
-            // On-device recognizer is real (free, instant, private). Server STT /
-            // pronunciation / chat stay mock until the Fly.io proxy is deployed —
-            // swap to ProxySTTProvider(config:) etc. once its URL + auth exist.
+            // On-device recognizer is always real (free, instant, private); the
+            // server legs go live once the proxy URL is configured.
             speech: LiveSpeechService(
                 onDeviceSTT: AppleSpeechRecognizer(),
-                serverSTT: MockSTTProvider(),
-                tts: MockTTSProvider(),
-                pronunciation: MockPronunciationAssessor(),
+                serverSTT: proxy.map { ProxySTTProvider(config: $0) } ?? MockSTTProvider(),
+                tts: proxy.map { ProxyTTSProvider(config: $0) } ?? MockTTSProvider(),
+                pronunciation: proxy.map { ProxyPronunciationAssessor(config: $0) } ?? MockPronunciationAssessor(),
                 pack: pack
             ),
-            realtime: MockRealtimeVoiceProvider(),
-            chat: MockChatProvider(),
-            sync: NoopSyncService(),
+            realtime: realtime,
+            chat: chat,
+            sync: sync,
             store: LiveSessionStore(db: db),
-            modeRegistry: registry
+            modeRegistry: registry,
+            usage: proxy.map { ProxyUsageService(config: $0) },
+            auth: auth
         )
     }
 
