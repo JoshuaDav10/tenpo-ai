@@ -3,5 +3,5 @@
   "stt":      { "primary": "deepgram:nova-ja",            "fallback": "openai:whisper-1" },
   "tts":      { "primary": "elevenlabs:voice_map",        "fallback": "openai:tts-1" },
   "pron":     { "primary": "azure:ja-JP" },
-  "realtime": { "primary": "openai:realtime",             "fallback": "gemini:live" }
+  "realtime": { "primary": "openai:gpt-realtime-mini",    "fallback": "gemini:live" }
 }
