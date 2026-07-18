@@ -7,8 +7,8 @@
 	<key>PROXY_URL</key>
 	<string></string>
 	<key>SUPABASE_URL</key>
-	<string></string>
+	<string>https://qcnhwwyomzzfgvxboban.supabase.co</string>
 	<key>SUPABASE_ANON_KEY</key>
-	<string></string>
+	<string>sb_publishable_XHMxDLnUjJF2i4ImCDOF-w_8fM2SaM6</string>
 </dict>
 </plist>
