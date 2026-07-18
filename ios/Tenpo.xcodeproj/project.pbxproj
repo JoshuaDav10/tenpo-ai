@@ -18,6 +18,7 @@
 		53A355D481A81E19C06B7F33 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F9DD6D3F5D252A964AD02DD /* DataManager.swift */; };
 		5B8193B733DD19D818DA91E0 /* ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC72B283DA74CF73A94E8B9B /* ConsentView.swift */; };
 		693DE57D90695E783F759838 /* TenpoKit in Frameworks */ = {isa = PBXBuildFile; productRef = 616B5796169AB5D56E4A47B7 /* TenpoKit */; };
+		79EAC48543EC7224F8D40BC1 /* VoiceSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4732FE45C297051F391C6E /* VoiceSessionView.swift */; };
 		7DE8F022EF75E76F1ECF2232 /* ComplianceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4DAD251DE9F40FF1973855D /* ComplianceStore.swift */; };
 		7F487ECB52F26EF013B7F5CE /* WhyDueView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 162E04B795A85A303C929B80 /* WhyDueView.swift */; };
 		8CE870E15BF3083F0C175EC2 /* DrillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86313E9D83622F0C7323ED43 /* DrillView.swift */; };
@@ -49,6 +50,7 @@
 		92E764F6367E47EC9B2CD379 /* seed */ = {isa = PBXFileReference; lastKnownFileType = folder; name = seed; path = ../tools/seed; sourceTree = SOURCE_ROOT; };
 		94BF1AB657B44B72B099298A /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		A4DAD251DE9F40FF1973855D /* ComplianceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceStore.swift; sourceTree = "<group>"; };
+		AA4732FE45C297051F391C6E /* VoiceSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSessionView.swift; sourceTree = "<group>"; };
 		B7367EF7C7A3B021D675A228 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BF2FDAF34A1B2532FC26FFFD /* TenpoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = TenpoConfig.plist; sourceTree = "<group>"; };
 		C48534D035DC85D781738A23 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 				01F41CB80439E3C547589C52 /* RoleplayView.swift */,
 				87EDC2536BF22DE17B2E6363 /* TenpoApp.swift */,
 				C97CD1BD975E00CB221FD0B0 /* TenpoConfig.swift */,
+				AA4732FE45C297051F391C6E /* VoiceSessionView.swift */,
 				162E04B795A85A303C929B80 /* WhyDueView.swift */,
 				FFF55B9ED0C82B39AE846BF5 /* Compliance */,
 				FCC8AF1B6D1C3C497C8FAB1C /* Config */,
@@ -253,6 +256,7 @@
 				44788CA3E138C9EEB0058B73 /* SettingsView.swift in Sources */,
 				915AA11C0406FE1B5C29D880 /* TenpoApp.swift in Sources */,
 				4EA7A035F7E8D486CAEA07D8 /* TenpoConfig.swift in Sources */,
+				79EAC48543EC7224F8D40BC1 /* VoiceSessionView.swift in Sources */,
 				7F487ECB52F26EF013B7F5CE /* WhyDueView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

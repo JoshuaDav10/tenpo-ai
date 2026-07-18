@@ -9,6 +9,7 @@ struct RoleplayListView: View {
     let container: AppContainer
     @State private var scenarios: [ContentItem] = []
     @State private var active: ActiveRoleplay?
+    @State private var activeVoice: ActiveVoiceRoleplay?
     @State private var policy: CostPolicy = .full
 
     var body: some View {
@@ -21,10 +22,14 @@ struct RoleplayListView: View {
                     if let scenario = Scenario(item) {
                         Button {
                             // R13: caps gate STARTING. Past the hard cap, no new roleplay.
-                            guard policy.allowsNewRoleplay,
-                                  let made = container.makeRoleplaySession(item, pipeline: policy.roleplayPipeline)
-                            else { return }
-                            active = ActiveRoleplay(runner: made.runner, scenario: made.scenario)
+                            guard policy.allowsNewRoleplay else { return }
+                            // Full budget → the voice loop (Pipeline A). Cheap mode →
+                            // the text cascade. §4.3.6; the proxy re-checks on open.
+                            if policy.roleplayPipeline == .realtime {
+                                activeVoice = ActiveVoiceRoleplay(item: item, scenario: scenario)
+                            } else if let made = container.makeRoleplaySession(item, pipeline: .cascade) {
+                                active = ActiveRoleplay(runner: made.runner, scenario: made.scenario)
+                            }
                         } label: {
                             row(scenario)
                         }
@@ -36,6 +41,13 @@ struct RoleplayListView: View {
         .navigationTitle("Roleplay")
         .navigationDestination(item: $active) { rp in
             GuidedRoleplayView(runner: rp.runner, scenario: rp.scenario)
+        }
+        .navigationDestination(item: $activeVoice) { rp in
+            VoiceSessionView(realtime: container.realtime, scenario: rp.scenario) {
+                // Soft-cap refusal mid-open → same scenario, text pipeline.
+                guard let made = container.makeRoleplaySession(rp.item, pipeline: .cascade) else { return nil }
+                return ActiveRoleplay(runner: made.runner, scenario: made.scenario)
+            }
         }
         .task {
             scenarios = (try? await container.scenarios()) ?? []
@@ -82,6 +94,14 @@ struct ActiveRoleplay: Identifiable, Hashable {
     let runner: SessionRunner
     let scenario: Scenario
     static func == (l: ActiveRoleplay, r: ActiveRoleplay) -> Bool { l.id == r.id }
+    func hash(into h: inout Hasher) { h.combine(id) }
+}
+
+struct ActiveVoiceRoleplay: Identifiable, Hashable {
+    let id = UUID()
+    let item: ContentItem
+    let scenario: Scenario
+    static func == (l: ActiveVoiceRoleplay, r: ActiveVoiceRoleplay) -> Bool { l.id == r.id }
     func hash(into h: inout Hasher) { h.combine(id) }
 }
 
