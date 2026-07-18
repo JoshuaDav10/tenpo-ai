@@ -58,7 +58,7 @@ public actor SupabaseSyncService: SyncService {
         let rows = try await db.read(fetch)
         guard !rows.isEmpty else { return }
         // Inject user_id into each row's JSON so RLS-scoped upserts land in the user's rows.
-        let encoder = JSONEncoder()
+        let encoder = PostgRESTCoding.encoder()
         var objects: [[String: Any]] = []
         for row in rows {
             let data = try encoder.encode(row)
@@ -119,7 +119,7 @@ public actor SupabaseSyncService: SyncService {
     private func fetchAll<R: Decodable>(table: String) async throws -> [R] {
         let request = try await makeRequest(table: table, method: "GET", query: [URLQueryItem(name: "select", value: "*")])
         let data = try await sendExpectingSuccess(request)
-        return try JSONDecoder().decode([R].self, from: data)
+        return try PostgRESTCoding.decoder().decode([R].self, from: data)
     }
 
     // MARK: - transport

@@ -77,10 +77,11 @@ private func makeService(_ db: DatabaseManager) -> (SupabaseSyncService, URLSess
     return (SupabaseSyncService(db: db, config: cfg, session: session), session)
 }
 
-/// Encode a record the same way the service's default `JSONDecoder()` will read it,
-/// so canned "remote" rows round-trip through the exact date/coding strategy in use.
+/// Encode a record the same way the service will read it, so canned "remote" rows
+/// round-trip through the exact date/coding strategy in use (ISO-8601, not the
+/// Foundation default reference-date double that Postgres would reject).
 private func remoteJSON<R: Encodable>(_ rows: [R]) -> Data {
-    try! JSONEncoder().encode(rows)
+    try! PostgRESTCoding.encoder().encode(rows)
 }
 
 // Serialized: the URLProtocol stub holds process-global state (URLSession owns the
@@ -171,5 +172,38 @@ private func remoteJSON<R: Encodable>(_ rows: [R]) -> Data {
 
         let count = try await db.read { try Int.fetchOne($0, sql: "SELECT COUNT(*) FROM review_event") ?? 0 }
         #expect(count == 2) // dup ignored, fresh inserted — no crash, no duplicate
+    }
+
+    @Test func pushEncodesTimestampsAsISO8601ForTimestamptz() async throws {
+        let db = try DatabaseManager.inMemory()
+        let when = Date(timeIntervalSince1970: 1_752_400_000) // fixed instant
+        let state = SkillState(itemID: ItemID(rawValue: "vocab_2"), dimension: .recognitionReading,
+                               stability: 1.0, difficulty: 5.0, due: when, lastReview: when,
+                               reps: 1, lapses: 0, suspended: false)
+        try await db.write { try SkillStateRecord(state).insert($0) }
+
+        SyncStub.reset { method, _ in method == "GET" ? (200, remoteJSON([SkillStateRecord]())) : (201, Data()) }
+        let (service, _) = makeService(db)
+        try await service.syncNow()
+
+        let post = SyncStub.captured.first { $0.method == "POST" && $0.path.hasSuffix("/skill_state") }
+        let objects = try JSONSerialization.jsonObject(with: post?.body ?? Data()) as? [[String: Any]]
+        let lastReview = objects?.first?["last_review"] as? String
+        // Postgres timestamptz needs an ISO string, not Foundation's reference-date double.
+        #expect(lastReview?.hasPrefix("2025-07-13T") == true)
+        #expect(lastReview?.hasSuffix("Z") == true)
+    }
+
+    @Test func pullDecodesPostgRESTFractionalAndPlainTimestamps() throws {
+        // PostgREST emits fractional seconds with a +00:00 offset; plain Z must also parse.
+        let json = Data("""
+        [{"item_id":"x","dimension":"recognition_reading","stability":1.0,"difficulty":5.0,
+          "due":"2026-07-14T05:12:01.123456+00:00","last_review":"2026-07-14T05:12:01Z",
+          "reps":1,"lapses":0,"suspended":false,"user_id":"ignored"}]
+        """.utf8)
+        let rows = try PostgRESTCoding.decoder().decode([SkillStateRecord].self, from: json)
+        #expect(rows.count == 1)
+        #expect(rows[0].due != nil)
+        #expect(rows[0].lastReview != nil)
     }
 }
