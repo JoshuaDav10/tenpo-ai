@@ -10,7 +10,7 @@ let package = Package(
             targets: [
                 "CoreModels", "LearnerModel", "ContentKit", "SpeechKit",
                 "RealtimeKit", "ModeEngine", "Modes", "LanguagePackCore", "JapanesePack",
-                "Persistence", "SyncKit", "DesignSystem",
+                "Persistence", "SyncKit", "AuthKit", "DesignSystem",
             ]
         ),
     ],
@@ -62,6 +62,10 @@ let package = Package(
         // Supabase sync (§4.7 sync rules).
         .target(name: "SyncKit", dependencies: ["CoreModels", "Persistence"]),
 
+        // Supabase GoTrue auth: email one-time-code sign-in, Keychain session,
+        // token refresh. No Apple entitlements → works on free-Apple-ID builds.
+        .target(name: "AuthKit"),
+
         // Shared UI primitives (PromptCard, AnswerBar, PitchContourView…).
         .target(name: "DesignSystem"),
 
@@ -75,6 +79,7 @@ let package = Package(
             "ModeEngine", "Modes", "CoreModels", "Persistence", "JapanesePack", "ContentKit", "SyncKit",
         ]),
         .testTarget(name: "SyncKitTests", dependencies: ["SyncKit", "CoreModels", "Persistence"]),
+        .testTarget(name: "AuthKitTests", dependencies: ["AuthKit"]),
         .testTarget(name: "RealtimeKitTests", dependencies: ["RealtimeKit", "CoreModels"]),
     ]
 )
