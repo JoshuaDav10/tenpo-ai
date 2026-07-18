@@ -76,7 +76,8 @@ export async function registerRealtime(app: FastifyInstance): Promise<void> {
 
     const realtimeModel = route("realtime").primary.split(":")[1] ?? "gpt-realtime";
     const upstream = new WebSocket(`${OPENAI_REALTIME_URL}?model=${encodeURIComponent(realtimeModel)}`, {
-      headers: { Authorization: `Bearer ${key}`, "OpenAI-Beta": "realtime=v1" },
+      // GA realtime API: no OpenAI-Beta header (the beta protocol is retired).
+      headers: { Authorization: `Bearer ${key}` },
     });
 
     // The first client message carries the scenario/persona; we turn it into the
@@ -92,7 +93,14 @@ export async function registerRealtime(app: FastifyInstance): Promise<void> {
           upstream.once("open", () => {
             upstream.send(JSON.stringify({
               type: "session.update",
-              session: { instructions, modalities: ["audio", "text"], voice: "alloy" },
+              // GA session shape: type is required, modalities renamed, voice
+              // moved under audio.output.
+              session: {
+                type: "realtime",
+                instructions,
+                output_modalities: ["audio"],
+                audio: { output: { voice: "alloy" } },
+              },
             }));
           });
         } catch {
