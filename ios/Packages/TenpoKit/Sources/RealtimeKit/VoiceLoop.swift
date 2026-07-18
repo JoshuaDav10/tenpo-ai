@@ -72,11 +72,10 @@ public struct VoiceLoop: Sendable {
             return []
 
         case .userSpeechStarted:
-            // Barge-in: the learner talking over the AI cancels the AI, instantly.
-            if state == .speaking || state == .thinking {
-                state = .listening
-                return [.stopPlayback, .state(.listening)]
-            }
+            // Turn-based by design (Joshua, field test 1): the AI's turn is not
+            // voice-interruptible — only an explicit tap (`tapInterrupt`) cuts it
+            // off. Mic audio isn't even forwarded outside `.listening`, so this
+            // arrives only during the learner's own turn. Nothing to do.
             return []
 
         case .userSpeechStopped:
@@ -112,10 +111,18 @@ public struct VoiceLoop: Sendable {
         }
     }
 
+    /// The learner taps the orb to cut the AI off and take the floor. The ONLY
+    /// interrupt path — voice never barges in.
+    public mutating func tapInterrupt() -> [VoiceLoopAction] {
+        guard state == .speaking || state == .thinking else { return [] }
+        state = .listening
+        return [.stopPlayback, .state(.listening)]
+    }
+
     /// Whether learner mic audio should be forwarded to the wire right now.
-    /// Always true while live: OpenAI's server VAD needs continuous audio to detect
-    /// barge-in — the *server* decides what counts as speech, not us.
-    public var shouldForwardMicAudio: Bool { state != .ended }
+    /// Only during the learner's turn: streaming while the AI speaks would let
+    /// noise interrupt it (and uploads audio nobody wants graded).
+    public var shouldForwardMicAudio: Bool { state == .listening }
 }
 
 /// Barge-in latency companion (R18): measures learner-stops-talking → first AI audio.

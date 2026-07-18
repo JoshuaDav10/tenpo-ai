@@ -29,32 +29,38 @@ struct VoiceLoopTests {
         #expect(loop.handle(.turnEnded(role: .actor)) == [.state(.listening)])
     }
 
-    @Test func userTalkingBeforeGreeting_takesTheFloor() {
-        var loop = VoiceLoop()
-        // Eager learner speaks during the opening wait → treat like barge-in.
-        #expect(loop.handle(.userSpeechStarted) == [.stopPlayback, .state(.listening)])
-        #expect(loop.handle(.userSpeechStopped) == [.state(.thinking)])
-    }
-
-    @Test func bargeIn_whileSpeaking_stopsPlaybackImmediately() {
+    @Test func voiceNeverInterrupts_onlyTapDoes() {
         var loop = VoiceLoop()
         _ = loop.handle(.assistantAudio(pcm(1)))
         #expect(loop.state == .speaking)
-
-        // Learner interrupts mid-reply: playback must flush, floor flips instantly.
-        #expect(loop.handle(.userSpeechStarted) == [.stopPlayback, .state(.listening)])
-
-        // Straggler audio deltas from the cancelled reply restart playback (still a
-        // reply in flight server-side until response.cancel lands) — but the state
-        // machine had returned the floor, so it re-enters speaking legally.
-        #expect(loop.handle(.assistantAudio(pcm(3))) == [.state(.speaking), .play(pcm(3))])
+        // Speech events during the AI's turn change nothing (turn-based design).
+        #expect(loop.handle(.userSpeechStarted).isEmpty)
+        #expect(loop.state == .speaking)
+        // The tap is the interrupt.
+        #expect(loop.tapInterrupt() == [.stopPlayback, .state(.listening)])
+        #expect(loop.state == .listening)
+        // Tapping during your own turn does nothing.
+        #expect(loop.tapInterrupt().isEmpty)
     }
 
-    @Test func bargeIn_whileThinking_alsoCancels() {
+    @Test func micStreamsOnlyOnLearnersTurn() {
+        var loop = VoiceLoop()
+        #expect(loop.shouldForwardMicAudio == false) // waiting for greeting
+        _ = loop.handle(.assistantAudio(pcm(1)))
+        #expect(loop.shouldForwardMicAudio == false) // AI speaking
+        _ = loop.handle(.turnEnded(role: .actor))
+        #expect(loop.shouldForwardMicAudio == true)  // learner's turn
+        _ = loop.handle(.userSpeechStopped)
+        #expect(loop.shouldForwardMicAudio == false) // endpointed, reply pending
+    }
+
+    @Test func tapInterrupt_whileThinking_alsoTakesTheFloor() {
         var loop = VoiceLoop()
         #expect(loop.state == .thinking)
-        // Learner resumes before the reply starts (changed their mind, kept talking).
-        #expect(loop.handle(.userSpeechStarted) == [.stopPlayback, .state(.listening)])
+        #expect(loop.tapInterrupt() == [.stopPlayback, .state(.listening)])
+        // Straggler audio deltas from the cancelled reply re-enter speaking legally
+        // (a reply can still be in flight server-side until the cancel lands).
+        #expect(loop.handle(.assistantAudio(pcm(3))) == [.state(.speaking), .play(pcm(3))])
     }
 
     @Test func benignCancelRaceError_isIgnoredNotFatal() {
@@ -90,15 +96,6 @@ struct VoiceLoopTests {
         var loop2 = VoiceLoop()
         #expect(loop2.handle(.error("socket died"))
                 == [.stopPlayback, .failed("socket died"), .state(.ended)])
-    }
-
-    @Test func micForwardingStaysOnWhileLive() {
-        var loop = VoiceLoop()
-        #expect(loop.shouldForwardMicAudio)
-        _ = loop.handle(.userSpeechStopped)
-        _ = loop.handle(.assistantAudio(pcm(1)))
-        // Even while the AI speaks, the mic streams — server VAD needs it for barge-in.
-        #expect(loop.shouldForwardMicAudio)
     }
 
     @Test func latencyMeter_measuresEndpointToFirstAudio() {

@@ -99,7 +99,20 @@ export async function registerRealtime(app: FastifyInstance): Promise<void> {
                 type: "realtime",
                 instructions,
                 output_modalities: ["audio"],
-                audio: { output: { voice: "alloy" } },
+                audio: {
+                  input: {
+                    // Patient, meaning-aware endpointing: wait for the learner to
+                    // actually finish a thought instead of pouncing on noise or
+                    // hesitation (learners pause a lot). No voice interruption —
+                    // the client is turn-based; interrupts are an explicit tap.
+                    turn_detection: {
+                      type: "semantic_vad",
+                      eagerness: "low",
+                      interrupt_response: false,
+                    },
+                  },
+                  output: { voice: "alloy" },
+                },
               },
             }));
             // The Actor opens the scene (SESSION_DESIGN Act 1): without an

@@ -92,6 +92,19 @@ final class VoiceSessionModel: ObservableObject {
         try? await session.send(audio: chunk)
     }
 
+    /// Tap-to-interrupt: the only way to cut the AI off (turn-based by design).
+    func tapInterrupt() async {
+        let actions = loop.tapInterrupt()
+        guard !actions.isEmpty else { return }
+        #if os(iOS)
+        engine?.stopPlayback()
+        #endif
+        try? await session?.interrupt()
+        for action in actions {
+            if case .state(let new) = action { state = new }
+        }
+    }
+
     private func handle(_ event: RealtimeEvent) async {
         meter.note(event)
         latencyMS = meter.lastVoiceToVoiceMS
@@ -105,10 +118,6 @@ final class VoiceSessionModel: ObservableObject {
                 #if os(iOS)
                 engine?.stopPlayback()
                 #endif
-                // Tell the server to cancel the in-flight reply too (barge-in).
-                if state == .speaking || state == .thinking {
-                    try? await session?.interrupt()
-                }
             case .state(let new):
                 state = new
             case .learnerSaid(let text):
@@ -219,6 +228,10 @@ struct VoiceSessionView: View {
                 .font(.system(size: 44))
                 .foregroundStyle(.white)
         }
+        .contentShape(Circle())
+        .onTapGesture {
+            Task { await model.tapInterrupt() }
+        }
     }
 
     private var orbColor: Color {
@@ -256,9 +269,9 @@ struct VoiceSessionView: View {
 
     private var statusText: String {
         switch model.state {
-        case .listening: return "Your turn — just talk. You can interrupt any time."
+        case .listening: return "Your turn — take your time."
         case .thinking: return model.lines.isEmpty ? "Starting the conversation…" : "…"
-        case .speaking: return "" // the voice itself is the feedback
+        case .speaking: return "Tap the circle to jump in."
         case .ended: return "Session ended."
         }
     }
