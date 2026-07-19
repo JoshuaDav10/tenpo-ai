@@ -1,7 +1,7 @@
 import Foundation
 
 public enum ContentKind: String, Codable, Sendable, CaseIterable {
-    case vocab, grammar, kanji, sentence, scenario
+    case vocab, grammar, kanji, sentence, scenario, lesson
 }
 
 /// A curriculum item (§4.7 `content_item`). Payload shape is kind-specific and

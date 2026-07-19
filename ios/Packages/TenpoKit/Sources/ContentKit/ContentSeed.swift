@@ -31,6 +31,7 @@ public enum ContentSeed {
         FileSpec(resource: "sentences_n5", kind: .sentence, source: "Tenpo seed (N5)"),
         FileSpec(resource: "cloze_n5", kind: .sentence, source: "Tenpo seed (N5)"),
         FileSpec(resource: "scenarios_n5", kind: .scenario, source: "Tenpo seed (N5)"),
+        FileSpec(resource: "lessons_n5", kind: .lesson, source: "Tenpo seed (N5)"),
     ]
 
     public enum SeedError: Error, Sendable {
@@ -98,5 +99,28 @@ public extension ContentService {
         guard !items.isEmpty else { return 0 }
         try await upsert(items)
         return items.count
+    }
+
+    /// Top-up for stores seeded before a content KIND existed (seedIfEmpty only
+    /// fires on an empty store, so devices that already have the 214-item seed
+    /// would never receive e.g. lessons). For each manifest kind with zero rows,
+    /// load just that kind's files. Idempotent. Returns items inserted.
+    @discardableResult
+    func seedMissingKinds(from bundle: Bundle, subdirectory: String? = "Seed") async throws -> Int {
+        var inserted = 0
+        let kinds = Set(ContentSeed.manifest.map(\.kind))
+        for kind in kinds {
+            guard try await items(kind: kind, band: nil, limit: 1).isEmpty else { continue }
+            for spec in ContentSeed.manifest where spec.kind == kind {
+                guard let url = bundle.url(forResource: spec.resource, withExtension: "json", subdirectory: subdirectory)
+                    ?? bundle.url(forResource: spec.resource, withExtension: "json") else { continue }
+                let data = try Data(contentsOf: url)
+                let items = try ContentSeed.items(fromJSONArray: data, spec: spec)
+                guard !items.isEmpty else { continue }
+                try await upsert(items)
+                inserted += items.count
+            }
+        }
+        return inserted
     }
 }

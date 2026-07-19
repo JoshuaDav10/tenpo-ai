@@ -306,6 +306,7 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
     sentences = _load_seed_file(seed_dir, "sentences_n5.json")
     cloze = _load_seed_file(seed_dir, "cloze_n5.json")
     scenarios = _load_seed_file(seed_dir, "scenarios_n5.json")
+    lessons = _load_seed_file(seed_dir, "lessons_n5.json")
 
     # --- kanji ---
     kanji_by_literal: dict[str, str] = {}
@@ -397,6 +398,19 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
             for target in goal.get("target_items", []):
                 upsert_link(conn, sc["id"], target, "uses")
 
+    # --- lessons (guided voice scripts; steps reference vocab via item_ref) ---
+    for lesson in lessons:
+        upsert_content_item(
+            conn, item_id=lesson["id"], kind="lesson", payload=lesson,
+            band=lesson.get("band"), source=SEED_SOURCE, license_=SEED_LICENSE,
+        )
+        if lesson.get("scenario_ref"):
+            upsert_link(conn, lesson["id"], lesson["scenario_ref"], "uses")
+        for step in lesson.get("steps", []):
+            for ref in [step.get("item_ref")] + list(step.get("item_refs", [])):
+                if ref:
+                    upsert_link(conn, lesson["id"], ref, "uses")
+
     conn.commit()
     # Prune scenario->target links whose target isn't in the DB (keep the graph clean).
     all_ids = existing_ids(conn)
@@ -415,8 +429,8 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
         log.info("pruned %d item_link rows pointing at absent targets", len(dangling))
     conn.commit()
     log.info(
-        "seed loaded: %d vocab, %d kanji, %d grammar, %d sentence (+%d cloze), %d scenario",
-        len(vocab), len(kanji), len(grammar), len(sentences), len(cloze), len(scenarios),
+        "seed loaded: %d vocab, %d kanji, %d grammar, %d sentence (+%d cloze), %d scenario, %d lesson",
+        len(vocab), len(kanji), len(grammar), len(sentences), len(cloze), len(scenarios), len(lessons),
     )
 
 

@@ -1,0 +1,63 @@
+{
+  "_comment": "Guided voice lessons (SESSION_DESIGN.md). Hand-authored; the step kinds map to server lesson.* templates. item_ref/item_refs point at seed vocab so grades land in FSRS; dangling refs are pruned by the importer.",
+  "items": [
+    {
+      "id": "lesson:classmate_intro_v1",
+      "title": "Meeting a classmate",
+      "band": "N5.1",
+      "topic_en": "introducing yourself to a new classmate on your first day",
+      "scenario_ref": "scenario:self_intro_v1",
+      "steps": [
+        {
+          "kind": "explain",
+          "focus_en": "Today we practice self-introductions: greeting someone new, giving your name, and the set phrase that ends every Japanese introduction. First lesson, so keep it warm and simple."
+        },
+        {
+          "kind": "model_repeat",
+          "target": "はじめまして",
+          "reading": "はじめまして (ha-ji-me-ma-shi-te)",
+          "gloss_en": "Nice to meet you — the standard opener when meeting someone for the first time",
+          "accepted": ["はじめまして"],
+          "pron_graded": true
+        },
+        {
+          "kind": "model_repeat",
+          "target": "私はジョシュです",
+          "reading": "わたしは ジョシュ です",
+          "gloss_en": "I am Josh — the pattern is 私は NAME です; they should use their own name",
+          "accepted": ["私はジョシュです", "わたしはジョシュです", "私はです", "です"],
+          "pron_graded": false,
+          "item_ref": "vocab:私"
+        },
+        {
+          "kind": "prompt_response",
+          "question_jp": "お名前は何ですか。",
+          "expectation_en": "answer with their name using the 私は〜です pattern",
+          "expected_patterns": ["です"],
+          "hint_en": "Answer with the pattern we just practiced: 私は — your name — です.",
+          "item_refs": ["vocab:名前", "vocab:私"]
+        },
+        {
+          "kind": "model_repeat",
+          "target": "よろしくお願いします",
+          "reading": "よろしく おねがいします",
+          "gloss_en": "Please treat me well — the set phrase that closes an introduction; there is no direct English equivalent",
+          "accepted": ["よろしくお願いします", "よろしくおねがいします", "よろしく"],
+          "pron_graded": true
+        },
+        {
+          "kind": "explain",
+          "focus_en": "Now put it together for real: they will meet a friendly classmate and should greet them, give their name, and close with よろしくお願いします. You'll play the classmate."
+        },
+        {
+          "kind": "mini_roleplay",
+          "turn_cap": 6,
+          "scenario_ref": "scenario:self_intro_v1"
+        },
+        {
+          "kind": "wrap"
+        }
+      ]
+    }
+  ]
+}
