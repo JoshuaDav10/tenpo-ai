@@ -194,6 +194,19 @@ private func remoteJSON<R: Encodable>(_ rows: [R]) -> Data {
         #expect(lastReview?.hasSuffix("Z") == true)
     }
 
+    @Test func purgeRemoteDeletesEveryTableScopedToTheUser() async throws {
+        let db = try DatabaseManager.inMemory()
+        SyncStub.reset { _, _ in (204, Data()) }
+        let (service, _) = makeService(db)
+        try await service.purgeRemote()
+
+        let deletes = SyncStub.captured.filter { $0.method == "DELETE" }
+        // §8.2: all five synced tables, each explicitly filtered to this user.
+        #expect(deletes.count == 5)
+        let tables = Set(deletes.map { $0.path.split(separator: "/").last.map(String.init) ?? "" })
+        #expect(tables == ["skill_state", "review_event", "error_event", "session", "transcript_turn"])
+    }
+
     @Test func pullDecodesPostgRESTFractionalAndPlainTimestamps() throws {
         // PostgREST emits fractional seconds with a +00:00 offset; plain Z must also parse.
         let json = Data("""

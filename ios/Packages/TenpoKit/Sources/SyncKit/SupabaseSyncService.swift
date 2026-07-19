@@ -44,6 +44,19 @@ public actor SupabaseSyncService: SyncService {
         lastSyncedAt = Date()
     }
 
+    /// §8.2 account deletion: remove every remote row this user owns. RLS already
+    /// scopes visibility, but PostgREST requires an explicit filter on DELETE —
+    /// and being explicit about whose rows die is the right instinct anyway.
+    public func purgeRemote() async throws {
+        for table in ["transcript_turn", "session", "error_event", "review_event", "skill_state"] {
+            var request = try await makeRequest(
+                table: table, method: "DELETE",
+                query: [URLQueryItem(name: "user_id", value: "eq.\(config.userID)")])
+            request.setValue("return=minimal", forHTTPHeaderField: "Prefer")
+            _ = try await sendExpectingSuccess(request)
+        }
+    }
+
     // MARK: - push (local → remote upsert)
 
     private func push() async throws {

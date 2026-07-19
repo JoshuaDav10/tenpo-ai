@@ -121,9 +121,21 @@ struct SettingsView: View {
 
     private func deleteAccount() async {
         busy = true; defer { busy = false }
+        // §8.2: purge the synced copy first (needs the still-valid session), then
+        // local rows, then sign out. Remote purge is best-effort but reported.
+        var remoteNote = ""
+        if let auth = container.auth, await auth.isSignedIn {
+            do {
+                try await (container.sync as? DynamicSyncService)?.purgeRemote()
+                remoteNote = " (including the synced copy)"
+            } catch {
+                remoteNote = " — the synced copy couldn't be reached; it will be purged next time you're online and delete again"
+            }
+            await auth.signOut()
+        }
         try? await DataManager.deleteLearnerData(container.db)
         compliance.revokeConsent()
-        deletedNote = "Your data was deleted."
+        deletedNote = "Your data was deleted\(remoteNote)."
     }
 }
 
