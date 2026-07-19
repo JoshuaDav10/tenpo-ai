@@ -19,7 +19,33 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **118** tests (`swift test`) — all green.
+- Swift: **123** tests (`swift test`) — all green. Server: **16**.
+
+## Batch 9 (2026-07-19, overnight) — flavors B/C, purge, pregen
+- ✅ CI crash fixed: GuidedLessonSession ported from DispatchQueue+ivars to an
+  **actor** (dynamic-exclusivity SIGBUS, reproducible once the suite ran
+  serialized). Suite `.serialized` + per-test teardown. CI green again.
+- ✅ **Flavor B** (Act 3B): `translate_to_jp` (English ask → Japanese production,
+  graded like a repeat incl. honest-grader second opinion) and `translate_to_en`
+  (Japanese phrase → English meaning via `englishAnswerMatches`, one no-reveal
+  nudge retry `lesson.meaning_retry`, honest miss on recognition-listening).
+  Classmate lesson carries one of each.
+- ✅ **Flavor C** (Act 3C): `pattern` lesson step = rule + worked examples +
+  generalization probes over untaught words; expands in `LessonScript` decode
+  into `lesson.pattern_teach` + translate probes whose grades land on the
+  PATTERN's item id (pattern-level SRS → weak patterns resurface). 4 authored
+  N5 patterns (たい/すぎる/ください/ましょう) as `pattern` content rows; second
+  lesson `lesson:cafe_want_v1` (teaches ください+たい → cafe roleplay).
+- ✅ Seeding: `seedSync` upserts the whole authored seed every launch (replaces
+  the kind-gap top-up) — new lessons/patterns/gloss fixes reach existing
+  installs with no migration.
+- ✅ §8.2 closed: `SupabaseSyncService.purgeRemote()` (all five tables,
+  user-filtered DELETE) wired into the Settings deletion flow — remote purge
+  first (session still valid), sign out, local wipe; failures reported honestly.
+- ✅ `server/tools/pregen_tts.ts`: audio-capex batch fill of the TTS cache from
+  the seed; idempotent; `--dry-run` manifests (~$0.04 at today's 133 lines).
+  Account-gated to RUN (needs provider keys via .env or fly ssh).
+- Server deployed (v10+). DEVICE VERIFY still owed by Joshua (batch 8 list).
 
 ## Batch 8 (2026-07-19) — the Lesson Conductor (plan: getting-close-ish-but-no-curried-pelican)
 Field test showed the realtime AI self-driving (auto-response on every VAD

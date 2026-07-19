@@ -87,5 +87,11 @@ cost governance. What remains is live verification against a deployed backend
 (realtime voice, live Director grading, sync resume, real cost metering) and App
 Store submission work. `docs/PROGRESS.md` tracks the detailed state.
 
-Tests: `swift test` (89, in `ios/Packages/TenpoKit`) + `npm test` (8, in `server`),
+Beyond the MVP surface, the conversation-first layer is in: guided voice lessons
+(`docs/SESSION_DESIGN.md`) run a conducted four-act arc over OpenAI Realtime —
+English-scaffolded teaching with honest repeat grading, interrogative probes in
+both directions, productive-pattern extrapolation with pattern-level SRS, a
+guardrailed roleplay finale, and a code-gated debrief.
+
+Tests: `swift test` (123, in `ios/Packages/TenpoKit`) + `npm test` (16, in `server`),
 all green; CI runs both plus an unsigned app build on every push.
