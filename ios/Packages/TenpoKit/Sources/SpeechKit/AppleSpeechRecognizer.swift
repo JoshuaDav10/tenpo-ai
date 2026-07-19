@@ -68,8 +68,13 @@ public final class AppleSpeechRecognizer: STTProvider, @unchecked Sendable {
 
     private func writeTemp(_ audio: AudioClip) throws -> URL {
         let ext: String
+        var payload = audio.data
         switch audio.encoding {
-        case .wav, .pcm16: ext = "wav"
+        case .wav: ext = "wav"
+        case .pcm16:
+            // Raw PCM named ".wav" is not a WAV — SFSpeech needs the RIFF header.
+            ext = "wav"
+            payload = WAV.encode(pcm16: audio.data, sampleRate: audio.sampleRate)
         case .m4a: ext = "m4a"
         case .mp3: ext = "mp3"
         case .opus: ext = "opus"
@@ -77,7 +82,7 @@ public final class AppleSpeechRecognizer: STTProvider, @unchecked Sendable {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString)
             .appendingPathExtension(ext)
-        try audio.data.write(to: url)
+        try payload.write(to: url)
         return url
     }
 }

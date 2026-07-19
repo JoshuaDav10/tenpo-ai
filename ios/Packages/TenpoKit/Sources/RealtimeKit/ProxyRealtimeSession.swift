@@ -40,7 +40,7 @@ public final class ProxyRealtimeVoiceProvider: RealtimeVoiceProvider, RealtimeVo
 
         // First frame carries the scenario/persona so the bridge can build the
         // Actor instructions (§4.4). Prompt text itself lives on the server (§7).
-        let initFrame = RealtimeInitFrame(variables: config.variables)
+        let initFrame = RealtimeInitFrame(mode: config.mode, variables: config.variables)
         try await proxySession.sendJSON(initFrame)
         proxySession.startReceiveLoop()
         return proxySession
@@ -49,8 +49,19 @@ public final class ProxyRealtimeVoiceProvider: RealtimeVoiceProvider, RealtimeVo
 
 public enum RealtimeError: Error, Sendable { case badURL, notConnected }
 
+/// Wire shape of the conductor's control frame ({type:"lesson.step", step:{…}}).
+struct LessonStepFrame: Encodable {
+    struct Step: Encodable {
+        var kind: String
+        var variables: [String: JSONValue]
+    }
+    var type = "lesson.step"
+    var step: Step
+}
+
 private struct RealtimeInitFrame: Encodable {
     var type = "init"
+    var mode: String?
     var variables: [String: JSONValue]
 }
 
@@ -82,8 +93,27 @@ final class ProxyRealtimeSession: RealtimeSession, @unchecked Sendable {
         ] as [String: Any])
     }
 
+    func send(step: LessonStepDirective) async throws {
+        try await sendJSON(Self.frame(for: step))
+    }
+
+    func commitInput() async throws {
+        try await sendJSON(["type": "input_audio_buffer.commit"])
+    }
+
+    func createResponse() async throws {
+        try await sendJSON(["type": "response.create"])
+    }
+
     func interrupt() async throws {
         try await sendJSON(["type": "response.cancel"])
+    }
+
+    /// Pure builder for the lesson.step control frame (mirrors mapEvent: testable
+    /// without a socket). Kept under the 2KB bridge parse gate by construction —
+    /// variables are short data strings, never prompt text.
+    static func frame(for step: LessonStepDirective) -> LessonStepFrame {
+        LessonStepFrame(step: .init(kind: step.kind, variables: step.variables))
     }
 
     func close() async {

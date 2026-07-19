@@ -7,12 +7,28 @@ public struct RealtimeConfig: Sendable {
     public var variables: [String: JSONValue]
     public var voice: VoiceID
     public var locale: LanguageID
+    /// Session shape selector for the bridge ("lesson" hands turn authority to the
+    /// client conductor). nil = legacy roleplay behavior.
+    public var mode: String?
 
-    public init(actorTemplateID: String, variables: [String: JSONValue] = [:], voice: VoiceID, locale: LanguageID) {
+    public init(actorTemplateID: String, variables: [String: JSONValue] = [:], voice: VoiceID, locale: LanguageID, mode: String? = nil) {
         self.actorTemplateID = actorTemplateID
         self.variables = variables
         self.voice = voice
         self.locale = locale
+        self.mode = mode
+    }
+}
+
+/// One conductor step: names a server-side lesson template (§7 — the prompt text
+/// stays on the server) plus runtime DATA variables (targets, transcripts, flags).
+public struct LessonStepDirective: Sendable {
+    public var kind: String
+    public var variables: [String: JSONValue]
+
+    public init(kind: String, variables: [String: JSONValue] = [:]) {
+        self.kind = kind
+        self.variables = variables
     }
 }
 
@@ -46,6 +62,14 @@ public protocol RealtimeSession: AnyObject, Sendable {
     func send(audio: AudioBuffer) async throws
     /// Director → Actor steering mid-scene (§4.4 actor_directive).
     func send(systemUpdate: String) async throws
+    /// Conductor step: the bridge renders the named server-side template and fires
+    /// a response.create with it. The primary way lessons make the AI speak.
+    func send(step: LessonStepDirective) async throws
+    /// Manual endpoint (input_audio_buffer.commit). Safety hatch — semantic VAD
+    /// auto-commits; used only if live verification disproves that.
+    func commitInput() async throws
+    /// Bare response.create (recovery path; uses session-level instructions).
+    func createResponse() async throws
     func interrupt() async throws
     func close() async
 }

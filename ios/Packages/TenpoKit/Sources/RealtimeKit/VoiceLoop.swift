@@ -47,13 +47,22 @@ extension VoiceLoopAction {
 /// (barge-in). Pure state machine over `RealtimeEvent`s; every decision is a returned
 /// `VoiceLoopAction`, so the whole loop is unit-testable with no socket and no mic.
 public struct VoiceLoop: Sendable {
-    /// Starts in `.thinking`: the Actor opens every scene (SESSION_DESIGN Act 1),
+    /// Who owns the floor after the AI finishes a turn.
+    /// - `conversational`: the learner — mic opens automatically (legacy voice chat).
+    /// - `conducted`: the conductor — the floor returns to `.thinking` and the mic
+    ///   opens only via `openMic()` when the current lesson step awaits a learner turn.
+    public enum Policy: Sendable { case conversational, conducted }
+
+    /// Starts in `.thinking`: the AI opens every session (SESSION_DESIGN Act 1),
     /// so the session begins waiting for the AI's greeting, not for the user.
     public private(set) var state: VoiceLoopState = .thinking
     /// Accumulates assistant transcript deltas for the current turn.
     private var assistantTurnText = ""
+    private let policy: Policy
 
-    public init() {}
+    public init(policy: Policy = .conversational) {
+        self.policy = policy
+    }
 
     /// Feed one wire event; get back the actions the host must perform.
     public mutating func handle(_ event: RealtimeEvent) -> [VoiceLoopAction] {
@@ -90,13 +99,16 @@ public struct VoiceLoop: Sendable {
             return role == .learner ? [.learnerSaid(text)] : []
 
         case .turnEnded:
-            // AI finished its reply; hand the floor back to the learner.
+            // AI finished its reply. Conversational: floor goes to the learner.
+            // Conducted: floor goes back to the conductor (which chains the next
+            // step or opens the mic explicitly).
             let said = assistantTurnText
             assistantTurnText = ""
-            state = .listening
+            let next: VoiceLoopState = policy == .conducted ? .thinking : .listening
+            state = next
             var actions: [VoiceLoopAction] = []
             if !said.isEmpty { actions.append(.assistantSaid(said)) }
-            actions.append(.state(.listening))
+            actions.append(.state(next))
             return actions
 
         case .proxyRefused(let code, let cheapModeFallback):
@@ -109,6 +121,14 @@ public struct VoiceLoop: Sendable {
             state = .ended
             return [.stopPlayback, .failed(message), .state(.ended)]
         }
+    }
+
+    /// Conducted mode: the conductor hands the floor to the learner (the current
+    /// step awaits a spoken answer). No-op when already listening or ended.
+    public mutating func openMic() -> [VoiceLoopAction] {
+        guard state == .thinking || state == .speaking else { return [] }
+        state = .listening
+        return [.state(.listening)]
     }
 
     /// The learner taps the orb to cut the AI off and take the floor. The ONLY

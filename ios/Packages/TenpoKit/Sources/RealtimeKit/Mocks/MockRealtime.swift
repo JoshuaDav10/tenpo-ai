@@ -10,11 +10,17 @@ public final class MockRealtimeSession: RealtimeSession, @unchecked Sendable {
 
     private var _sentAudio: [AudioBuffer] = []
     private var _systemUpdates: [String] = []
+    private var _sentSteps: [LessonStepDirective] = []
+    private var _committedInput = 0
+    private var _createdResponses = 0
     private var _interrupted = false
     private var _closed = false
 
     public var sentAudio: [AudioBuffer] { synced { _sentAudio } }
     public var systemUpdates: [String] { synced { _systemUpdates } }
+    public var sentSteps: [LessonStepDirective] { synced { _sentSteps } }
+    public var committedInput: Int { synced { _committedInput } }
+    public var createdResponses: Int { synced { _createdResponses } }
     public var interrupted: Bool { synced { _interrupted } }
     public var closed: Bool { synced { _closed } }
 
@@ -34,6 +40,18 @@ public final class MockRealtimeSession: RealtimeSession, @unchecked Sendable {
 
     public func send(systemUpdate: String) async throws {
         synced { _systemUpdates.append(systemUpdate) }
+    }
+
+    public func send(step: LessonStepDirective) async throws {
+        synced { _sentSteps.append(step) }
+    }
+
+    public func commitInput() async throws {
+        synced { _committedInput += 1 }
+    }
+
+    public func createResponse() async throws {
+        synced { _createdResponses += 1 }
     }
 
     public func interrupt() async throws {

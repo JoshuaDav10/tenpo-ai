@@ -121,6 +121,40 @@ struct VoiceLoopTests {
         }
     }
 
+    @Test func conductedPolicy_floorReturnsToConductorNotMic() {
+        var loop = VoiceLoop(policy: .conducted)
+        _ = loop.handle(.assistantAudio(pcm(1)))
+        // AI finishes → back to thinking (conductor's floor), NOT listening.
+        #expect(loop.handle(.turnEnded(role: .actor)) == [.state(.thinking)])
+        #expect(loop.shouldForwardMicAudio == false)
+        // Conductor explicitly opens the mic when a learner turn is expected.
+        #expect(loop.openMic() == [.state(.listening)])
+        #expect(loop.shouldForwardMicAudio == true)
+        // Redundant openMic is a no-op.
+        #expect(loop.openMic().isEmpty)
+    }
+
+    @Test func conductedPolicy_tapInterruptStillWorks() {
+        var loop = VoiceLoop(policy: .conducted)
+        _ = loop.handle(.assistantAudio(pcm(1)))
+        #expect(loop.tapInterrupt() == [.stopPlayback, .state(.listening)])
+    }
+
+    @Test func lessonStepFrameBuilderProducesWireShape() throws {
+        let frame = ProxyRealtimeSession.frame(
+            for: LessonStepDirective(kind: "lesson.model_repeat",
+                                     variables: ["target": .string("はじめまして")]))
+        let data = try JSONEncoder().encode(frame)
+        let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        #expect(obj?["type"] as? String == "lesson.step")
+        let step = obj?["step"] as? [String: Any]
+        #expect(step?["kind"] as? String == "lesson.model_repeat")
+        let vars = step?["variables"] as? [String: Any]
+        #expect(vars?["target"] as? String == "はじめまして")
+        // Stays under the bridge's 2KB parse gate.
+        #expect(data.count < 2048)
+    }
+
     @Test func speechStartStopEventsMapFromWireFrames() {
         #expect(ProxyRealtimeSession.mapEvent(["type": "input_audio_buffer.speech_started"]) != nil)
         #expect(ProxyRealtimeSession.mapEvent(["type": "input_audio_buffer.speech_stopped"]) != nil)
