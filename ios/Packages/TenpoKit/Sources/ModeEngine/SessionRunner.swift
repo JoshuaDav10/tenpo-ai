@@ -112,7 +112,7 @@ public actor SessionRunner {
         case .choices(let text, _, _): return (.system, text)
         case .heard(let t): return (.learner, t.text)
         case .info(let text): return (.system, text)
-        case .verdict, .progress, .goalProgress, .finished: return nil
+        case .verdict, .progress, .goalProgress, .finished, .card: return nil
         }
     }
 }

@@ -56,7 +56,7 @@ let package = Package(
         // in the ModeRegistry; zero changes to core to add one.
         .target(name: "Modes", dependencies: [
             "ModeEngine", "CoreModels", "ContentKit", "SpeechKit",
-            "LearnerModel", "LanguagePackCore",
+            "LearnerModel", "LanguagePackCore", "RealtimeKit",
         ]),
 
         // Supabase sync (§4.7 sync rules).
@@ -77,6 +77,7 @@ let package = Package(
         .testTarget(name: "ContentKitTests", dependencies: ["ContentKit", "CoreModels", "Persistence"]),
         .testTarget(name: "ModeEngineTests", dependencies: [
             "ModeEngine", "Modes", "CoreModels", "Persistence", "JapanesePack", "ContentKit", "SyncKit",
+            "RealtimeKit", "SpeechKit",
         ]),
         .testTarget(name: "SyncKitTests", dependencies: ["SyncKit", "CoreModels", "Persistence"]),
         .testTarget(name: "AuthKitTests", dependencies: ["AuthKit"]),

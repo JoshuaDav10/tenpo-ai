@@ -65,6 +65,9 @@ public enum ModeEvent: Sendable {
     /// makes honest scoring visible). Drill modes never emit this.
     case goalProgress(completed: Int, total: Int)
     case info(String)
+    /// Study-context card for the current step (lesson target phrase + furigana +
+    /// gloss). UI chrome, not a transcript turn — never persisted.
+    case card(text: String, reading: String?, gloss: String?)
     case finished
 }
 

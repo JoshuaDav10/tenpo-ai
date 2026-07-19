@@ -189,7 +189,7 @@ final class RoleplayViewModel: ObservableObject {
             summary = Self.summary(for: result)
             errors = result.errors // R8: categorized error list for the post-session breakdown
             consume?.cancel()
-        case .verdict, .progress, .choices:
+        case .verdict, .progress, .choices, .card:
             break
         }
     }
