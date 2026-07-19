@@ -291,6 +291,33 @@ const LESSON_STEPS: Record<string, StepRenderer> = {
       "Ask ONLY the question — slowly and clearly. Do not model an answer. Then stop and wait.",
     ].filter(Boolean).join("\n"),
 
+  // Flavor B (SESSION_DESIGN Act 3B): interrogative probes in English, both directions.
+  "lesson.translate_to_jp": (v) =>
+    [
+      "Production probe. In English, ask the learner how they would say this in Japanese:",
+      `The English meaning to elicit: "${String(v.english_prompt ?? "")}"`,
+      "Ask naturally (e.g. \"How would you say … in Japanese?\"). Do NOT say the Japanese",
+      "answer or any part of it. Then stop and wait.",
+    ].join("\n"),
+
+  "lesson.translate_to_en": (v) =>
+    [
+      "Comprehension probe. Say this Japanese phrase slowly and clearly, then ask in",
+      "English what it means:",
+      `Phrase: ${String(v.phrase_jp ?? "")}`,
+      "(e.g. \"If I said 「…」 — what did I just say?\"). Do NOT reveal the meaning.",
+      "Then stop and wait.",
+    ].join("\n"),
+
+  "lesson.meaning_retry": (v) =>
+    [
+      "Their guess at the meaning wasn't right. Without revealing the answer:",
+      `What they guessed: ${String(v.heard ?? "")}`,
+      `The phrase: ${String(v.phrase_jp ?? "")}`,
+      "In English, say that's not quite it, offer one small nudge (context, not the",
+      "answer), repeat the phrase once slowly, and ask again. Then stop and wait.",
+    ].join("\n"),
+
   "lesson.hint": (v) =>
     [
       "The learner asked for help. In English, give one short hint toward the expected answer",

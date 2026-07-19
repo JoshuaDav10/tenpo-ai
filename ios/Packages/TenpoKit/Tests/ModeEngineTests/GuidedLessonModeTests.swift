@@ -286,6 +286,62 @@ private let repeatStep = """
         #expect(await waitUntil { h.stepKinds.last == "lesson.wrap" })
     }
 
+    @Test func translateToJP_gradesLikeARepeat_withRecallReview() async throws {
+        let h = try await makeHarness(steps: """
+        { "kind": "translate_to_jp", "english_prompt": "nice to meet you",
+          "accepted": ["はじめまして"], "item_ref": "vocab:私" }, { "kind": "wrap" }
+        """)
+        #expect(await waitUntil { h.stepKinds == ["lesson.translate_to_jp"] })
+        #expect(h.wire.sentSteps[0].variables["english_prompt"] == .string("nice to meet you"))
+
+        h.assistantDone()
+        h.learnerSays("はじめまして")
+        #expect(await waitUntil { h.stepKinds.last == "lesson.wrap" })
+        h.assistantDone()
+        _ = await waitUntil { h.box.events.contains { if case .finished = $0 { return true }; return false } }
+        let result = await h.session.finish()
+        #expect(result.reviews.contains { $0.itemID.rawValue == "vocab:私" && $0.grade == .good })
+    }
+
+    @Test func translateToEN_meaningRetryThenHonestMiss() async throws {
+        let h = try await makeHarness(steps: """
+        { "kind": "translate_to_en", "phrase_jp": "お名前は何ですか",
+          "accepted_en": ["what is your name", "your name"], "item_ref": "vocab:名前" },
+        { "kind": "wrap" }
+        """)
+        #expect(await waitUntil { h.stepKinds == ["lesson.translate_to_en"] })
+
+        h.assistantDone()
+        h.learnerSays("nice to meet you") // wrong meaning
+        #expect(await waitUntil { h.stepKinds.last == "lesson.meaning_retry" })
+        #expect(h.wire.sentSteps.last?.variables["phrase_jp"] == .string("お名前は何ですか"))
+
+        h.assistantDone()
+        h.learnerSays("goodbye") // wrong again → honest miss, advance
+        #expect(await waitUntil { h.stepKinds.last == "lesson.wrap" })
+        h.assistantDone()
+        _ = await waitUntil { h.box.events.contains { if case .finished = $0 { return true }; return false } }
+        let result = await h.session.finish()
+        #expect(result.errors.contains { $0.itemID?.rawValue == "vocab:名前" })
+        #expect(result.reviews.contains { $0.grade == .again && $0.dimension == .recognitionListening })
+    }
+
+    @Test func translateToEN_correctEnglishAnswerPasses() async throws {
+        let h = try await makeHarness(steps: """
+        { "kind": "translate_to_en", "phrase_jp": "お名前は何ですか",
+          "accepted_en": ["what is your name", "what's your name", "your name"], "item_ref": "vocab:名前" },
+        { "kind": "wrap" }
+        """)
+        #expect(await waitUntil { h.stepKinds.count == 1 })
+        h.assistantDone()
+        h.learnerSays("What's your name?")
+        #expect(await waitUntil { h.stepKinds.last == "lesson.wrap" })
+        #expect(h.wire.sentSteps.last?.variables["transition"] == .string("correct"))
+        h.assistantDone()
+        _ = await waitUntil { h.box.events.contains { if case .finished = $0 { return true }; return false } }
+        _ = await h.session.finish()
+    }
+
     @Test func typedText_devPath_actsAsTranscript() async throws {
         let h = try await makeHarness(steps: "\(repeatStep), { \"kind\": \"wrap\" }")
         #expect(await waitUntil { h.stepKinds.count == 1 })

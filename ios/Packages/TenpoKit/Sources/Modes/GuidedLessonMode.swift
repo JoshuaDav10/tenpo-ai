@@ -360,6 +360,18 @@ actor GuidedLessonSession: ModeSession {
             if let expectation = probe.expectationEN { vars["expectation_en"] = .string(expectation) }
             await send(step: "lesson.prompt_response", vars)
 
+        case .translateToJP(let probe):
+            phase = .delivering(thenLearner: true)
+            continuation.yield(.card(text: "“\(probe.promptEN)”", reading: nil, gloss: "say it in Japanese"))
+            vars["english_prompt"] = .string(probe.promptEN)
+            await send(step: "lesson.translate_to_jp", vars)
+
+        case .translateToEN(let probe):
+            phase = .delivering(thenLearner: true)
+            continuation.yield(.card(text: probe.phraseJP, reading: nil, gloss: "what does this mean?"))
+            vars["phrase_jp"] = .string(probe.phraseJP)
+            await send(step: "lesson.translate_to_en", vars)
+
         case .miniRoleplay(let cap, _):
             roleplayCap = cap
             roleplayTurns = 0
@@ -426,7 +438,49 @@ actor GuidedLessonSession: ModeSession {
         switch steps[stepIndex] {
         case .modelAndRepeat(let rep): await gradeRepeat(rep, heard: text)
         case .promptResponse(let probe): await gradeProbe(probe, heard: text)
+        case .translateToJP(let probe):
+            // Grades exactly like a repeat: known accepted Japanese answers, honest
+            // grader as the second opinion, corrective retry naming the target.
+            await gradeRepeat(LessonStep.Repeat(
+                target: probe.accepted[0], glossEN: probe.promptEN,
+                accepted: probe.accepted, itemRef: probe.itemRef), heard: text)
+        case .translateToEN(let probe): await gradeMeaning(probe, heard: text)
         default: break
+        }
+    }
+
+    private func gradeMeaning(_ probe: LessonStep.TranslateEN, heard: String) async {
+        if englishAnswerMatches(heard, probe.acceptedEN) {
+            if let ref = probe.itemRef {
+                reviews.append(ReviewEvent(itemID: ref, dimension: .recognitionListening,
+                                           grade: attempt == 0 ? .good : .hard,
+                                           modeID: GuidedLessonMode.descriptor.id,
+                                           sessionID: plan.sessionID))
+                continuation.yield(.verdict(itemID: ref, grade: attempt == 0 ? .good : .hard, diff: nil))
+            }
+            transition = "correct"
+            await advance()
+            return
+        }
+        attempt += 1
+        if attempt > 1 {
+            if let ref = probe.itemRef {
+                errors.append(ErrorEvent(sessionID: plan.sessionID, itemID: ref,
+                                         category: .vocab, surface: heard,
+                                         expected: probe.acceptedEN.first))
+                reviews.append(ReviewEvent(itemID: ref, dimension: .recognitionListening,
+                                           grade: .again, modeID: GuidedLessonMode.descriptor.id,
+                                           sessionID: plan.sessionID))
+            }
+            struggles.append(probe.phraseJP)
+            transition = "struggled"
+            await advance()
+        } else {
+            phase = .delivering(thenLearner: true)
+            await send(step: "lesson.meaning_retry", [
+                "heard": .string(heard),
+                "phrase_jp": .string(probe.phraseJP),
+            ])
         }
     }
 

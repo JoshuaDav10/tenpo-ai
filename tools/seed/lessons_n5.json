@@ -46,6 +46,18 @@
           "pron_graded": true
         },
         {
+          "kind": "translate_to_jp",
+          "english_prompt": "nice to meet you",
+          "accepted": ["はじめまして"],
+          "item_ref": "vocab:私"
+        },
+        {
+          "kind": "translate_to_en",
+          "phrase_jp": "お名前は何ですか",
+          "accepted_en": ["what is your name", "what's your name", "your name"],
+          "item_ref": "vocab:名前"
+        },
+        {
           "kind": "explain",
           "focus_en": "Now put it together for real: they will meet a friendly classmate and should greet them, give their name, and close with よろしくお願いします. You'll play the classmate."
         },

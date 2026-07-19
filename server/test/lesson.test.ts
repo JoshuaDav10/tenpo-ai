@@ -9,6 +9,9 @@ const ALL_KINDS = [
   "lesson.reprompt",
   "lesson.correct_retry",
   "lesson.prompt_response",
+  "lesson.translate_to_jp",
+  "lesson.translate_to_en",
+  "lesson.meaning_retry",
   "lesson.hint",
   "lesson.roleplay_open",
   "lesson.roleplay_turn",
@@ -45,6 +48,20 @@ test("step variables interpolate as data, and unknown kind throws", () => {
   assert.ok(praised.includes("praise is allowed"));
 
   assert.throws(() => renderLessonStep("lesson.nope", {}), /unknown lesson step kind/);
+});
+
+test("interrogative probes interpolate and never leak answers into the ask", () => {
+  const toJP = renderLessonStep("lesson.translate_to_jp", { english_prompt: "nice to meet you" });
+  assert.ok(toJP.includes("nice to meet you"));
+  assert.ok(toJP.includes("Do NOT say the Japanese"));
+
+  const toEN = renderLessonStep("lesson.translate_to_en", { phrase_jp: "お名前は何ですか" });
+  assert.ok(toEN.includes("お名前は何ですか"));
+  assert.ok(toEN.includes("Do NOT reveal"));
+
+  const retry = renderLessonStep("lesson.meaning_retry", { heard: "goodbye?", phrase_jp: "はじめまして" });
+  assert.ok(retry.includes("goodbye?"));
+  assert.ok(retry.includes("はじめまして"));
 });
 
 test("transition variable folds acknowledgment into the next step", () => {

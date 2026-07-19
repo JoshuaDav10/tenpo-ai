@@ -66,9 +66,37 @@ public enum LessonStep: Sendable {
         }
     }
 
+    /// Flavor B production probe: "How would you say X?" — answered in Japanese.
+    public struct TranslateJP: Sendable {
+        public var promptEN: String
+        public var accepted: [String]
+        public var itemRef: ItemID?
+
+        public init(promptEN: String, accepted: [String], itemRef: ItemID? = nil) {
+            self.promptEN = promptEN
+            self.accepted = accepted
+            self.itemRef = itemRef
+        }
+    }
+
+    /// Flavor B comprehension probe: "What does Y mean?" — answered in English.
+    public struct TranslateEN: Sendable {
+        public var phraseJP: String
+        public var acceptedEN: [String]
+        public var itemRef: ItemID?
+
+        public init(phraseJP: String, acceptedEN: [String], itemRef: ItemID? = nil) {
+            self.phraseJP = phraseJP
+            self.acceptedEN = acceptedEN
+            self.itemRef = itemRef
+        }
+    }
+
     case explain(focusEN: String)
     case modelAndRepeat(Repeat)
     case promptResponse(Probe)
+    case translateToJP(TranslateJP)
+    case translateToEN(TranslateEN)
     case miniRoleplay(turnCap: Int, scenarioRef: ItemID?)
     case wrap
 }
@@ -120,6 +148,9 @@ private struct RawStep: Decodable {
     var item_refs: [String]?
     var turn_cap: Int?
     var scenario_ref: String?
+    var english_prompt: String?
+    var phrase_jp: String?
+    var accepted_en: [String]?
 }
 
 private extension LessonStep {
@@ -140,6 +171,16 @@ private extension LessonStep {
                 questionJP: question, expectationEN: raw.expectation_en,
                 expectedPatterns: raw.expected_patterns ?? [], hintEN: raw.hint_en,
                 itemRefs: (raw.item_refs ?? []).map(ItemID.init(rawValue:))))
+        case "translate_to_jp":
+            guard let prompt = raw.english_prompt, let accepted = raw.accepted, !accepted.isEmpty else { return nil }
+            self = .translateToJP(TranslateJP(
+                promptEN: prompt, accepted: accepted,
+                itemRef: raw.item_ref.map(ItemID.init(rawValue:))))
+        case "translate_to_en":
+            guard let phrase = raw.phrase_jp, let accepted = raw.accepted_en, !accepted.isEmpty else { return nil }
+            self = .translateToEN(TranslateEN(
+                phraseJP: phrase, acceptedEN: accepted,
+                itemRef: raw.item_ref.map(ItemID.init(rawValue:))))
         case "mini_roleplay":
             self = .miniRoleplay(turnCap: raw.turn_cap ?? 6,
                                  scenarioRef: raw.scenario_ref.map(ItemID.init(rawValue:)))
