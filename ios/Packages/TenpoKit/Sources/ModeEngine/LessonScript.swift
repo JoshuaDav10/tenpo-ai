@@ -92,11 +92,30 @@ public enum LessonStep: Sendable {
         }
     }
 
+    /// Flavor C: a productive pattern taught once, then generalization-probed on
+    /// words the learner was never taught. Grades land on the PATTERN's item id,
+    /// so weak patterns — not just weak words — resurface in later sessions.
+    public struct Pattern: Sendable {
+        public var patternID: ItemID
+        public var nameEN: String
+        public var ruleEN: String
+        /// Worked examples, "japanese|english" pairs for the teach beat.
+        public var examples: [(jp: String, en: String)]
+
+        public init(patternID: ItemID, nameEN: String, ruleEN: String, examples: [(jp: String, en: String)]) {
+            self.patternID = patternID
+            self.nameEN = nameEN
+            self.ruleEN = ruleEN
+            self.examples = examples
+        }
+    }
+
     case explain(focusEN: String)
     case modelAndRepeat(Repeat)
     case promptResponse(Probe)
     case translateToJP(TranslateJP)
     case translateToEN(TranslateEN)
+    case patternTeach(Pattern)
     case miniRoleplay(turnCap: Int, scenarioRef: ItemID?)
     case wrap
 }
@@ -118,7 +137,7 @@ extension LessonScript {
             band: raw.band ?? item.band ?? "N5",
             topicEN: raw.topic_en ?? "",
             scenarioRef: raw.scenario_ref.map(ItemID.init(rawValue:)),
-            steps: steps.compactMap(LessonStep.init(raw:))
+            steps: steps.flatMap(LessonStep.expand(raw:))
         )
     }
 }
@@ -151,9 +170,57 @@ private struct RawStep: Decodable {
     var english_prompt: String?
     var phrase_jp: String?
     var accepted_en: [String]?
+    var pattern_id: String?
+    var name_en: String?
+    var rule_en: String?
+    var examples: [RawExample]?
+    var probes: [RawProbe]?
+}
+
+private struct RawExample: Decodable {
+    var jp: String?
+    var en: String?
+}
+
+private struct RawProbe: Decodable {
+    var direction: String?      // "to_jp" | "to_en"
+    var prompt_en: String?
+    var accepted: [String]?
+    var phrase_jp: String?
+    var accepted_en: [String]?
 }
 
 private extension LessonStep {
+    /// A raw step usually maps 1:1, but a `pattern` step expands into its teach
+    /// beat plus one probe step per generalization question — the conductor never
+    /// needs to know patterns are composite.
+    static func expand(raw: RawStep) -> [LessonStep] {
+        guard raw.kind == "pattern" else {
+            return LessonStep(raw: raw).map { [$0] } ?? []
+        }
+        guard let id = raw.pattern_id, let rule = raw.rule_en else { return [] }
+        let patternRef = ItemID(rawValue: id)
+        let examples = (raw.examples ?? []).compactMap { ex -> (jp: String, en: String)? in
+            guard let jp = ex.jp, let en = ex.en else { return nil }
+            return (jp, en)
+        }
+        var steps: [LessonStep] = [.patternTeach(Pattern(
+            patternID: patternRef, nameEN: raw.name_en ?? id, ruleEN: rule, examples: examples))]
+        for probe in raw.probes ?? [] {
+            switch probe.direction {
+            case "to_jp":
+                guard let prompt = probe.prompt_en, let accepted = probe.accepted, !accepted.isEmpty else { continue }
+                steps.append(.translateToJP(TranslateJP(promptEN: prompt, accepted: accepted, itemRef: patternRef)))
+            case "to_en":
+                guard let phrase = probe.phrase_jp, let accepted = probe.accepted_en, !accepted.isEmpty else { continue }
+                steps.append(.translateToEN(TranslateEN(phraseJP: phrase, acceptedEN: accepted, itemRef: patternRef)))
+            default:
+                continue
+            }
+        }
+        return steps
+    }
+
     init?(raw: RawStep) {
         switch raw.kind {
         case "explain":

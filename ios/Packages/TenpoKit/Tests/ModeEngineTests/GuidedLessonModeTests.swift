@@ -342,6 +342,40 @@ private let repeatStep = """
         _ = await h.session.finish()
     }
 
+    @Test func patternStep_teachesThenProbesGeneralization_gradesOnPatternID() async throws {
+        let h = try await makeHarness(steps: """
+        { "kind": "pattern", "pattern_id": "pattern:tai_form",
+          "name_en": "たい (want to)", "rule_en": "drop masu, add tai",
+          "examples": [ { "jp": "食べたい", "en": "want to eat" } ],
+          "probes": [
+            { "direction": "to_jp", "prompt_en": "I want to go", "accepted": ["行きたい", "いきたい"] },
+            { "direction": "to_en", "phrase_jp": "買いたい", "accepted_en": ["want to buy"] }
+          ] }, { "kind": "wrap" }
+        """)
+        // Teach beat first, with rule + examples as data.
+        #expect(await waitUntil { h.stepKinds == ["lesson.pattern_teach"] })
+        #expect(h.wire.sentSteps[0].variables["examples"] == .string("食べたい = want to eat"))
+
+        // Teach chains automatically into probe 1 (production on an untaught verb).
+        h.assistantDone("Here's the pattern…")
+        #expect(await waitUntil { h.stepKinds.last == "lesson.translate_to_jp" })
+        h.assistantDone()
+        h.learnerSays("行きたい") // generalized correctly
+
+        // Probe 2: comprehension of another untaught application.
+        #expect(await waitUntil { h.stepKinds.last == "lesson.translate_to_en" })
+        h.assistantDone()
+        h.learnerSays("want to buy")
+
+        #expect(await waitUntil { h.stepKinds.last == "lesson.wrap" })
+        h.assistantDone()
+        _ = await waitUntil { h.box.events.contains { if case .finished = $0 { return true }; return false } }
+        let result = await h.session.finish()
+        // Both grades landed on the PATTERN's SRS id — generalization is the skill.
+        #expect(result.reviews.filter { $0.itemID.rawValue == "pattern:tai_form" && $0.grade == .good }.count == 2)
+        #expect(result.status == .completed)
+    }
+
     @Test func typedText_devPath_actsAsTranscript() async throws {
         let h = try await makeHarness(steps: "\(repeatStep), { \"kind\": \"wrap\" }")
         #expect(await waitUntil { h.stepKinds.count == 1 })

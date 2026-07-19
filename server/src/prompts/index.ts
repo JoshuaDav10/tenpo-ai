@@ -291,6 +291,20 @@ const LESSON_STEPS: Record<string, StepRenderer> = {
       "Ask ONLY the question — slowly and clearly. Do not model an answer. Then stop and wait.",
     ].filter(Boolean).join("\n"),
 
+  // Flavor C (SESSION_DESIGN Act 3C): teach a productive pattern, then the
+  // conductor probes generalization to unlearned words via the translate steps.
+  "lesson.pattern_teach": (v) =>
+    [
+      "Teach one productive pattern — the learner should leave able to APPLY it to",
+      "words they've never studied, not just repeat examples.",
+      `Pattern: ${String(v.name_en ?? "")}`,
+      `The rule, in plain words: ${String(v.rule_en ?? "")}`,
+      `Worked examples (say each Japanese one slowly): ${String(v.examples ?? "")}`,
+      "Explain it in English the way a friend would (one breath, no jargon), say the",
+      "examples, then tell them you'll now ask them to make one themselves. Stop and wait",
+      "— the next question comes separately.",
+    ].join("\n"),
+
   // Flavor B (SESSION_DESIGN Act 3B): interrogative probes in English, both directions.
   "lesson.translate_to_jp": (v) =>
     [

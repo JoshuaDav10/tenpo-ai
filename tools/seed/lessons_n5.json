@@ -70,6 +70,59 @@
           "kind": "wrap"
         }
       ]
+    },
+    {
+      "id": "lesson:cafe_want_v1",
+      "title": "Ordering what you want",
+      "band": "N5.2",
+      "topic_en": "asking for things at a cafe — and making words you were never taught",
+      "scenario_ref": "scenario:cafe_order_v1",
+      "steps": [
+        {
+          "kind": "explain",
+          "focus_en": "Today is about ASKING for things two ways: the polite request をください, and saying what you want with たい. The trick: these are patterns, not phrases — once they have the rule they can build words nobody taught them."
+        },
+        {
+          "kind": "pattern",
+          "pattern_id": "pattern:kudasai",
+          "name_en": "〜をください (please give me)",
+          "rule_en": "Say the thing, add をください, and you've politely asked for it. 水 (water) → 水をください. コーヒー → コーヒーをください.",
+          "examples": [
+            { "jp": "水をください", "en": "water, please" },
+            { "jp": "コーヒーをください", "en": "coffee, please" }
+          ],
+          "probes": [
+            { "direction": "to_jp", "prompt_en": "tea, please — tea is お茶", "accepted": ["お茶をください", "おちゃをください"] },
+            { "direction": "to_en", "phrase_jp": "メニューをください", "accepted_en": ["menu please", "the menu please", "please give me the menu", "a menu please"] }
+          ]
+        },
+        {
+          "kind": "pattern",
+          "pattern_id": "pattern:tai_form",
+          "name_en": "〜たい (want to)",
+          "rule_en": "Take a verb's ます-form, drop ます, add たい — now it means you WANT to do it. 食べます → 食べたい (want to eat). 飲みます → 飲みたい (want to drink).",
+          "examples": [
+            { "jp": "食べたい", "en": "I want to eat" },
+            { "jp": "飲みたい", "en": "I want to drink" }
+          ],
+          "probes": [
+            { "direction": "to_jp", "prompt_en": "I want to go — the verb is 行きます", "accepted": ["行きたい", "いきたい"] },
+            { "direction": "to_en", "phrase_jp": "買いたい", "accepted_en": ["want to buy", "i want to buy", "to want to buy"] }
+          ]
+        },
+        {
+          "kind": "explain",
+          "focus_en": "Time to use it for real: they're at the cafe counter and should order something using ください or たい. You'll play the barista — casual register."
+        },
+        {
+          "kind": "mini_roleplay",
+          "turn_cap": 6,
+          "scenario_ref": "scenario:cafe_order_v1"
+        },
+        {
+          "kind": "wrap"
+        }
+      ]
     }
   ]
 }

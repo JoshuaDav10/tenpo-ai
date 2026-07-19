@@ -7,11 +7,9 @@ enum ContentBootstrap {
     @discardableResult
     static func run(_ container: AppContainer) async -> Int {
         do {
-            let fresh = try await container.content.seedIfEmpty(from: .main, subdirectory: "seed")
-            // Kinds added after this device was first seeded (e.g. lessons) —
-            // seedIfEmpty won't fire on a populated store.
-            let topUp = try await container.content.seedMissingKinds(from: .main, subdirectory: "seed")
-            return fresh + topUp
+            // Upserts every authored seed item, so new/updated lessons, patterns,
+            // and glosses reach already-seeded installs on next launch.
+            return try await container.content.seedSync(from: .main, subdirectory: "seed")
         } catch {
             // A seeding failure must not brick the app — drills just have nothing
             // to draw yet. Surface via the count; log for the debug screen later.

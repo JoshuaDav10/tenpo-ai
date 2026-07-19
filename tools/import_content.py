@@ -307,6 +307,7 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
     cloze = _load_seed_file(seed_dir, "cloze_n5.json")
     scenarios = _load_seed_file(seed_dir, "scenarios_n5.json")
     lessons = _load_seed_file(seed_dir, "lessons_n5.json")
+    patterns = _load_seed_file(seed_dir, "patterns_n5.json")
 
     # --- kanji ---
     kanji_by_literal: dict[str, str] = {}
@@ -397,6 +398,13 @@ def import_seed(conn: sqlite3.Connection, seed_dir: Path) -> None:
         for goal in sc.get("goals", []):
             for target in goal.get("target_items", []):
                 upsert_link(conn, sc["id"], target, "uses")
+
+    # --- patterns (productive rules; pattern-level SRS rows, flavor C) ---
+    for pattern in patterns:
+        upsert_content_item(
+            conn, item_id=pattern["id"], kind="pattern", payload=pattern,
+            band=pattern.get("band"), source=SEED_SOURCE, license_=SEED_LICENSE,
+        )
 
     # --- lessons (guided voice scripts; steps reference vocab via item_ref) ---
     for lesson in lessons:

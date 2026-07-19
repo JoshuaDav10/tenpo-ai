@@ -372,6 +372,16 @@ actor GuidedLessonSession: ModeSession {
             vars["phrase_jp"] = .string(probe.phraseJP)
             await send(step: "lesson.translate_to_en", vars)
 
+        case .patternTeach(let pattern):
+            // Teaching beat: chains straight into the pattern's first probe.
+            phase = .delivering(thenLearner: false)
+            continuation.yield(.card(text: pattern.nameEN, reading: nil, gloss: pattern.ruleEN))
+            vars["name_en"] = .string(pattern.nameEN)
+            vars["rule_en"] = .string(pattern.ruleEN)
+            vars["examples"] = .string(pattern.examples
+                .map { "\($0.jp) = \($0.en)" }.joined(separator: "; "))
+            await send(step: "lesson.pattern_teach", vars)
+
         case .miniRoleplay(let cap, _):
             roleplayCap = cap
             roleplayTurns = 0

@@ -32,6 +32,7 @@ public enum ContentSeed {
         FileSpec(resource: "cloze_n5", kind: .sentence, source: "Tenpo seed (N5)"),
         FileSpec(resource: "scenarios_n5", kind: .scenario, source: "Tenpo seed (N5)"),
         FileSpec(resource: "lessons_n5", kind: .lesson, source: "Tenpo seed (N5)"),
+        FileSpec(resource: "patterns_n5", kind: .pattern, source: "Tenpo seed (N5)"),
     ]
 
     public enum SeedError: Error, Sendable {
@@ -101,26 +102,16 @@ public extension ContentService {
         return items.count
     }
 
-    /// Top-up for stores seeded before a content KIND existed (seedIfEmpty only
-    /// fires on an empty store, so devices that already have the 214-item seed
-    /// would never receive e.g. lessons). For each manifest kind with zero rows,
-    /// load just that kind's files. Idempotent. Returns items inserted.
+    /// Keep the authored seed current on every launch: upsert ALL bundled seed
+    /// items. Seed ids are the app's source of truth for authored content, so a
+    /// new lesson, pattern, or a fixed gloss reaches existing installs without
+    /// any migration dance (seedIfEmpty never fires on a populated store).
+    /// Non-seed ids (learner-generated content) are untouched. Idempotent.
     @discardableResult
-    func seedMissingKinds(from bundle: Bundle, subdirectory: String? = "Seed") async throws -> Int {
-        var inserted = 0
-        let kinds = Set(ContentSeed.manifest.map(\.kind))
-        for kind in kinds {
-            guard try await items(kind: kind, band: nil, limit: 1).isEmpty else { continue }
-            for spec in ContentSeed.manifest where spec.kind == kind {
-                guard let url = bundle.url(forResource: spec.resource, withExtension: "json", subdirectory: subdirectory)
-                    ?? bundle.url(forResource: spec.resource, withExtension: "json") else { continue }
-                let data = try Data(contentsOf: url)
-                let items = try ContentSeed.items(fromJSONArray: data, spec: spec)
-                guard !items.isEmpty else { continue }
-                try await upsert(items)
-                inserted += items.count
-            }
-        }
-        return inserted
+    func seedSync(from bundle: Bundle, subdirectory: String? = "Seed") async throws -> Int {
+        let items = try ContentSeed.loadAll(from: bundle, subdirectory: subdirectory)
+        guard !items.isEmpty else { return 0 }
+        try await upsert(items)
+        return items.count
     }
 }

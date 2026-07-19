@@ -1,0 +1,61 @@
+{
+  "_comment": "Productive patterns (SESSION_DESIGN Act 3C / flavor C). Each is a content row so pattern-level grades live in FSRS and weak patterns resurface. Probes deliberately use vocab the learner may NOT have drilled — generalization is the skill being graded, not the word.",
+  "items": [
+    {
+      "id": "pattern:tai_form",
+      "name_en": "〜たい (want to)",
+      "band": "N5.2",
+      "rule_en": "Take a verb's ます-form, drop ます, add たい — now it means you WANT to do it. 食べます (eat) → 食べたい (want to eat). 飲みます (drink) → 飲みたい (want to drink).",
+      "examples": [
+        { "jp": "食べたい", "en": "I want to eat" },
+        { "jp": "飲みたい", "en": "I want to drink" }
+      ],
+      "probes": [
+        { "direction": "to_jp", "prompt_en": "I want to go — the verb is 行きます", "accepted": ["行きたい", "いきたい"] },
+        { "direction": "to_en", "phrase_jp": "買いたい", "accepted_en": ["want to buy", "i want to buy", "to want to buy"] }
+      ]
+    },
+    {
+      "id": "pattern:sugiru",
+      "name_en": "〜すぎる (too much)",
+      "band": "N5.3",
+      "rule_en": "Drop an adjective's final い and add すぎる — it means TOO much of it. 高い (expensive) → 高すぎる (too expensive). 大きい (big) → 大きすぎる (too big).",
+      "examples": [
+        { "jp": "高すぎる", "en": "too expensive" },
+        { "jp": "大きすぎる", "en": "too big" }
+      ],
+      "probes": [
+        { "direction": "to_en", "phrase_jp": "安すぎる", "accepted_en": ["too cheap"] },
+        { "direction": "to_jp", "prompt_en": "too small — the adjective is 小さい", "accepted": ["小さすぎる", "ちいさすぎる"] }
+      ]
+    },
+    {
+      "id": "pattern:kudasai",
+      "name_en": "〜をください (please give me)",
+      "band": "N5.1",
+      "rule_en": "Say the thing, add をください, and you've politely asked for it. 水 (water) → 水をください (water, please). コーヒー → コーヒーをください.",
+      "examples": [
+        { "jp": "水をください", "en": "water, please" },
+        { "jp": "コーヒーをください", "en": "coffee, please" }
+      ],
+      "probes": [
+        { "direction": "to_jp", "prompt_en": "tea, please — tea is お茶", "accepted": ["お茶をください", "おちゃをください"] },
+        { "direction": "to_en", "phrase_jp": "メニューをください", "accepted_en": ["menu please", "the menu please", "please give me the menu", "a menu please"] }
+      ]
+    },
+    {
+      "id": "pattern:mashou",
+      "name_en": "〜ましょう (let's)",
+      "band": "N5.2",
+      "rule_en": "Swap a verb's ます for ましょう and you're proposing doing it together. 行きます (go) → 行きましょう (let's go). 食べます → 食べましょう (let's eat).",
+      "examples": [
+        { "jp": "行きましょう", "en": "let's go" },
+        { "jp": "食べましょう", "en": "let's eat" }
+      ],
+      "probes": [
+        { "direction": "to_jp", "prompt_en": "let's talk — the verb is 話します", "accepted": ["話しましょう", "はなしましょう"] },
+        { "direction": "to_en", "phrase_jp": "帰りましょう", "accepted_en": ["let's go home", "lets go home", "let's return", "lets return"] }
+      ]
+    }
+  ]
+}

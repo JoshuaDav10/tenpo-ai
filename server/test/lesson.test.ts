@@ -9,6 +9,7 @@ const ALL_KINDS = [
   "lesson.reprompt",
   "lesson.correct_retry",
   "lesson.prompt_response",
+  "lesson.pattern_teach",
   "lesson.translate_to_jp",
   "lesson.translate_to_en",
   "lesson.meaning_retry",
