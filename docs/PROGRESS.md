@@ -19,7 +19,43 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **98** tests (`swift test`) — all green.
+- Swift: **118** tests (`swift test`) — all green.
+
+## Batch 8 (2026-07-19) — the Lesson Conductor (plan: getting-close-ish-but-no-curried-pelican)
+Field test showed the realtime AI self-driving (auto-response on every VAD
+endpoint), no learner transcripts (transcription unconfigured), and Japanese
+immersion instead of Joshua's English-first scaffolded teaching. Fix inverted
+control: **the client mode is the conductor.**
+- Server: `LESSON_SYSTEM` + 10 `lesson.*` step templates (`renderLessonStep`);
+  bridge init gains `mode:"lesson"` → `create_response:false` + input
+  transcription (`gpt-4o-mini-transcribe`), no auto response.create; post-init
+  `{type:"lesson.step"}` control frames render server-side into
+  `response.create{instructions}` (§7); ≥2KB frames skip parsing (audio).
+- RealtimeKit: `RealtimeSession.send(step:)` (+commit/createResponse hatches),
+  `VoiceLoop` conducted policy + `openMic()`, `VoiceAudioIO` pipe (hardware in
+  the view, decisions in the mode → SessionRunner persistence/SRS restored),
+  `WAV.encode` (also fixed headerless-wav in AppleSpeechRecognizer.writeTemp).
+- Content: `ContentKind.lesson`, `LessonScript` tolerant decode,
+  `lessons_n5.json` (classmate intro: explain → はじめまして/私は〜です repeats →
+  name probe → よろしくお願いします → roleplay handoff → mini_roleplay(6) → wrap),
+  importer + `seedMissingKinds` top-up (seedIfEmpty never fires on populated
+  stores — required for existing installs).
+- `GuidedLessonMode`: step driver (framing beats chain; learner beats open the
+  mic; transcript-or-timeout, noise → reprompt, NEVER advances ungraded);
+  grading = transcript fast-path → HonestGrader second opinion on captured
+  turn PCM (R6) → ≤2 corrective retries → honest .again+error; weak-item
+  weaving (Act 1); mini-roleplay via RoleplayEngine + live Director with the
+  R4 help ladder mapped to lesson.roleplay_help; wrap praise code-gated (R15)
+  with struggle callouts. 11-case headless suite.
+- App: Lessons section in Roleplay tab (cheap mode → scenario text cascade),
+  LessonSessionView (orb + study card + step counter + goal HUD + debrief +
+  DEBUG typed path). Verified on sim: lesson + 8 scenarios render.
+- DEVICE VERIFY (Joshua, increment 6): English open→waits; wrong repeat →
+  corrective retry naming heard; silence/noise → reprompt, no advance;
+  learner bubbles; session rows + reviews; tap-interrupt; roleplay reaches
+  wrap with honest goals. Risks staged: create_response:false auto-commit
+  assumption (fallback commitInput), instructions override-vs-append,
+  transcription field name — all one-line server fixes if wrong.
 
 ## Batch 7 (2026-07-18, daytime) — the voice loop (SESSION_DESIGN.md §1)
 - ✅ Backend LIVE: Supabase (schema run, RLS verified) + Fly `tenpo-proxy`
