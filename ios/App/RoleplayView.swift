@@ -2,20 +2,59 @@ import SwiftUI
 import CoreModels
 import ModeEngine
 import SpeechKit
+import RealtimeKit
 
 // MARK: - Scenario picker
 
 struct RoleplayListView: View {
     let container: AppContainer
     @State private var scenarios: [ContentItem] = []
+    @State private var lessons: [ContentItem] = []
     @State private var active: ActiveRoleplay?
     @State private var activeVoice: ActiveVoiceRoleplay?
+    @State private var activeLesson: ActiveLesson?
     @State private var policy: CostPolicy = .full
 
     var body: some View {
         List {
             if policy != .full {
                 Section { CostNotice(policy: policy) }
+            }
+            if !lessons.isEmpty {
+                Section("Lessons") {
+                    ForEach(lessons) { item in
+                        if let script = LessonScript(item) {
+                            Button {
+                                guard policy.allowsNewRoleplay else { return }
+                                Task {
+                                    // Cheap mode: the lesson's scenario in text cascade.
+                                    if policy.roleplayPipeline != .realtime {
+                                        if let ref = script.scenarioRef,
+                                           let scenarioItem = try? await container.content.item(id: ref),
+                                           let made = container.makeRoleplaySession(scenarioItem, pipeline: .cascade) {
+                                            active = ActiveRoleplay(runner: made.runner, scenario: made.scenario)
+                                        }
+                                        return
+                                    }
+                                    if let made = await container.makeLessonSession(item) {
+                                        activeLesson = ActiveLesson(runner: made.runner, audio: made.audio, lesson: made.lesson)
+                                    }
+                                }
+                            } label: {
+                                VStack(alignment: .leading, spacing: 4) {
+                                    HStack {
+                                        Text(script.title).font(.headline)
+                                        Spacer()
+                                        Image(systemName: "waveform.circle.fill")
+                                            .foregroundStyle(.tint)
+                                    }
+                                    Text(script.topicEN).font(.caption).foregroundStyle(.secondary)
+                                }
+                            }
+                            .disabled(!policy.allowsNewRoleplay)
+                        }
+                    }
+                }
             }
             Section {
                 ForEach(scenarios) { item in
@@ -49,8 +88,12 @@ struct RoleplayListView: View {
                 return ActiveRoleplay(runner: made.runner, scenario: made.scenario)
             }
         }
+        .navigationDestination(item: $activeLesson) { lesson in
+            LessonSessionView(runner: lesson.runner, audio: lesson.audio, lesson: lesson.lesson)
+        }
         .task {
             scenarios = (try? await container.scenarios()) ?? []
+            lessons = (try? await container.lessons()) ?? []
             policy = await container.costPolicy()
         }
     }
@@ -102,6 +145,15 @@ struct ActiveVoiceRoleplay: Identifiable, Hashable {
     let item: ContentItem
     let scenario: Scenario
     static func == (l: ActiveVoiceRoleplay, r: ActiveVoiceRoleplay) -> Bool { l.id == r.id }
+    func hash(into h: inout Hasher) { h.combine(id) }
+}
+
+struct ActiveLesson: Identifiable, Hashable {
+    let id = UUID()
+    let runner: SessionRunner
+    let audio: VoiceAudioIO
+    let lesson: LessonScript
+    static func == (l: ActiveLesson, r: ActiveLesson) -> Bool { l.id == r.id }
     func hash(into h: inout Hasher) { h.combine(id) }
 }
 
@@ -324,7 +376,8 @@ struct GuidedRoleplayView: View {
 /// R8 post-session error taxonomy: the Director's categorized error list, grouped
 /// by category (vocab / grammar / particle / pronunciation / register). Each error
 /// is a drillable item already enrolled in tomorrow's review (R8 → SRS, R7).
-private struct ErrorTaxonomyView: View {
+/// Shared by the roleplay and lesson debrief screens.
+struct ErrorTaxonomyView: View {
     let errors: [ErrorEvent]
 
     private var grouped: [(category: ErrorCategory, items: [ErrorEvent])] {

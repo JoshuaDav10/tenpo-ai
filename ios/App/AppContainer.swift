@@ -112,6 +112,31 @@ final class AppContainer {
         try await content.items(kind: .scenario, band: nil, limit: 100)
     }
 
+    /// All guided voice lessons in the content store.
+    func lessons() async throws -> [ContentItem] {
+        try await content.items(kind: .lesson, band: nil, limit: 100)
+    }
+
+    /// A conducted voice lesson (SESSION_DESIGN.md): runner + the audio pipe the
+    /// view drives hardware through. Runs the full four acts through SessionRunner
+    /// (persistence R12, SRS commits R8).
+    func makeLessonSession(_ lessonItem: ContentItem) async -> (runner: SessionRunner, audio: VoiceAudioIO, lesson: LessonScript)? {
+        guard let script = LessonScript(lessonItem) else { return nil }
+        var items = [lessonItem]
+        if let ref = script.scenarioRef, let scenario = try? await content.item(id: ref) {
+            items.append(scenario)
+        }
+        let audio = VoiceAudioIO()
+        let plan = SessionPlan(items: items, scenarioID: script.scenarioRef, pipeline: .realtime)
+        let mode = GuidedLessonMode(
+            context: ModeContext(
+                learner: learner, content: content, speech: speech, realtime: realtime,
+                pack: pack, director: LiveDirectorService(chat: chat)),
+            audio: audio)
+        let runner = SessionRunner(mode: mode, plan: plan, store: store, learner: learner, sync: sync)
+        return (runner, audio, script)
+    }
+
     /// A runner for a specific scenario. Returns the decoded Scenario for the HUD.
     /// `pipeline` (from `costPolicy()`) picks realtime vs. cascade; today the app
     /// only ships the cascade GuidedRoleplayMode, so both currently run cheap-mode,
@@ -142,6 +167,7 @@ final class AppContainer {
         registry.register(ListeningPickMeaningMode.self)
         registry.register(RapidFireMode.self)
         registry.register(GuidedRoleplayMode.self)
+        registry.register(GuidedLessonMode.self)
     }
 
     static func live() throws -> AppContainer {

@@ -14,6 +14,7 @@
 		44788CA3E138C9EEB0058B73 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C48534D035DC85D781738A23 /* SettingsView.swift */; };
 		453C715B9C7CF23B2A9B3A82 /* seed in Resources */ = {isa = PBXBuildFile; fileRef = 92E764F6367E47EC9B2CD379 /* seed */; };
 		4EA7A035F7E8D486CAEA07D8 /* TenpoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = C97CD1BD975E00CB221FD0B0 /* TenpoConfig.swift */; };
+		4F9D5615A2DA0583D3FCEF7B /* LessonSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 422686F0B7B7261882F706B2 /* LessonSessionView.swift */; };
 		527B032855F328584967C7C7 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BF1AB657B44B72B099298A /* AppContainer.swift */; };
 		53A355D481A81E19C06B7F33 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F9DD6D3F5D252A964AD02DD /* DataManager.swift */; };
 		5B8193B733DD19D818DA91E0 /* ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC72B283DA74CF73A94E8B9B /* ConsentView.swift */; };
@@ -40,8 +41,9 @@
 		162E04B795A85A303C929B80 /* WhyDueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhyDueView.swift; sourceTree = "<group>"; };
 		2BDBDDCDADA9D509A0479F3F /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		36254461A4F65A0AC9427177 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		422686F0B7B7261882F706B2 /* LessonSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonSessionView.swift; sourceTree = "<group>"; };
 		63EF76204533A77E2C0E5EC5 /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
-		6DE683A3BE2ADC02A64E46CD /* Tenpo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tenpo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6DE683A3BE2ADC02A64E46CD /* Tenpo.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Tenpo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6F9DD6D3F5D252A964AD02DD /* DataManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataManager.swift; sourceTree = "<group>"; };
 		769BAD91649513C3B63660A3 /* DebugRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugRoute.swift; sourceTree = "<group>"; };
 		86313E9D83622F0C7323ED43 /* DrillView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrillView.swift; sourceTree = "<group>"; };
@@ -51,7 +53,7 @@
 		94BF1AB657B44B72B099298A /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
 		A4DAD251DE9F40FF1973855D /* ComplianceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComplianceStore.swift; sourceTree = "<group>"; };
 		AA4732FE45C297051F391C6E /* VoiceSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSessionView.swift; sourceTree = "<group>"; };
-		B7367EF7C7A3B021D675A228 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B7367EF7C7A3B021D675A228 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BF2FDAF34A1B2532FC26FFFD /* TenpoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = TenpoConfig.plist; sourceTree = "<group>"; };
 		C48534D035DC85D781738A23 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C70FD112C3C65046A2A0C66B /* MasteryDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryDashboardView.swift; sourceTree = "<group>"; };
@@ -118,6 +120,7 @@
 				86313E9D83622F0C7323ED43 /* DrillView.swift */,
 				11FDABF261633D03F4CDA71E /* DynamicSyncService.swift */,
 				CD7FFC87F0EFF0DFD2DAAB2D /* HomeView.swift */,
+				422686F0B7B7261882F706B2 /* LessonSessionView.swift */,
 				C70FD112C3C65046A2A0C66B /* MasteryDashboardView.swift */,
 				D362DCADA81DCCDE1F9C7D08 /* Preferences.swift */,
 				B7367EF7C7A3B021D675A228 /* PrivacyInfo.xcprivacy */,
@@ -248,6 +251,7 @@
 				8CE870E15BF3083F0C175EC2 /* DrillView.swift in Sources */,
 				DA51FCFE280E2997EE93BEEC /* DynamicSyncService.swift in Sources */,
 				950E37D51227850B7D672E00 /* HomeView.swift in Sources */,
+				4F9D5615A2DA0583D3FCEF7B /* LessonSessionView.swift in Sources */,
 				C5B576B73A88E13E9FDC5300 /* LicensesView.swift in Sources */,
 				A92D45F62EC26C03BA625389 /* MasteryDashboardView.swift in Sources */,
 				383D36BB1E34612C053FE3A5 /* Preferences.swift in Sources */,
@@ -390,7 +394,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = B53CHRFAYK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tenpo records your voice during practice to transcribe and grade your speaking. Audio is processed by speech-recognition providers listed in Settings → Privacy.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Tenpo uses on-device speech recognition to grade your spoken answers instantly, without sending easy drills to a server.";
@@ -416,7 +419,6 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = B53CHRFAYK;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Tenpo records your voice during practice to transcribe and grade your speaking. Audio is processed by speech-recognition providers listed in Settings → Privacy.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Tenpo uses on-device speech recognition to grade your spoken answers instantly, without sending easy drills to a server.";
