@@ -109,7 +109,10 @@ private let repeatStep = """
 
 // MARK: - tests
 
-@Suite struct GuidedLessonModeTests {
+// Serialized: each harness runs live pump tasks and sub-second timeout timers;
+// letting a dozen of them interleave on a slow CI runner crashed the process
+// (signal 10) even though TSan is clean. One at a time, torn down before the next.
+@Suite(.serialized) struct GuidedLessonModeTests {
 
     @Test func happyPath_stepsFlowInOrderWithGrades() async throws {
         let h = try await makeHarness(steps: """
@@ -191,6 +194,7 @@ private let repeatStep = """
         // Silence after the reprompt → patient timeout → another gentle reprompt.
         h.assistantDone()
         #expect(await waitUntil(timeout: 2) { h.stepKinds.filter { $0 == "lesson.reprompt" }.count == 2 })
+        _ = await h.session.finish()
     }
 
     @Test func probe_hintOnFirstMiss_errorAfterSecond() async throws {
@@ -227,6 +231,7 @@ private let repeatStep = """
         // The woven weak-item repeat lands between explain and wrap.
         #expect(await waitUntil { h.stepKinds.last == "lesson.model_repeat" })
         #expect(h.wire.sentSteps.last?.variables["target"] == .string("水"))
+        _ = await h.session.finish()
     }
 
     @Test func roleplayAct_turnCapLeadsToWrap() async throws {
@@ -245,6 +250,7 @@ private let repeatStep = """
         #expect(await waitUntil { h.stepKinds.last == "lesson.wrap" })
         // Goal HUD flowed from the engine.
         #expect(h.box.events.contains { if case .goalProgress = $0 { return true }; return false })
+        _ = await h.session.finish()
     }
 
     @Test func quit_wrapsAndFinishesAbandoned() async throws {
@@ -265,6 +271,7 @@ private let repeatStep = """
         h.wire.emit(.proxyRefused(code: "cost_cheap_mode", cheapModeFallback: true))
         #expect(await waitUntil { h.box.events.contains { if case .finished = $0 { return true }; return false } })
         #expect(h.box.events.contains { if case .info(let t) = $0 { return t.contains("text mode") }; return false })
+        _ = await h.session.finish()
     }
 
     @Test func tapInterrupt_cancelsAndOpensTheFloor() async throws {
