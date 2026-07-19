@@ -3,7 +3,7 @@ import websocket from "@fastify/websocket";
 import WebSocket from "ws";
 import { jwtVerify, createRemoteJWKSet } from "jose";
 import { route } from "./providerRouter.ts";
-import { getRealtimeInstructions } from "./prompts/index.ts";
+import { getRealtimeInstructions, getLessonSessionInstructions, renderLessonStep } from "./prompts/index.ts";
 import { usage, realtimeAdmission } from "./costMeter.ts";
 
 // WS /realtime (§4.3.1 Pipeline A, §7): bridges client <-> OpenAI Realtime.
@@ -33,6 +33,70 @@ async function verifyToken(token: string | undefined): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+export interface RealtimeInit {
+  mode?: string;
+  variables?: Record<string, unknown>;
+}
+
+/** Session config per mode. Legacy (no mode) keeps the roleplay-actor shape;
+ * "lesson" hands turn authority to the client conductor: no auto-response on
+ * VAD endpoints, and input transcription on so learner transcripts flow. */
+export function buildSessionConfig(init: RealtimeInit): Record<string, unknown> {
+  if (init.mode === "lesson") {
+    return {
+      type: "realtime",
+      instructions: getLessonSessionInstructions(),
+      output_modalities: ["audio"],
+      audio: {
+        input: {
+          transcription: { model: "gpt-4o-mini-transcribe" }, // no language pin — lessons are bilingual
+          turn_detection: {
+            type: "semantic_vad",
+            eagerness: "low",
+            create_response: false, // the conductor decides when the AI speaks
+            interrupt_response: false,
+          },
+        },
+        output: { voice: "alloy" },
+      },
+    };
+  }
+  return {
+    type: "realtime",
+    instructions: getRealtimeInstructions(init.variables ?? {}),
+    output_modalities: ["audio"],
+    audio: {
+      input: {
+        turn_detection: { type: "semantic_vad", eagerness: "low", interrupt_response: false },
+      },
+      output: { voice: "alloy" },
+    },
+  };
+}
+
+/** Post-init frame router. `lesson.step` control frames become server-rendered
+ * response.create instructions (§7 — prompt text never leaves the server);
+ * everything else forwards verbatim. Audio appends (≥6KB base64 per 100ms chunk)
+ * skip parsing entirely via the size gate. */
+export function interceptFrame(text: string): { forward: string } | { upstream: Record<string, unknown> } {
+  if (text.length < 2048) {
+    try {
+      const obj = JSON.parse(text) as { type?: string; step?: { kind?: string; variables?: Record<string, unknown> } };
+      if (obj?.type === "lesson.step" && obj.step?.kind) {
+        return {
+          upstream: {
+            type: "response.create",
+            response: { instructions: renderLessonStep(obj.step.kind, obj.step.variables ?? {}) },
+          },
+        };
+      }
+    } catch {
+      // not JSON we understand — forward untouched
+    }
+  }
+  return { forward: text };
 }
 
 export async function registerRealtime(app: FastifyInstance): Promise<void> {
@@ -80,52 +144,40 @@ export async function registerRealtime(app: FastifyInstance): Promise<void> {
       headers: { Authorization: `Bearer ${key}` },
     });
 
-    // The first client message carries the scenario/persona; we turn it into the
-    // Actor instructions and open the realtime session.
+    // The first client message is the init frame ({type:"init", mode?, variables});
+    // it selects the session shape. Lesson mode hands turn authority to the client
+    // conductor, so no opening response.create is sent — the first lesson.step is
+    // the English intro (SESSION_DESIGN Act 1).
     let opened = false;
     clientSock.on("message", (raw: WebSocket.RawData) => {
       const text = raw.toString();
       if (!opened) {
         opened = true;
         try {
-          const init = JSON.parse(text) as { variables?: Record<string, unknown> };
-          const instructions = getRealtimeInstructions(init.variables ?? {});
+          const init = JSON.parse(text) as RealtimeInit;
+          const session = buildSessionConfig(init);
+          const isLesson = init.mode === "lesson";
           upstream.once("open", () => {
-            upstream.send(JSON.stringify({
-              type: "session.update",
-              // GA session shape: type is required, modalities renamed, voice
-              // moved under audio.output.
-              session: {
-                type: "realtime",
-                instructions,
-                output_modalities: ["audio"],
-                audio: {
-                  input: {
-                    // Patient, meaning-aware endpointing: wait for the learner to
-                    // actually finish a thought instead of pouncing on noise or
-                    // hesitation (learners pause a lot). No voice interruption —
-                    // the client is turn-based; interrupts are an explicit tap.
-                    turn_detection: {
-                      type: "semantic_vad",
-                      eagerness: "low",
-                      interrupt_response: false,
-                    },
-                  },
-                  output: { voice: "alloy" },
-                },
-              },
-            }));
-            // The Actor opens the scene (SESSION_DESIGN Act 1): without an
-            // explicit response.create the model waits silently for the user.
-            upstream.send(JSON.stringify({ type: "response.create" }));
+            upstream.send(JSON.stringify({ type: "session.update", session }));
+            if (!isLesson) {
+              // Legacy roleplay: the Actor opens the scene unprompted.
+              upstream.send(JSON.stringify({ type: "response.create" }));
+            }
           });
         } catch {
           send({ type: "error", error: "bad_init" });
         }
         return;
       }
-      // Subsequent frames (audio append / commit / systemUpdate) pass through.
-      if (upstream.readyState === WebSocket.OPEN) upstream.send(text);
+      // Subsequent frames: lesson.step control frames render server-side (§7);
+      // audio appends and everything else pass through verbatim.
+      if (upstream.readyState !== WebSocket.OPEN) return;
+      const routed = interceptFrame(text);
+      if ("upstream" in routed) {
+        upstream.send(JSON.stringify(routed.upstream));
+      } else {
+        upstream.send(routed.forward);
+      }
     });
 
     upstream.on("message", (raw) => clientSock.send(raw.toString()));

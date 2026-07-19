@@ -210,6 +210,168 @@ export function getTemplate(id: string): PromptTemplate | undefined {
   return TEMPLATES[id];
 }
 
+// ── Guided voice lessons (SESSION_DESIGN.md) ─────────────────────────────────
+// The conductor (client GuidedLessonMode) drives the realtime session step by
+// step: it sends {type:"lesson.step", step:{kind, variables}} control frames and
+// the bridge renders these templates into per-response instructions. Prompt TEXT
+// lives only here (§7); the client sends data.
+
+export const LESSON_SYSTEM = [
+  "You are a warm, patient Japanese teacher in a live one-on-one VOICE lesson with a beginner.",
+  "Protocol:",
+  "- Explanations, instructions, and encouragement are in ENGLISH. Japanese is for target phrases,",
+  "  modeled lines, and roleplay only. Say Japanese targets slowly and clearly, then stop.",
+  "- Perform exactly ONE teaching beat per turn (under ~15 seconds of speech), then STOP and wait.",
+  "- NEVER ask a question and then answer it yourself. NEVER speak the learner's part.",
+  "  NEVER continue past your beat. The lesson advances only when you are told what to do next.",
+  "- If told the learner was unintelligible, say you didn't catch it and invite them to try",
+  "  again — never pretend to have understood.",
+  "- No praise about overall performance, no scores, and never end or wrap up the lesson",
+  "  unless the current turn instruction explicitly says to.",
+  "- Keep the tone human and encouraging; brief, not chatty.",
+].join("\n");
+
+type StepRenderer = (v: Record<string, unknown>) => string;
+
+function transitionNote(v: Record<string, unknown>): string {
+  switch (v.transition) {
+    case "correct":
+      return "Their last attempt was right — acknowledge in a word or two (e.g. \"Nice.\" / \"いいですね。\"), then:";
+    case "struggled":
+      return "They struggled with the last one — one short encouraging clause (no dwelling), then move on:";
+    default:
+      return "";
+  }
+}
+
+const LESSON_STEPS: Record<string, StepRenderer> = {
+  "lesson.explain": (v) =>
+    [
+      v.first === true
+        ? "Open the lesson: greet the learner in English, introduce yourself as their Japanese practice partner in one sentence, and say what today's practice is about."
+        : "Briefly set up the next part of the lesson in English.",
+      `Topic: ${String(v.topic_en ?? "")}`,
+      v.focus_en ? `Cover, in your own words: ${String(v.focus_en)}` : "",
+      "Do not teach a phrase yet and do not ask a question — just frame it, then stop.",
+    ].filter(Boolean).join("\n"),
+
+  "lesson.model_repeat": (v) =>
+    [
+      "Teach one phrase and elicit a repeat:",
+      `Target (Japanese): ${String(v.target ?? "")}`,
+      v.reading ? `Pronunciation reading: ${String(v.reading)}` : "",
+      `Meaning: ${String(v.gloss_en ?? "")}`,
+      "In English, give the meaning in a natural sentence, then say the Japanese target slowly and",
+      "clearly ONCE, then invite them to try saying it. Then stop and wait.",
+    ].filter(Boolean).join("\n"),
+
+  "lesson.reprompt": (v) =>
+    [
+      "You couldn't make out what the learner said (noise or silence).",
+      "In English, gently say you didn't catch that and invite them to try again.",
+      v.target ? `Model the target once more, slowly: ${String(v.target)}` : "",
+      "Then stop and wait.",
+    ].filter(Boolean).join("\n"),
+
+  "lesson.correct_retry": (v) =>
+    [
+      "The learner's attempt didn't match the target. Correct it kindly:",
+      `What they said (as transcribed): ${String(v.heard ?? "")}`,
+      `The target: ${String(v.target ?? "")}`,
+      v.reading ? `Reading: ${String(v.reading)}` : "",
+      "In English, briefly point out the difference (one concrete thing, no lecture), then model",
+      "the target again slowly and invite one more try. Then stop and wait.",
+    ].filter(Boolean).join("\n"),
+
+  "lesson.prompt_response": (v) =>
+    [
+      "Ask the learner a question they should answer in Japanese:",
+      `Ask, in Japanese: ${String(v.question_jp ?? "")}`,
+      v.expectation_en ? `(They are expected to: ${String(v.expectation_en)})` : "",
+      "Ask ONLY the question — slowly and clearly. Do not model an answer. Then stop and wait.",
+    ].filter(Boolean).join("\n"),
+
+  "lesson.hint": (v) =>
+    [
+      "The learner asked for help. In English, give one short hint toward the expected answer",
+      v.hint_en ? `Hint content: ${String(v.hint_en)}` : "",
+      v.target ? `If useful, remind them of: ${String(v.target)}` : "",
+      "Then re-ask or re-invite briefly. Then stop and wait.",
+    ].filter(Boolean).join("\n"),
+
+  "lesson.roleplay_open": (v) =>
+    [
+      "Switch into roleplay. First, in English and one sentence, tell them you'll now practice it",
+      "for real and who you're playing. Then deliver your FIRST in-character line in Japanese.",
+      `Scene (JSON): ${JSON.stringify({
+        setting: v.setting ?? null,
+        persona_hint: v.persona_hint ?? null,
+        register: v.register ?? "polite",
+        band: v.band ?? "N5",
+      })}`,
+      "In character: natural Japanese at the learner's band, one exchange, then stop and wait.",
+    ].join("\n"),
+
+  "lesson.roleplay_turn": (v) =>
+    [
+      "Continue the roleplay in character, in Japanese, one exchange only.",
+      `Register: ${String(v.register ?? "polite")}, band: ${String(v.band ?? "N5")}.`,
+      v.directive ? `Director's steering for this turn (obey it): ${String(v.directive)}` : "",
+      "Gentle recasts for errors; never lecture mid-scene, never end the scene. Stop and wait.",
+    ].filter(Boolean).join("\n"),
+
+  "lesson.roleplay_help": (v) =>
+    [
+      "The learner is confused in the roleplay. Help, matched to this level:",
+      helpInstruction(String(v.kind ?? "rephrase_simpler"), v),
+      "Then stop and wait.",
+    ].join("\n"),
+
+  "lesson.wrap": (v) =>
+    [
+      "Close the lesson, in English, briefly:",
+      v.praise_allowed === true
+        ? "They earned it today — one warm, specific sentence of praise is allowed."
+        : "Do NOT praise overall performance; be encouraging about effort only.",
+      typeof v.goals_completed === "number"
+        ? `Scene goals completed: ${v.goals_completed} of ${v.goals_total}. State this honestly.`
+        : "",
+      Array.isArray(v.struggles) && v.struggles.length
+        ? `Mention (kindly, one sentence) that these will come back in review: ${(v.struggles as unknown[]).join("、")}`
+        : "",
+      "End with one sentence about what you'll practice together next time. Then say goodbye briefly.",
+    ].filter(Boolean).join("\n"),
+};
+
+function helpInstruction(kind: string, v: Record<string, unknown>): string {
+  switch (kind) {
+    case "rephrase_simpler":
+      return "Repeat your last Japanese line more slowly with simpler words (stay in Japanese).";
+    case "show_text_furigana":
+      return `Say the key phrase again very slowly, syllable by syllable${v.target ? `: ${String(v.target)}` : ""}.`;
+    case "l1_bridge":
+      return "Briefly explain in English what was just said and what they might answer, then repeat the Japanese line once.";
+    case "log_weakness_advance":
+      return "In English, reassure them it's fine, give the meaning, and move the scene forward yourself with an easy next line in Japanese.";
+    default:
+      return "Repeat your last line more slowly and simply.";
+  }
+}
+
+/** Render a lesson step into per-response instructions. Throws on unknown kind. */
+export function renderLessonStep(kind: string, variables: Record<string, unknown>): string {
+  const renderer = LESSON_STEPS[kind];
+  if (!renderer) throw new Error(`unknown lesson step kind: ${kind}`);
+  const parts = [LESSON_SYSTEM, "# This turn", transitionNote(variables), renderer(variables)];
+  return parts.filter((p) => p.length > 0).join("\n\n");
+}
+
+/** Standing instructions for a lesson-mode realtime session (safety net for any
+ * bare response.create; every step render is self-contained regardless). */
+export function getLessonSessionInstructions(): string {
+  return LESSON_SYSTEM;
+}
+
 /** Actor instructions for the realtime (Pipeline A) session.update (§4.3.1). */
 export function getRealtimeInstructions(variables: Record<string, unknown>): string {
   const scene = {
