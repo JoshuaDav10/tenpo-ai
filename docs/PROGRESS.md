@@ -21,6 +21,36 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
 ## Current test counts
 - Swift: **123** tests (`swift test`) — all green. Server: **16**.
 
+## Batch 10 (2026-07-19, later) — UX overhaul (Pingo-informed) + app icon
+Joshua's verdict on the first build: "not good at all… everything poorly."
+He sent a Pingo teardown video (narration + screens). The takeaway: the
+SESSION is the app, not a screen buried under navigation. Rebuilt the shell:
+- `HomeShell` — three vertically-swiped panes: Progress ↑ / Session home /
+  Plan ↓. Corner chrome only (settings + streak chip). The tab/list nav is gone.
+- `SessionHomePane` — horizontal mode carousel; each card is one swipe + one
+  tap from speaking (lessons, free conversation, review/drills).
+- `TenpoBlob` (DesignSystem) — a morphing-blob CHARACTER that is both the brand
+  mark on the home cards and the voice-state indicator in session (moods:
+  idle/listening/thinking/speaking/celebrating). `VoiceStateBlob` maps
+  VoiceLoopState → mood; the gray orb is retired from both session views.
+- `TenpoTheme` — shared palette (warm canvas, blue/pink/yellow) so shell,
+  sessions, and character read as one product.
+- `ProgressPane` pours the real FSRS dashboard into glanceable widget cards
+  (mastery bands, weak-area heatmap, forgetting forecast, why-due tap-through) —
+  substance Pingo lacks. `PlanPane` = today's queue + lesson roadmap. Streak
+  computed from real session history (`AppContainer.streakDays`).
+- Session screens restyled to the canvas: in-content top bar (× + segmented
+  `StepProgressBar`), white study cards with shadows + spring transitions.
+- **App icon**: the blob character on warm canvas (was blank — TestFlight gap),
+  via CoreGraphics render, wired through the asset catalog.
+- DEBUG lesson harness: `DevLessonRealtimeProvider` + `TENPO_MOCK_VOICE=1` +
+  `TENPO_ROUTE=lesson` runs a full lesson on the sim with no proxy/auth/spend —
+  session visuals now verifiable on every change. Old `HomeView` deleted.
+- All three panes + the restyled lesson + the icon verified on the simulator.
+- STILL OWED by Joshua: a screen-recording of an actual practice session
+  (evidence for the chat-system rework — the "does everything poorly" half not
+  yet addressed). Device verify of the live lesson also still owed.
+
 ## Batch 9 (2026-07-19, overnight) — flavors B/C, purge, pregen
 - ✅ CI crash fixed: GuidedLessonSession ported from DispatchQueue+ivars to an
   **actor** (dynamic-exclusivity SIGBUS, reproducible once the suite ran
