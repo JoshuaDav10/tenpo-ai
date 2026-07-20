@@ -242,7 +242,7 @@ struct LessonSessionView: View {
     }
 
     private var orb: some View {
-        VoiceStateBlob(state: model.state) { Task { await model.tapOrb() } }
+        VoiceStateBlob(state: model.state, celebrate: model.finished) { Task { await model.tapOrb() } }
     }
 
     private var statusLine: some View {
@@ -259,6 +259,7 @@ struct LessonSessionView: View {
     }
 
     private var statusText: String {
+        if model.finished { return "Lesson complete!" }
         switch model.state {
         case .listening: return "Your turn — take your time."
         case .thinking: return model.lines.isEmpty ? "Starting your lesson…" : "…"

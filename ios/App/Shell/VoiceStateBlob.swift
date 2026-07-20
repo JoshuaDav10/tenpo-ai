@@ -7,6 +7,7 @@ import RealtimeKit
 /// (the one continuous character, home → conversation).
 struct VoiceStateBlob: View {
     let state: VoiceLoopState
+    var celebrate: Bool = false
     var onTap: () -> Void
 
     var body: some View {
@@ -16,6 +17,7 @@ struct VoiceStateBlob: View {
     }
 
     private var mood: TenpoBlob.Mood {
+        if celebrate { return .celebrating }
         switch state {
         case .listening: return .listening
         case .thinking: return .thinking
@@ -26,6 +28,7 @@ struct VoiceStateBlob: View {
 
     /// Blue-led while listening (your turn), warm while it works/speaks.
     private var palette: [Color] {
+        if celebrate { return TenpoBlob.defaultPalette }
         switch state {
         case .listening:
             return TenpoBlob.defaultPalette
