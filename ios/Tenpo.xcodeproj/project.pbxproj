@@ -18,6 +18,7 @@
 		527B032855F328584967C7C7 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94BF1AB657B44B72B099298A /* AppContainer.swift */; };
 		53A355D481A81E19C06B7F33 /* DataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F9DD6D3F5D252A964AD02DD /* DataManager.swift */; };
 		5B8193B733DD19D818DA91E0 /* ConsentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC72B283DA74CF73A94E8B9B /* ConsentView.swift */; };
+		654E074A27F4E61D80E01BEF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 366D8E92D7D513E90CF1ABE2 /* Assets.xcassets */; };
 		693DE57D90695E783F759838 /* TenpoKit in Frameworks */ = {isa = PBXBuildFile; productRef = 616B5796169AB5D56E4A47B7 /* TenpoKit */; };
 		708A1BB30DF7A95C7E688E43 /* PlanPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1598D537296ABC2490D71AB2 /* PlanPane.swift */; };
 		79EAC48543EC7224F8D40BC1 /* VoiceSessionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4732FE45C297051F391C6E /* VoiceSessionView.swift */; };
@@ -48,6 +49,7 @@
 		162E04B795A85A303C929B80 /* WhyDueView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhyDueView.swift; sourceTree = "<group>"; };
 		2BDBDDCDADA9D509A0479F3F /* LicensesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LicensesView.swift; sourceTree = "<group>"; };
 		36254461A4F65A0AC9427177 /* AccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
+		366D8E92D7D513E90CF1ABE2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		38AE7D4E87610AD92FD1DFC5 /* HomeShell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeShell.swift; sourceTree = "<group>"; };
 		422686F0B7B7261882F706B2 /* LessonSessionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LessonSessionView.swift; sourceTree = "<group>"; };
 		63EF76204533A77E2C0E5EC5 /* ReaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReaderView.swift; sourceTree = "<group>"; };
@@ -125,6 +127,7 @@
 			children = (
 				36254461A4F65A0AC9427177 /* AccountView.swift */,
 				94BF1AB657B44B72B099298A /* AppContainer.swift */,
+				366D8E92D7D513E90CF1ABE2 /* Assets.xcassets */,
 				0676B7F49C08C3CFFD2AA160 /* ContentBootstrap.swift */,
 				769BAD91649513C3B63660A3 /* DebugRoute.swift */,
 				C5328303C7C1023423C17226 /* DevLessonRealtime.swift */,
@@ -251,6 +254,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				654E074A27F4E61D80E01BEF /* Assets.xcassets in Resources */,
 				24247F1A19DA061B45164A11 /* PrivacyInfo.xcprivacy in Resources */,
 				DC88708BE672BEBCEC4195DB /* TenpoConfig.plist in Resources */,
 				453C715B9C7CF23B2A9B3A82 /* seed in Resources */,

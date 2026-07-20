@@ -27,6 +27,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.joshuadavid.tenpo
         GENERATE_INFOPLIST_FILE: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CURRENT_PROJECT_VERSION: 1
         MARKETING_VERSION: 0.1.0
         SWIFT_VERSION: "6.0"
