@@ -30,7 +30,7 @@ struct TenpoApp: App {
     private func rootView(_ container: AppContainer) -> some View {
         // §8.1: block practice behind explicit third-party-AI consent.
         if compliance.hasConsented {
-            HomeView(container: container, compliance: compliance)
+            HomeShell(container: container, compliance: compliance)
         } else {
             ConsentView(store: compliance)
         }

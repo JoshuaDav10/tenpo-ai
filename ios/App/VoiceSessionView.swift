@@ -211,45 +211,7 @@ struct VoiceSessionView: View {
     /// The one visual that carries the whole interaction: breathing while
     /// listening, pulsing while thinking, rippling while the AI speaks.
     private var orb: some View {
-        ZStack {
-            Circle()
-                .fill(orbColor.opacity(0.15))
-                .frame(width: 190, height: 190)
-                .scaleEffect(model.state == .speaking ? 1.15 : 1.0)
-                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true),
-                           value: model.state)
-            Circle()
-                .fill(orbColor.gradient)
-                .frame(width: 140, height: 140)
-                .scaleEffect(model.state == .listening ? 1.06 : 1.0)
-                .animation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true),
-                           value: model.state)
-            Image(systemName: orbSymbol)
-                .font(.system(size: 44))
-                .foregroundStyle(.white)
-        }
-        .contentShape(Circle())
-        .onTapGesture {
-            Task { await model.tapInterrupt() }
-        }
-    }
-
-    private var orbColor: Color {
-        switch model.state {
-        case .listening: return .blue
-        case .thinking: return .orange
-        case .speaking: return .green
-        case .ended: return .gray
-        }
-    }
-
-    private var orbSymbol: String {
-        switch model.state {
-        case .listening: return "waveform"
-        case .thinking: return "ellipsis"
-        case .speaking: return "speaker.wave.2.fill"
-        case .ended: return "checkmark"
-        }
+        VoiceStateBlob(state: model.state) { Task { await model.tapInterrupt() } }
     }
 
     private var statusLine: some View {

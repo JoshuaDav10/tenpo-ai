@@ -76,6 +76,32 @@ final class AppContainer {
         )
     }
 
+    /// Consecutive days (ending today or yesterday) with at least one session.
+    func streakDays() async -> Int {
+        let days: [String] = (try? await db.read { database in
+            try String.fetchAll(database,
+                sql: "SELECT DISTINCT date(started_at) FROM session ORDER BY 1 DESC LIMIT 366")
+        }) ?? []
+        guard !days.isEmpty else { return 0 }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.timeZone = .current
+        let calendar = Calendar.current
+        var cursor = calendar.startOfDay(for: Date())
+        var streak = 0
+        var index = 0
+        // A streak survives if today has no session YET but yesterday did.
+        if days.first != formatter.string(from: cursor) {
+            cursor = calendar.date(byAdding: .day, value: -1, to: cursor)!
+        }
+        while index < days.count, days[index] == formatter.string(from: cursor) {
+            streak += 1
+            index += 1
+            cursor = calendar.date(byAdding: .day, value: -1, to: cursor)!
+        }
+        return streak
+    }
+
     /// Sum of session cost recorded today (dogfood cost meter, §4.3.6). Local
     /// sessions cost $0; this populates once the proxy records per-session cost.
     func todaySpendUSD() async -> Double {

@@ -231,41 +231,7 @@ struct LessonSessionView: View {
     }
 
     private var orb: some View {
-        ZStack {
-            Circle()
-                .fill(orbColor.opacity(0.15))
-                .frame(width: 170, height: 170)
-                .scaleEffect(model.state == .speaking ? 1.12 : 1.0)
-                .animation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: model.state)
-            Circle()
-                .fill(orbColor.gradient)
-                .frame(width: 124, height: 124)
-                .scaleEffect(model.state == .listening ? 1.06 : 1.0)
-                .animation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true), value: model.state)
-            Image(systemName: orbSymbol)
-                .font(.system(size: 40))
-                .foregroundStyle(.white)
-        }
-        .contentShape(Circle())
-        .onTapGesture { Task { await model.tapOrb() } }
-    }
-
-    private var orbColor: Color {
-        switch model.state {
-        case .listening: return .blue
-        case .thinking: return .orange
-        case .speaking: return .green
-        case .ended: return .gray
-        }
-    }
-
-    private var orbSymbol: String {
-        switch model.state {
-        case .listening: return "waveform"
-        case .thinking: return "ellipsis"
-        case .speaking: return "speaker.wave.2.fill"
-        case .ended: return "checkmark"
-        }
+        VoiceStateBlob(state: model.state) { Task { await model.tapOrb() } }
     }
 
     private var statusLine: some View {

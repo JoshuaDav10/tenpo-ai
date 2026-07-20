@@ -82,7 +82,7 @@ struct MasteryDashboardView: View {
 
 /// The forgetting forecast (§4.7): a mini bar chart of reviews coming due over the
 /// next two weeks. Deliberately calm — surfaces load without streak/urgency pressure (R17).
-private struct ForgettingForecast: View {
+struct ForgettingForecast: View {
     let forecast: DueForecast
 
     var body: some View {
@@ -116,7 +116,7 @@ private struct ForgettingForecast: View {
     }
 }
 
-private struct DimensionRow: View {
+struct DimensionRow: View {
     let entry: DimensionMastery
 
     var body: some View {
@@ -139,7 +139,7 @@ private struct DimensionRow: View {
 }
 
 /// learning (<2d) / young (<21d) / mature (≥21d) as a proportional bar + legend.
-private struct BandBar: View {
+struct BandBar: View {
     let counts: MasteryBandCounts
 
     var body: some View {
@@ -181,7 +181,7 @@ private struct BandBar: View {
 /// Weak-area heatmap (§3.3): JLPT sub-bands (rows) × skill dimensions (columns),
 /// each cell tinted by how well-retained that intersection is. Empty where nothing
 /// is tracked yet.
-private struct WeakAreaHeatmap: View {
+struct WeakAreaHeatmap: View {
     let grid: WeakAreaGrid
 
     var body: some View {
