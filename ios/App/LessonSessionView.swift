@@ -2,6 +2,7 @@ import SwiftUI
 import CoreModels
 import ModeEngine
 import RealtimeKit
+import DesignSystem
 
 /// The conducted voice lesson screen (SESSION_DESIGN.md): orb + study card +
 /// ambient transcript, no send button. All decisions live in GuidedLessonMode;
@@ -47,15 +48,20 @@ final class LessonSessionModel: ObservableObject {
 
     func start() async {
         #if os(iOS)
-        guard await AVAudioApplication.requestRecordPermission() else {
-            micDenied = true
-            return
+        // Dev harness (TENPO_MOCK_VOICE) types input instead of speaking, so it
+        // needs no mic — skip the prompt that would otherwise block the sim.
+        let mockVoice = ProcessInfo.processInfo.environment["TENPO_MOCK_VOICE"] == "1"
+        if !mockVoice {
+            guard await AVAudioApplication.requestRecordPermission() else {
+                micDenied = true
+                return
+            }
+            let engine = RealtimeAudioEngine { [audio] chunk in
+                audio.submitMic(chunk)
+            }
+            try? engine.start()
+            self.engine = engine
         }
-        let engine = RealtimeAudioEngine { [audio] chunk in
-            audio.submitMic(chunk)
-        }
-        try? engine.start()
-        self.engine = engine
         #endif
 
         audioTask = Task { [weak self] in
@@ -157,6 +163,7 @@ struct LessonSessionView: View {
 
     var body: some View {
         VStack(spacing: 16) {
+            topBar
             header
             if let card = model.card { studyCard(card) }
             Spacer(minLength: 8)
@@ -169,27 +176,29 @@ struct LessonSessionView: View {
             #endif
         }
         .padding()
-        .navigationTitle(lesson.title)
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    Task { await model.end() }
-                } label: {
-                    Label("End", systemImage: "xmark.circle.fill")
-                }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                if model.stepTotal > 0 && !model.finished {
-                    Text("\(min(model.stepIndex + 1, model.stepTotal))/\(model.stepTotal)")
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
+        .navigationBarHidden(true)
+        .tenpoCanvas()
         .task { await model.start() }
         .onDisappear { Task { await model.teardown() } }
+    }
+
+    /// In-content top bar (no system nav chrome) matching the shell's calm look:
+    /// End on the left, a segmented step progress bar filling the width.
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            Button { Task { await model.end() } } label: {
+                Image(systemName: "xmark")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 34, height: 34)
+                    .background(.thinMaterial, in: Circle())
+            }
+            if model.stepTotal > 0 {
+                StepProgressBar(current: model.finished ? model.stepTotal : model.stepIndex,
+                                total: model.stepTotal)
+            }
+        }
+        .padding(.top, 4)
     }
 
     private var header: some View {
@@ -200,12 +209,13 @@ struct LessonSessionView: View {
             if let goals = model.goals {
                 Label("\(goals.done)/\(goals.total) goals", systemImage: "checkmark.seal")
                     .font(.caption).bold()
+                    .foregroundStyle(TenpoTheme.blue)
             }
             if let banner = model.banner {
                 Text(banner)
                     .font(.caption).foregroundStyle(.secondary)
-                    .padding(6)
-                    .background(.yellow.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+                    .padding(8)
+                    .background(TenpoTheme.yellow.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
             }
         }
     }
@@ -224,10 +234,11 @@ struct LessonSessionView: View {
             }
         }
         .frame(maxWidth: .infinity)
-        .padding()
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16))
-        .transition(.opacity)
-        .animation(.default, value: card)
+        .padding(20)
+        .background(TenpoTheme.surface, in: RoundedRectangle(cornerRadius: 20))
+        .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
+        .transition(.scale(scale: 0.96).combined(with: .opacity))
+        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: card)
     }
 
     private var orb: some View {
@@ -308,6 +319,28 @@ struct LessonSessionView: View {
         }
     }
     #endif
+}
+
+/// Segmented lesson progress: one filled pill per completed step.
+struct StepProgressBar: View {
+    let current: Int
+    let total: Int
+
+    var body: some View {
+        GeometryReader { geo in
+            let gap: CGFloat = 4
+            let width = (geo.size.width - gap * CGFloat(max(total - 1, 0))) / CGFloat(max(total, 1))
+            HStack(spacing: gap) {
+                ForEach(0..<max(total, 1), id: \.self) { i in
+                    Capsule()
+                        .fill(i < current ? TenpoTheme.blue : Color.primary.opacity(0.12))
+                        .frame(width: width, height: 5)
+                }
+            }
+            .animation(.spring(response: 0.3), value: current)
+        }
+        .frame(height: 5)
+    }
 }
 
 #if os(iOS)

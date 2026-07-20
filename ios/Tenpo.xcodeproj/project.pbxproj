@@ -26,7 +26,6 @@
 		8A4EB32EAC2CD906514388D5 /* VoiceStateBlob.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA44D4CD06C2587A39A8E336 /* VoiceStateBlob.swift */; };
 		8CE870E15BF3083F0C175EC2 /* DrillView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86313E9D83622F0C7323ED43 /* DrillView.swift */; };
 		915AA11C0406FE1B5C29D880 /* TenpoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87EDC2536BF22DE17B2E6363 /* TenpoApp.swift */; };
-		950E37D51227850B7D672E00 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD7FFC87F0EFF0DFD2DAAB2D /* HomeView.swift */; };
 		A7F5DC6B0944D3DD4B6BEECA /* ReaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63EF76204533A77E2C0E5EC5 /* ReaderView.swift */; };
 		A92D45F62EC26C03BA625389 /* MasteryDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C70FD112C3C65046A2A0C66B /* MasteryDashboardView.swift */; };
 		BAD3817924B829D3CBECDD54 /* ProgressPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = F28C3318F55939199659E6E4 /* ProgressPane.swift */; };
@@ -36,6 +35,7 @@
 		D4B110CDFD7A3FD661EC6F0D /* HomeShell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38AE7D4E87610AD92FD1DFC5 /* HomeShell.swift */; };
 		DA51FCFE280E2997EE93BEEC /* DynamicSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11FDABF261633D03F4CDA71E /* DynamicSyncService.swift */; };
 		DC88708BE672BEBCEC4195DB /* TenpoConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = BF2FDAF34A1B2532FC26FFFD /* TenpoConfig.plist */; };
+		DDDBCBD313AC370D852FBEDC /* DevLessonRealtime.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5328303C7C1023423C17226 /* DevLessonRealtime.swift */; };
 		F13B6DF2938B134C8747DAC3 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36254461A4F65A0AC9427177 /* AccountView.swift */; };
 /* End PBXBuildFile section */
 
@@ -64,9 +64,9 @@
 		B7367EF7C7A3B021D675A228 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		BF2FDAF34A1B2532FC26FFFD /* TenpoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = TenpoConfig.plist; sourceTree = "<group>"; };
 		C48534D035DC85D781738A23 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C5328303C7C1023423C17226 /* DevLessonRealtime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DevLessonRealtime.swift; sourceTree = "<group>"; };
 		C70FD112C3C65046A2A0C66B /* MasteryDashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MasteryDashboardView.swift; sourceTree = "<group>"; };
 		C97CD1BD975E00CB221FD0B0 /* TenpoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TenpoConfig.swift; sourceTree = "<group>"; };
-		CD7FFC87F0EFF0DFD2DAAB2D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		D362DCADA81DCCDE1F9C7D08 /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		DA44D4CD06C2587A39A8E336 /* VoiceStateBlob.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceStateBlob.swift; sourceTree = "<group>"; };
 		EC72B283DA74CF73A94E8B9B /* ConsentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsentView.swift; sourceTree = "<group>"; };
@@ -127,9 +127,9 @@
 				94BF1AB657B44B72B099298A /* AppContainer.swift */,
 				0676B7F49C08C3CFFD2AA160 /* ContentBootstrap.swift */,
 				769BAD91649513C3B63660A3 /* DebugRoute.swift */,
+				C5328303C7C1023423C17226 /* DevLessonRealtime.swift */,
 				86313E9D83622F0C7323ED43 /* DrillView.swift */,
 				11FDABF261633D03F4CDA71E /* DynamicSyncService.swift */,
-				CD7FFC87F0EFF0DFD2DAAB2D /* HomeView.swift */,
 				422686F0B7B7261882F706B2 /* LessonSessionView.swift */,
 				C70FD112C3C65046A2A0C66B /* MasteryDashboardView.swift */,
 				D362DCADA81DCCDE1F9C7D08 /* Preferences.swift */,
@@ -271,10 +271,10 @@
 				112E0503BD2F703CBA62AF32 /* ContentBootstrap.swift in Sources */,
 				53A355D481A81E19C06B7F33 /* DataManager.swift in Sources */,
 				107061AEA5347D3BE0F424D6 /* DebugRoute.swift in Sources */,
+				DDDBCBD313AC370D852FBEDC /* DevLessonRealtime.swift in Sources */,
 				8CE870E15BF3083F0C175EC2 /* DrillView.swift in Sources */,
 				DA51FCFE280E2997EE93BEEC /* DynamicSyncService.swift in Sources */,
 				D4B110CDFD7A3FD661EC6F0D /* HomeShell.swift in Sources */,
-				950E37D51227850B7D672E00 /* HomeView.swift in Sources */,
 				4F9D5615A2DA0583D3FCEF7B /* LessonSessionView.swift in Sources */,
 				C5B576B73A88E13E9FDC5300 /* LicensesView.swift in Sources */,
 				A92D45F62EC26C03BA625389 /* MasteryDashboardView.swift in Sources */,

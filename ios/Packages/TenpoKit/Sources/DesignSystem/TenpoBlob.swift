@@ -28,11 +28,7 @@ public struct TenpoBlob: View {
         self.size = size
     }
 
-    public static let defaultPalette: [Color] = [
-        Color(red: 0.28, green: 0.45, blue: 1.0),   // tenpo blue
-        Color(red: 0.98, green: 0.42, blue: 0.55),  // ume pink
-        Color(red: 1.0, green: 0.78, blue: 0.25),   // yuzu yellow
-    ]
+    public static let defaultPalette: [Color] = TenpoTheme.blobPalette
 
     public var body: some View {
         TimelineView(.animation) { timeline in

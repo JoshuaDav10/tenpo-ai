@@ -212,7 +212,18 @@ final class AppContainer {
         let proxy = config.proxyConfig(authToken: token)
 
         let realtime: any RealtimeVoiceService
-        if let realtimeConfig = config.realtimeConfig(authToken: token) {
+        #if DEBUG
+        let mockVoice = ProcessInfo.processInfo.environment["TENPO_MOCK_VOICE"] == "1"
+        #else
+        let mockVoice = false
+        #endif
+        if mockVoice {
+            #if DEBUG
+            realtime = DevLessonRealtimeProvider() // simulator: run lessons w/o proxy/auth
+            #else
+            realtime = MockRealtimeVoiceProvider()
+            #endif
+        } else if let realtimeConfig = config.realtimeConfig(authToken: token) {
             realtime = ProxyRealtimeVoiceProvider(config: realtimeConfig)
         } else {
             realtime = MockRealtimeVoiceProvider()

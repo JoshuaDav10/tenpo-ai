@@ -12,6 +12,7 @@ struct DebugRoute: View {
     let compliance: ComplianceStore
     @State private var ready = false
     @State private var drillRunner: SessionRunner?
+    @State private var lesson: ActiveLesson?
 
     var body: some View {
         NavigationStack {
@@ -19,6 +20,9 @@ struct DebugRoute: View {
                 switch route {
                 case "roleplay": RoleplayListView(container: container)
                 case "settings": SettingsView(container: container, compliance: compliance)
+                case "lesson":
+                    if let lesson { LessonSessionView(runner: lesson.runner, audio: lesson.audio, lesson: lesson.lesson) }
+                    else { ProgressView("Building lesson…") }
                 case "drill":
                     if let drillRunner { DrillView(runner: drillRunner) }
                     else { ProgressView("Building session…") }
@@ -33,6 +37,12 @@ struct DebugRoute: View {
             _ = try? await ContentBootstrap.run(container)
             if route == "dashboard" { await seedDemoReviews() }
             if route == "drill" { drillRunner = try? await container.makeDailySession() }
+            if route == "lesson" {
+                if let item = (try? await container.lessons())?.first,
+                   let made = await container.makeLessonSession(item) {
+                    lesson = ActiveLesson(runner: made.runner, audio: made.audio, lesson: made.lesson)
+                }
+            }
             ready = true
         }
     }
