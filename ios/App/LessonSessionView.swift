@@ -4,7 +4,7 @@ import ModeEngine
 import RealtimeKit
 import DesignSystem
 
-/// The conducted voice lesson screen (SESSION_DESIGN.md): orb + study card +
+/// The conducted voice lesson screen (SESSION_DESIGN.md): Pingo-minimal —
 /// ambient transcript, no send button. All decisions live in GuidedLessonMode;
 /// this view owns only hardware (mic/speaker) and rendering, connected through
 /// VoiceAudioIO — which is what lets the lesson run through SessionRunner.
@@ -152,6 +152,7 @@ struct LessonSessionView: View {
     let lesson: LessonScript
     @StateObject private var model: LessonSessionModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showTranscript = false
     #if DEBUG
     @State private var typed = ""
     #endif
@@ -162,30 +163,54 @@ struct LessonSessionView: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            topBar
-            header
-            if let card = model.card { studyCard(card) }
-            Spacer(minLength: 8)
-            orb
-            statusLine
-            Spacer(minLength: 8)
-            if model.finished { debrief } else { transcriptPeek }
-            #if DEBUG
-            if !model.finished { devTextEntry }
-            #endif
+        ZStack {
+            if model.finished {
+                CompletionScreen(title: lesson.title, errors: model.errors,
+                                 praised: model.summary?.contains("complete") ?? false) {
+                    dismiss()
+                }
+                .transition(.opacity)
+            } else {
+                conversation
+            }
         }
-        .padding()
+        .animation(.easeInOut(duration: 0.4), value: model.finished)
         .navigationBarHidden(true)
-        .tenpoCanvas()
         .task { await model.start() }
         .onDisappear { Task { await model.teardown() } }
+        .sheet(isPresented: $showTranscript) {
+            TranscriptSheet(lines: model.lines)
+        }
     }
 
-    /// In-content top bar (no system nav chrome) matching the shell's calm look:
-    /// End on the left, a segmented step progress bar filling the width.
+    // MARK: - conversation (Pingo-minimal: character + one hint, nothing else)
+
+    private var conversation: some View {
+        VStack(spacing: 0) {
+            topBar
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
+            Spacer()
+            VoiceStateBlob(state: model.state) { Task { await model.tapOrb() } }
+            hintLine
+                .padding(.top, 22)
+                .padding(.horizontal, 40)
+            Spacer()
+            #if DEBUG
+            devTextEntry
+                .padding(.horizontal, 20)
+                .padding(.bottom, 6)
+            #endif
+            transcriptTab
+                .padding(.bottom, 14)
+        }
+        .tenpoCanvas()
+    }
+
+    /// End on the left; a subtle step-progress bar (our edge over Pingo, which
+    /// gives no sense of place). No topic, no goals, no cards — pure voice.
     private var topBar: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             Button { Task { await model.end() } } label: {
                 Image(systemName: "xmark")
                     .font(.subheadline.weight(.semibold))
@@ -194,61 +219,15 @@ struct LessonSessionView: View {
                     .background(.thinMaterial, in: Circle())
             }
             if model.stepTotal > 0 {
-                StepProgressBar(current: model.finished ? model.stepTotal : model.stepIndex,
-                                total: model.stepTotal)
-            }
-        }
-        .padding(.top, 4)
-    }
-
-    private var header: some View {
-        VStack(spacing: 6) {
-            Text(lesson.topicEN)
-                .font(.subheadline).foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-            if let goals = model.goals {
-                Label("\(goals.done)/\(goals.total) goals", systemImage: "checkmark.seal")
-                    .font(.caption).bold()
-                    .foregroundStyle(TenpoTheme.blue)
-            }
-            if let banner = model.banner {
-                Text(banner)
-                    .font(.caption).foregroundStyle(.secondary)
-                    .padding(8)
-                    .background(TenpoTheme.yellow.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
+                StepProgressBar(current: model.stepIndex, total: model.stepTotal)
             }
         }
     }
 
-    /// The study card: what to say, how to read it, what it means.
-    private func studyCard(_ card: LessonSessionModel.Card) -> some View {
-        VStack(spacing: 6) {
-            Text(card.text)
-                .font(.system(size: 32, weight: .semibold))
-            if let reading = card.reading, reading != card.text {
-                Text(reading).font(.callout).foregroundStyle(.secondary)
-            }
-            if let gloss = card.gloss {
-                Text(gloss).font(.footnote).foregroundStyle(.tertiary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(20)
-        .background(TenpoTheme.surface, in: RoundedRectangle(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.04), radius: 8, y: 2)
-        .transition(.scale(scale: 0.96).combined(with: .opacity))
-        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: card)
-    }
-
-    private var orb: some View {
-        VoiceStateBlob(state: model.state, celebrate: model.finished) { Task { await model.tapOrb() } }
-    }
-
-    private var statusLine: some View {
+    private var hintLine: some View {
         Group {
             if model.micDenied {
-                Text("Tenpo needs the microphone for voice lessons. Enable it in Settings → Privacy → Microphone.")
+                Text("Tenpo needs the microphone. Enable it in Settings → Privacy → Microphone.")
                     .foregroundStyle(.red)
             } else {
                 Text(statusText).foregroundStyle(.secondary)
@@ -256,70 +235,136 @@ struct LessonSessionView: View {
         }
         .font(.callout)
         .multilineTextAlignment(.center)
+        .animation(.easeInOut, value: model.state)
     }
 
     private var statusText: String {
-        if model.finished { return "Lesson complete!" }
         switch model.state {
-        case .listening: return "Your turn — take your time."
+        case .listening: return "Your turn — just speak."
         case .thinking: return model.lines.isEmpty ? "Starting your lesson…" : "…"
-        case .speaking: return "Tap the circle to jump in."
+        case .speaking: return "Tap to interrupt."
         case .ended: return ""
         }
     }
 
-    private var transcriptPeek: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(model.lines.suffix(3)) { line in
-                HStack {
-                    if line.isLearner { Spacer(minLength: 30) }
-                    Text(line.text)
-                        .font(.footnote)
-                        .foregroundStyle(line.isLearner ? .primary : .secondary)
-                        .padding(.horizontal, 10).padding(.vertical, 6)
-                        .background(.quaternary.opacity(0.5), in: Capsule())
-                    if !line.isLearner { Spacer(minLength: 30) }
-                }
+    /// The pull-up affordance for the on-demand transcript.
+    private var transcriptTab: some View {
+        Button { showTranscript = true } label: {
+            VStack(spacing: 2) {
+                Image(systemName: "chevron.compact.up")
+                Text("Transcript").font(.subheadline.weight(.medium))
             }
+            .foregroundStyle(TenpoTheme.blue)
         }
-        .frame(maxWidth: .infinity)
-        .animation(.default, value: model.lines)
-    }
-
-    private var debrief: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                if let summary = model.summary {
-                    Text(summary)
-                        .font(.callout).bold()
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12))
-                }
-                if !model.errors.isEmpty {
-                    ErrorTaxonomyView(errors: model.errors)
-                }
-                Button("Done") { dismiss() }
-                    .buttonStyle(.borderedProminent)
-            }
-        }
+        .disabled(model.lines.isEmpty)
+        .opacity(model.lines.isEmpty ? 0.4 : 1)
     }
 
     #if DEBUG
     /// Simulator/dev path: type instead of speak (LearnerInput.text).
     private var devTextEntry: some View {
-        HStack {
-            TextField("dev: type your line", text: $typed)
-                .textFieldStyle(.roundedBorder)
-                .font(.footnote)
-                .onSubmit {
-                    let text = typed
-                    typed = ""
-                    Task { await model.sendTyped(text) }
-                }
-        }
+        TextField("dev: type your line", text: $typed)
+            .textFieldStyle(.roundedBorder)
+            .font(.footnote)
+            .onSubmit {
+                let text = typed
+                typed = ""
+                Task { await model.sendTyped(text) }
+            }
     }
     #endif
+}
+
+/// The on-demand transcript (Pingo's pull-up): full bubble history, learner right,
+/// tutor left.
+private struct TranscriptSheet: View {
+    let lines: [LessonSessionModel.Line]
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 10) {
+                        ForEach(lines) { line in
+                            HStack {
+                                if line.isLearner { Spacer(minLength: 44) }
+                                Text(line.text)
+                                    .padding(.horizontal, 14).padding(.vertical, 10)
+                                    .background(line.isLearner ? TenpoTheme.pink.opacity(0.15)
+                                                              : Color(.secondarySystemBackground),
+                                                in: RoundedRectangle(cornerRadius: 16))
+                                if !line.isLearner { Spacer(minLength: 44) }
+                            }
+                            .id(line.id)
+                        }
+                    }
+                    .padding()
+                }
+                .onAppear { proxy.scrollTo(lines.last?.id, anchor: .bottom) }
+            }
+            .navigationTitle("Transcript")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+/// Full-bleed celebration (Pingo's completion), then the honest debrief below —
+/// keeping our substance (what to firm up, queued for review).
+private struct CompletionScreen: View {
+    let title: String
+    let errors: [ErrorEvent]
+    let praised: Bool
+    var onDone: () -> Void
+
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                VoiceStateBlob(state: .ended, celebrate: true) {}
+                    .padding(.top, 60)
+                Text(praised ? "Nice work!" : "Good effort!")
+                    .font(.subheadline).foregroundStyle(.white.opacity(0.85))
+                Text("\(title) complete!")
+                    .font(.system(size: 30, weight: .bold))
+                    .foregroundStyle(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+
+                if !errors.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("A few things queued for review")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.white)
+                        ErrorTaxonomyView(errors: errors)
+                    }
+                    .padding()
+                    .background(.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 16))
+                    .padding(.horizontal, 20)
+                }
+
+                Button(action: onDone) {
+                    Text("Done")
+                        .font(.headline)
+                        .frame(width: 200, height: 52)
+                        .background(.white, in: Capsule())
+                        .foregroundStyle(TenpoTheme.blue)
+                }
+                .padding(.top, 8)
+                Spacer(minLength: 40)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .background(
+            LinearGradient(colors: [TenpoTheme.blue, TenpoTheme.blue.opacity(0.82)],
+                           startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
+        )
+    }
 }
 
 /// Segmented lesson progress: one filled pill per completed step.

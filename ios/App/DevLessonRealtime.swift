@@ -33,13 +33,50 @@ final class DevLessonRealtimeSession: RealtimeSession, @unchecked Sendable {
     func interrupt() async throws {}
     func close() async { continuation.finish() }
 
+    private static let autoplay = ProcessInfo.processInfo.environment["TENPO_AUTOPLAY"] == "1"
+
     /// Each conductor step becomes a short spoken beat, then the floor is handed
-    /// back. A tiny delay mimics the AI speaking so the orb visibly cycles.
+    /// back. A tiny delay mimics the AI speaking so the orb visibly cycles. Under
+    /// TENPO_AUTOPLAY the learner side is auto-answered too, so a full lesson runs
+    /// hands-free (for screenshotting the transcript + completion screens).
     func send(step: LessonStepDirective) async throws {
         let line = Self.spokenLine(for: step)
         continuation.yield(.assistantTranscript(line))
         try? await Task.sleep(nanoseconds: 500_000_000)
         continuation.yield(.turnEnded(role: .actor))
+
+        if Self.autoplay, let answer = Self.autoAnswer(for: step) {
+            try? await Task.sleep(nanoseconds: 700_000_000)
+            continuation.yield(.userSpeechStarted)
+            continuation.yield(.userSpeechStopped)
+            continuation.yield(.partialTranscript(role: .learner, text: answer))
+        }
+    }
+
+    /// A plausible learner answer for autoplay. Repeat steps echo the target (pass);
+    /// others give a best guess that may fail — retries are capped, so the lesson
+    /// still advances to completion.
+    private static func autoAnswer(for step: LessonStepDirective) -> String? {
+        func v(_ key: String) -> String? {
+            if case .string(let s)? = step.variables[key] { return s }
+            return nil
+        }
+        switch step.kind {
+        case "lesson.model_repeat", "lesson.correct_retry", "lesson.reprompt":
+            return v("target") ?? "はい"
+        case "lesson.prompt_response", "lesson.hint":
+            return "私はジョシュです"
+        case "lesson.translate_to_jp":
+            return "わかりません"
+        case "lesson.translate_to_en", "lesson.meaning_retry":
+            return "I'm not sure"
+        case "lesson.roleplay_open", "lesson.roleplay_turn", "lesson.roleplay_help":
+            return "はい、ありがとうございます"
+        case "lesson.explain", "lesson.pattern_teach", "lesson.wrap":
+            return nil // framing beats — no learner turn
+        default:
+            return nil
+        }
     }
 
     private static func spokenLine(for step: LessonStepDirective) -> String {

@@ -28,7 +28,8 @@ struct VoiceStateBlob: View {
 
     /// Blue-led while listening (your turn), warm while it works/speaks.
     private var palette: [Color] {
-        if celebrate { return TenpoBlob.defaultPalette }
+        // White-led so it pops on the full-bleed color completion screen.
+        if celebrate { return [.white, TenpoBlob.defaultPalette[2], TenpoBlob.defaultPalette[1]] }
         switch state {
         case .listening:
             return TenpoBlob.defaultPalette
