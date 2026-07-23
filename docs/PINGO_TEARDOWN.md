@@ -62,9 +62,29 @@ exported transcript. "The base experience, pretty much the same every round."
 - **No sense of place**: no visible lesson length / progress / "where am I."
 - **Grading inconsistency**: accepted 二つ (kanji) sometimes, rejected it others.
 
-## MISSING from Pingo (Joshua says there are several — TBD, to capture from him)
+## Feature parity + Joshua's vision (his list, 2026-07-23)
 
-_(Joshua to enumerate: what he hates + what's absent. Placeholder for his list.)_
+Pingo behaviors to MATCH (some we already have):
+1. Tap to interrupt, then speak. ✅ (we have tap-to-interrupt)
+2. Speaking while the tutor talks doesn't derail anything — you take your turn
+   by tapping or when it's your turn. ✅ (our turn-based design: mic not
+   forwarded during the AI's turn)
+3. View a transcript. ✅ (pull-up sheet built)
+4. **See romanization / pronunciation** (romaji under the Japanese). ❌ build
+5. **See the kanji if you want** (kanji ⇄ kana toggle). ❌ build
+6. **Tap a word → it's explained** (per-word gloss/breakdown). ❌ build
+7. **Granular exploration after the transcript** — drill into any line/word. ❌
+8. **The moat / north star:** problem words & phrases are noted and prepped for
+   SRS, building a personalized model of the learner — a RAG / "omnicron" of the
+   person: **a learning buddy that knows their history and adapts to how they
+   learn.** Partially built (FSRS + categorized error taxonomy + weak-item
+   weaving); needs to become a richer, always-on learner profile the tutor reads
+   every session, plus real adaptivity (ease up when frustrated, resurface weak
+   patterns, remember preferences).
+
+Build order implied: romaji + kanji toggle + tap-to-explain in the transcript
+(4–7 are one feature cluster), then deepen the learner profile → tutor-prompt
+loop (8). #1–3 already done.
 
 ## How our current build compares
 
