@@ -89,7 +89,7 @@ struct RoleplayListView: View {
             }
         }
         .navigationDestination(item: $activeLesson) { lesson in
-            LessonSessionView(runner: lesson.runner, audio: lesson.audio, lesson: lesson.lesson)
+            LessonSessionView(runner: lesson.runner, audio: lesson.audio, lesson: lesson.lesson, analyzer: container.analyzer)
         }
         .task {
             scenarios = (try? await container.scenarios()) ?? []

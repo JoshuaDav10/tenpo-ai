@@ -136,7 +136,7 @@ struct SessionHomePane: View {
     private func destination(_ launch: Launch) -> some View {
         switch launch {
         case .lesson(let active):
-            LessonSessionView(runner: active.runner, audio: active.audio, lesson: active.lesson)
+            LessonSessionView(runner: active.runner, audio: active.audio, lesson: active.lesson, analyzer: container.analyzer)
         case .roleplay(let active):
             VoiceSessionView(realtime: container.realtime, scenario: active.scenario) {
                 guard let made = container.makeRoleplaySession(active.item, pipeline: .cascade) else { return nil }

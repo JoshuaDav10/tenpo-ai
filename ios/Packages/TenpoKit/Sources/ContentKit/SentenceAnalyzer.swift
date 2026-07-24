@@ -136,21 +136,38 @@ public actor SentenceAnalyzer {
             // Unknown: consume a run of the same character class so we don't
             // shatter words into single characters. Only a dictionary word or a
             // particle breaks the run — otherwise です would become "de su".
+            // Common fixed phrases are matched whole so they read naturally.
             var run = single
             var next = index + 1
-            while next < chars.count,
-                  sameClass(chars[next], chars[index]),
-                  !startsDictionaryWord(chars, at: next),
-                  Self.functionWords[String(chars[next])] == nil {
-                run.append(chars[next])
-                next += 1
+            var phraseNote: String?
+            // Longest phrase wins (ありがとうございます over ありがとう).
+            let remainder = String(chars[index...])
+            if let phrase = Self.fixedPhrases.keys
+                .filter({ remainder.hasPrefix($0) })
+                .max(by: { $0.count < $1.count }) {
+                run = phrase
+                phraseNote = Self.fixedPhrases[phrase]
+                next = index + phrase.count
+            } else {
+                while next < chars.count,
+                      sameClass(chars[next], chars[index]),
+                      !startsDictionaryWord(chars, at: next),
+                      Self.functionWords[String(chars[next])] == nil {
+                    run.append(chars[next])
+                    next += 1
+                }
             }
             let reading = Romaji.isAllKana(run) ? run : nil
+            // Fixed greetings SPELL は but SAY わ (こんにちは → konnichiwa).
+            let spoken = (phraseNote != nil && run.hasSuffix("は"))
+                ? String(run.dropLast()) + "わ"
+                : reading
+            let tokenRomaji = spoken.map(Romaji.from(kana:))
             tokens.append(AnalyzedToken(
                 id: tokenID, surface: run, reading: reading,
-                romaji: reading.map(Romaji.from(kana:))))
+                romaji: tokenRomaji, note: phraseNote))
             kana += reading ?? run
-            if let reading { romaji += Romaji.from(kana: reading) + " " } else { romaji += run }
+            if let tokenRomaji { romaji += tokenRomaji + " " } else { romaji += run }
             tokenID += 1
             index = next
         }
@@ -197,7 +214,6 @@ public actor SentenceAnalyzer {
     static let functionWords: [String: String] = [
         // Copula and polite endings (multi-character entries win by longest match).
         "です": "polite “is / am / are” — ends a polite statement",
-        "ですか": "polite question — です plus the question marker か",
         "ました": "past polite verb ending — “did …”",
         "ません": "negative polite verb ending — “does not …”",
         "ます": "polite verb ending — present or future",
@@ -223,5 +239,27 @@ public actor SentenceAnalyzer {
 
     static let particleReadings: [String: String] = [
         "は": "わ", "へ": "え", "を": "お",
+    ]
+
+    /// Set phrases that must read as ONE word — the seed vocab can't cover the
+    /// greetings and fillers that appear constantly in conversation, and without
+    /// this こんにちは romanizes as "kon ni chi wa".
+    static let fixedPhrases: [String: String] = [
+        "こんにちは": "hello (daytime greeting) — は here is pronounced “wa”",
+        "こんばんは": "good evening — は here is pronounced “wa”",
+        "おはよう": "good morning (casual)",
+        "おはようございます": "good morning (polite)",
+        "はじめまして": "nice to meet you — said at a first meeting",
+        "ありがとう": "thank you (casual)",
+        "ありがとうございます": "thank you (polite)",
+        "すみません": "excuse me / sorry / thank you — the all-purpose polite opener",
+        "よろしくお願いします": "please treat me well — closes an introduction",
+        "おねがいします": "please — polite request",
+        "さようなら": "goodbye",
+        "わかりました": "understood / got it",
+        "わかりません": "I don't understand",
+        "だいじょうぶ": "okay / fine / no problem",
+        "いただきます": "said before eating",
+        "ごちそうさま": "said after eating",
     ]
 }

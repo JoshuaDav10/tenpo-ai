@@ -21,8 +21,18 @@ struct DebugRoute: View {
                 case "roleplay": RoleplayListView(container: container)
                 case "settings": SettingsView(container: container, compliance: compliance)
                 case "lesson":
-                    if let lesson { LessonSessionView(runner: lesson.runner, audio: lesson.audio, lesson: lesson.lesson) }
+                    if let lesson { LessonSessionView(runner: lesson.runner, audio: lesson.audio, lesson: lesson.lesson, analyzer: container.analyzer) }
                     else { ProgressView("Building lesson…") }
+                case "transcript":
+                    // Renders the tappable transcript with sample lines so the
+                    // romaji / kana toggle / tap-to-explain UI is verifiable
+                    // without driving a whole session.
+                    TranscriptSheet(lines: [
+                        .init(isLearner: false, text: "こんにちは。私は先生です。"),
+                        .init(isLearner: true, text: "私は水を飲む"),
+                        .init(isLearner: false, text: "お名前は何ですか。"),
+                        .init(isLearner: true, text: "私はジョシュです"),
+                    ], analyzer: container.analyzer)
                 case "drill":
                     if let drillRunner { DrillView(runner: drillRunner) }
                     else { ProgressView("Building session…") }

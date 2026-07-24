@@ -118,6 +118,31 @@ struct SentenceAnalyzerTests {
         #expect(sentence.romaji.contains("desu"))
     }
 
+    @Test func fixedGreetingsReadAsOneWordWithSpokenWa() async {
+        // こんにちは must not fragment into "kon ni chi wa", and its trailing は
+        // is pronounced "wa" — exactly the kind of thing learners need told.
+        let sentence = await makeAnalyzer().analyze("こんにちは")
+        #expect(sentence.tokens.count == 1)
+        let greeting = sentence.tokens[0]
+        #expect(greeting.surface == "こんにちは")
+        #expect(greeting.romaji == "konnichiwa")
+        #expect(greeting.note?.contains("hello") == true)
+        #expect(greeting.isExplainable)
+    }
+
+    @Test func longestFixedPhraseWins() async {
+        let sentence = await makeAnalyzer().analyze("ありがとうございます")
+        #expect(sentence.tokens.count == 1)
+        #expect(sentence.tokens[0].note?.contains("polite") == true)
+    }
+
+    @Test func questionParticleStaysItsOwnWord() async {
+        // です + か should read "desu ka", not "desuka".
+        let sentence = await makeAnalyzer().analyze("何ですか")
+        #expect(sentence.romaji.contains("desu ka"))
+        #expect(sentence.tokens.contains { $0.surface == "か" && $0.note?.contains("question") == true })
+    }
+
     @Test func cachesRepeatedAnalyses() async {
         let analyzer = makeAnalyzer()
         let first = await analyzer.analyze("私は水を飲む")

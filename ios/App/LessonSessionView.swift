@@ -3,6 +3,7 @@ import CoreModels
 import ModeEngine
 import RealtimeKit
 import DesignSystem
+import ContentKit
 
 /// The conducted voice lesson screen (SESSION_DESIGN.md): Pingo-minimal —
 /// ambient transcript, no send button. All decisions live in GuidedLessonMode;
@@ -150,6 +151,7 @@ final class LessonSessionModel: ObservableObject {
 
 struct LessonSessionView: View {
     let lesson: LessonScript
+    let analyzer: SentenceAnalyzer
     @StateObject private var model: LessonSessionModel
     @Environment(\.dismiss) private var dismiss
     @State private var showTranscript = false
@@ -157,8 +159,10 @@ struct LessonSessionView: View {
     @State private var typed = ""
     #endif
 
-    init(runner: SessionRunner, audio: VoiceAudioIO, lesson: LessonScript) {
+    init(runner: SessionRunner, audio: VoiceAudioIO, lesson: LessonScript,
+         analyzer: SentenceAnalyzer) {
         self.lesson = lesson
+        self.analyzer = analyzer
         _model = StateObject(wrappedValue: LessonSessionModel(runner: runner, audio: audio))
     }
 
@@ -179,7 +183,7 @@ struct LessonSessionView: View {
         .task { await model.start() }
         .onDisappear { Task { await model.teardown() } }
         .sheet(isPresented: $showTranscript) {
-            TranscriptSheet(lines: model.lines)
+            TranscriptSheet(lines: model.lines, analyzer: analyzer)
         }
     }
 
@@ -273,45 +277,6 @@ struct LessonSessionView: View {
             }
     }
     #endif
-}
-
-/// The on-demand transcript (Pingo's pull-up): full bubble history, learner right,
-/// tutor left.
-private struct TranscriptSheet: View {
-    let lines: [LessonSessionModel.Line]
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            ScrollViewReader { proxy in
-                ScrollView {
-                    VStack(spacing: 10) {
-                        ForEach(lines) { line in
-                            HStack {
-                                if line.isLearner { Spacer(minLength: 44) }
-                                Text(line.text)
-                                    .padding(.horizontal, 14).padding(.vertical, 10)
-                                    .background(line.isLearner ? TenpoTheme.pink.opacity(0.15)
-                                                              : Color(.secondarySystemBackground),
-                                                in: RoundedRectangle(cornerRadius: 16))
-                                if !line.isLearner { Spacer(minLength: 44) }
-                            }
-                            .id(line.id)
-                        }
-                    }
-                    .padding()
-                }
-                .onAppear { proxy.scrollTo(lines.last?.id, anchor: .bottom) }
-            }
-            .navigationTitle("Transcript")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-        }
-    }
 }
 
 /// Full-bleed celebration (Pingo's completion), then the honest debrief below —

@@ -28,6 +28,9 @@ final class AppContainer {
     let sync: any SyncService
     let store: any SessionStore
     let modeRegistry: ModeRegistry
+    /// Readings/romaji/word explanations for the transcript (lazily indexes the
+    /// curriculum; one instance so its cache is shared across screens).
+    private(set) lazy var analyzer = SentenceAnalyzer(content: content, pack: pack)
     /// Proxy cost meter (§4.3.6). nil until the Fly.io proxy URL exists — then the
     /// client reads authoritative server spend instead of the ~$0 local meter.
     let usage: (any UsageSource)?
