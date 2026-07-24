@@ -82,10 +82,5 @@ public struct JapanesePack: LanguagePack {
     }
 }
 
-extension Character {
-    var isKana: Bool {
-        guard let scalar = unicodeScalars.first else { return false }
-        return (0x3040...0x30FF).contains(scalar.value) // hiragana + katakana blocks
-            || (0xFF66...0xFF9D).contains(scalar.value) // halfwidth katakana
-    }
-}
+// `Character.isKana` lives in LanguagePackCore so tokenization/romaji helpers can
+// share it (JapanesePack re-exports it via its LanguagePackCore dependency).
