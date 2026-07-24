@@ -4,7 +4,7 @@
 read this + `docs/ARCHITECTURE.md` (the spec) and can resume without reloading the
 whole history. Update it whenever a chunk is verifiably complete.
 
-Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring, CI)
+Last updated: 2026-07-23 (batch 12 — teaching quality + omnicron v1)
 
 ## How to build & test (conventions)
 - Xcode 26.6 installed but `xcode-select` points at CommandLineTools → prefix Swift
