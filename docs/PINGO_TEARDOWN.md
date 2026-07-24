@@ -70,10 +70,13 @@ Pingo behaviors to MATCH (some we already have):
    by tapping or when it's your turn. ✅ (our turn-based design: mic not
    forwarded during the AI's turn)
 3. View a transcript. ✅ (pull-up sheet built)
-4. **See romanization / pronunciation** (romaji under the Japanese). ❌ build
-5. **See the kanji if you want** (kanji ⇄ kana toggle). ❌ build
-6. **Tap a word → it's explained** (per-word gloss/breakdown). ❌ build
-7. **Granular exploration after the transcript** — drill into any line/word. ❌
+4. **See romanization / pronunciation** (romaji under the Japanese). ✅ built
+5. **See the kanji if you want** (kanji ⇄ kana toggle). ✅ built (toggle menu)
+6. **Tap a word → it's explained** (per-word gloss/breakdown). ✅ built
+7. **Granular exploration after the transcript** — drill into any line/word. ✅
+   (SentenceAnalyzer + TranscriptSheet + WordExplanation; romaji follows
+   PRONUNCIATION for particles/greetings — wa/o, konnichiwa — while the kana
+   line keeps spelling.)
 8. **The moat / north star:** problem words & phrases are noted and prepped for
    SRS, building a personalized model of the learner — a RAG / "omnicron" of the
    person: **a learning buddy that knows their history and adapts to how they

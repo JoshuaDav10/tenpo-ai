@@ -19,7 +19,29 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **123** tests (`swift test`) — all green. Server: **16**.
+- Swift: **136** tests (`swift test`) — all green. Server: **16**.
+
+## Batch 11 (2026-07-23) — Pingo teardown, minimal session UI, tappable transcript
+Joshua sent a Pingo session recording + exported transcript (analysis in
+`docs/PINGO_TEARDOWN.md`) and his parity/vision list.
+- ✅ Session UI is now **full Pingo-minimal**: conversation screen = character +
+  one hint line. Study cards/bubbles moved into a pull-up transcript. We keep a
+  step-progress bar (Pingo gives no sense of place).
+- ✅ **Celebration completion** (full-bleed, character in white-led celebrating
+  mood) with our honest debrief kept below it.
+- ✅ **Tappable transcript** (his items 4–7): `SentenceAnalyzer` (ContentKit)
+  tokenizes with the shipped curriculum as its dictionary, annotating reading,
+  romaji, glosses, item id, plus grammar notes for particles/polite endings and
+  fixed greetings. `Romaji` (LanguagePackCore) does Hepburn incl. youon, sokuon,
+  long vowels, n→m. TranscriptSheet renders per-word taps, a romaji line, and a
+  kana⇄kanji toggle; WordExplanation shows reading/romaji/meaning/grammar and
+  whether the word is in the review deck.
+  Romanization follows PRONUNCIATION where it matters (は→wa, を→o,
+  こんにちは→konnichiwa, です か→"desu ka") while the kana line keeps spelling.
+- Engine decision: teaching stays **authored steps** (not a generative agent) so
+  honest grading + SRS survive; richer teaching = better per-step prompts. NEXT.
+- Dev harness: `TENPO_AUTOPLAY=1` runs a lesson hands-free; `TENPO_ROUTE=
+  transcript|word` renders those screens directly for verification.
 
 ## Batch 10 (2026-07-19, later) — UX overhaul (Pingo-informed) + app icon
 Joshua's verdict on the first build: "not good at all… everything poorly."
