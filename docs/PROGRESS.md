@@ -19,7 +19,26 @@ Last updated: 2026-07-18 (batch 6 — auth, Supabase schema, live config wiring,
   don't emit — keep `init(stringLiteral:)` concrete per struct.
 
 ## Current test counts
-- Swift: **136** tests (`swift test`) — all green. Server: **16**.
+- Swift: **141** tests (`swift test`) — all green. Server: **17**.
+
+## Batch 12 (2026-07-23) — teaching quality + the omnicron
+- ✅ **Teaching-prompt upgrade**: LESSON_SYSTEM now instructs breakdowns
+  (word-by-word), recasting (name the ONE fix, never "wrong"), recaps, natural
+  transitions, name use, and varied wording. It also tells the tutor to READ THE
+  LEARNER — acknowledge frustration and offer an easier win instead of drilling,
+  answer meta/off-topic remarks like a person — the two things Pingo does worst.
+  New `lesson.recap` beat fires at a natural seam after a run of taught phrases;
+  `correct_retry` gets the attempt count and slows down on a second miss.
+- ✅ **Omnicron v1** (`LearnerProfile`): level, tracked/due counts, streak,
+  sessions, days-since, weak items, recurring error CATEGORIES, and concrete
+  recent corrections — all from data already recorded. Sent at session open;
+  the bridge folds it into session instructions under "Who you're teaching" with
+  rules to adapt silently and never recite. Learner's first name comes from the
+  account email. Guardrails tested: no fabricated history for new learners,
+  one-off mistakes aren't "recurring", absences are gentle not scolding.
+- Deployed to Fly (v12). NEXT for the omnicron: mid-session adaptivity
+  (frustration/repetition detection), remembered preferences, profile-driven
+  lesson choice.
 
 ## Batch 11 (2026-07-23) — Pingo teardown, minimal session UI, tappable transcript
 Joshua sent a Pingo session recording + exported transcript (analysis in

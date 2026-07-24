@@ -80,10 +80,14 @@ Pingo behaviors to MATCH (some we already have):
 8. **The moat / north star:** problem words & phrases are noted and prepped for
    SRS, building a personalized model of the learner — a RAG / "omnicron" of the
    person: **a learning buddy that knows their history and adapts to how they
-   learn.** Partially built (FSRS + categorized error taxonomy + weak-item
-   weaving); needs to become a richer, always-on learner profile the tutor reads
-   every session, plus real adaptivity (ease up when frustrated, resurface weak
-   patterns, remember preferences).
+   learn.** 🔨 v1 BUILT: `LearnerProfile` (LearnerModel) assembles level, weak
+   items, recurring error categories, recent corrections, streak, and absence
+   from data we already record; the conductor sends it at session open and the
+   bridge folds it into the session instructions ("Who you're teaching") with
+   rules to adapt silently — never recite it. The tutor also knows their name.
+   STILL TO COME: mid-session adaptivity (detect frustration/repetition and ease
+   off — Pingo's worst failure), remembered preferences, and profile-driven
+   lesson selection.
 
 Build order implied: romaji + kanji toggle + tap-to-explain in the transcript
 (4–7 are one feature cluster), then deepen the learner profile → tutor-prompt
