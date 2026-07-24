@@ -33,6 +33,10 @@ struct DebugRoute: View {
                         .init(isLearner: false, text: "お名前は何ですか。"),
                         .init(isLearner: true, text: "私はジョシュです"),
                     ], analyzer: container.analyzer)
+                case "word":
+                    WordExplanation(token: AnalyzedToken(
+                        id: 0, surface: "を", reading: "お", romaji: "o",
+                        note: "object marker — marks what the action is done to (pronounced “o”)"))
                 case "drill":
                     if let drillRunner { DrillView(runner: drillRunner) }
                     else { ProgressView("Building session…") }

@@ -118,7 +118,7 @@ private struct TranscriptBubble: View {
 }
 
 /// Tap-a-word explanation: reading, romaji, meaning, and grammar note.
-private struct WordExplanation: View {
+struct WordExplanation: View {
     let token: AnalyzedToken
 
     var body: some View {
