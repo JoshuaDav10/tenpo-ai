@@ -3,6 +3,7 @@ import CoreModels
 import ModeEngine
 import ContentKit
 import SpeechKit
+import LearnerModel
 import RealtimeKit
 
 /// The conducted voice lesson (SESSION_DESIGN.md, all four acts).
@@ -24,19 +25,24 @@ public struct GuidedLessonMode: LearningMode {
     private let context: ModeContext
     private let audio: VoiceAudioIO
     private let timing: LessonTiming
+    /// Shown to the tutor so it can address the learner by name.
+    private let learnerName: String?
 
     public init(context: ModeContext) {
         self.init(context: context, audio: VoiceAudioIO())
     }
 
-    public init(context: ModeContext, audio: VoiceAudioIO, timing: LessonTiming = .live) {
+    public init(context: ModeContext, audio: VoiceAudioIO, timing: LessonTiming = .live,
+                learnerName: String? = nil) {
         self.context = context
         self.audio = audio
         self.timing = timing
+        self.learnerName = learnerName
     }
 
     public func makeSession(plan: SessionPlan) -> any ModeSession {
-        GuidedLessonSession(context: context, plan: plan, audio: audio, timing: timing)
+        GuidedLessonSession(context: context, plan: plan, audio: audio, timing: timing,
+                            learnerName: learnerName)
     }
 }
 
@@ -62,6 +68,7 @@ actor GuidedLessonSession: ModeSession {
     private let plan: SessionPlan
     private let audio: VoiceAudioIO
     private let timing: LessonTiming
+    private let learnerName: String?
 
     private var loop = VoiceLoop(policy: .conducted)
     private var session: (any RealtimeSession)?
@@ -102,11 +109,13 @@ actor GuidedLessonSession: ModeSession {
         case done
     }
 
-    init(context: ModeContext, plan: SessionPlan, audio: VoiceAudioIO, timing: LessonTiming) {
+    init(context: ModeContext, plan: SessionPlan, audio: VoiceAudioIO, timing: LessonTiming,
+         learnerName: String? = nil) {
         self.context = context
         self.plan = plan
         self.audio = audio
         self.timing = timing
+        self.learnerName = learnerName
         var cont: AsyncStream<ModeEvent>.Continuation!
         self.events = AsyncStream { cont = $0 }
         self.continuation = cont
@@ -149,9 +158,18 @@ actor GuidedLessonSession: ModeSession {
             steps.insert(contentsOf: woven, at: insertAt)
         }
 
+        // The omnicron: what the tutor knows about this learner, sent once at
+        // session open so every beat is informed by their history.
+        var openVariables: [String: JSONValue] = [:]
+        if let live = context.learner as? LiveLearnerModelService,
+           let profile = try? await live.profile() {
+            let summary = profile.promptSummary(name: learnerName)
+            if !summary.isEmpty { openVariables["learner_profile"] = .string(summary) }
+        }
+
         do {
             let session = try await realtime.openSession(RealtimeConfig(
-                actorTemplateID: "lesson", variables: [:],
+                actorTemplateID: "lesson", variables: openVariables,
                 voice: VoiceID(rawValue: "alloy"), locale: LanguageID(rawValue: "ja"),
                 mode: "lesson"))
             self.script = script

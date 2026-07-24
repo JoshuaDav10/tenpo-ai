@@ -444,9 +444,22 @@ export function renderLessonStep(kind: string, variables: Record<string, unknown
 }
 
 /** Standing instructions for a lesson-mode realtime session (safety net for any
- * bare response.create; every step render is self-contained regardless). */
-export function getLessonSessionInstructions(): string {
-  return LESSON_SYSTEM;
+ * bare response.create; every step render is self-contained regardless).
+ * When the client sends a learner profile, it rides along here so the tutor
+ * knows who it is talking to for the whole session. */
+export function getLessonSessionInstructions(variables: Record<string, unknown> = {}): string {
+  const profile = typeof variables.learner_profile === "string" ? variables.learner_profile.trim() : "";
+  if (!profile) return LESSON_SYSTEM;
+  return [
+    LESSON_SYSTEM,
+    "",
+    "# Who you're teaching",
+    profile,
+    "",
+    "Use this to adapt: weave their weak spots in naturally, keep an eye on the recurring",
+    "mistake, and reference their history only when it helps. NEVER read this profile aloud,",
+    "never recite statistics at them, and never imply you are tracking them.",
+  ].join("\n");
 }
 
 /** Actor instructions for the realtime (Pipeline A) session.update (§4.3.1). */

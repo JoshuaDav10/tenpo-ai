@@ -47,7 +47,7 @@ export function buildSessionConfig(init: RealtimeInit): Record<string, unknown> 
   if (init.mode === "lesson") {
     return {
       type: "realtime",
-      instructions: getLessonSessionInstructions(),
+      instructions: getLessonSessionInstructions(init.variables ?? {}),
       output_modalities: ["audio"],
       audio: {
         input: {

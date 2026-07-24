@@ -85,6 +85,21 @@ test("lesson session config: client holds turn authority, transcription on", () 
   assert.ok(String(cfg.instructions).includes("ONE teaching beat"));
 });
 
+test("learner profile rides in the session instructions but is never recited", () => {
+  const profile = "Learner: Joshua.\nRecurring weak spot: particles (は/が/を choice) (4 times recently).";
+  const cfg = buildSessionConfig({ mode: "lesson", variables: { learner_profile: profile } }) as any;
+  const instructions = String(cfg.instructions);
+  assert.ok(instructions.includes("Joshua"));
+  assert.ok(instructions.includes("particles"));
+  // The tutor must adapt to it silently — never read it out, never recite stats.
+  assert.ok(instructions.includes("NEVER read this profile aloud"));
+  assert.ok(instructions.includes("never imply you are tracking them"));
+
+  // No profile → plain protocol, no empty "who you're teaching" section.
+  const plain = String((buildSessionConfig({ mode: "lesson" }) as any).instructions);
+  assert.ok(!plain.includes("Who you're teaching"));
+});
+
 test("legacy session config keeps the roleplay-actor shape", () => {
   const cfg = buildSessionConfig({ variables: { setting: "cafe" } }) as any;
   assert.equal(cfg.audio.input.turn_detection.create_response, undefined);

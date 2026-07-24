@@ -176,7 +176,7 @@ public struct DueExplanation: Sendable, Hashable, Identifiable {
 /// Persistence-backed implementation. Review/error events are durably recorded,
 /// FSRS state is scheduled on every review, and the daily queue is built here.
 public final class LiveLearnerModelService: LearnerModelService {
-    private let db: DatabaseManager
+    let db: DatabaseManager
     private let fsrs: FSRS
 
     /// Default new-items-per-day cap for the queue builder (§4.5).

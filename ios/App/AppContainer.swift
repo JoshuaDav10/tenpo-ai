@@ -157,11 +157,17 @@ final class AppContainer {
         }
         let audio = VoiceAudioIO()
         let plan = SessionPlan(items: items, scenarioID: script.scenarioRef, pipeline: .realtime)
+        // Name the tutor can use — from the signed-in account's email local part,
+        // capitalized (joshua.david10x@… → "Joshua"). nil when signed out.
+        let name = await auth?.email
+            .flatMap { $0.split(separator: "@").first.map(String.init) }
+            .flatMap { $0.split(whereSeparator: { !$0.isLetter }).first.map(String.init) }
+            .map(\.capitalized)
         let mode = GuidedLessonMode(
             context: ModeContext(
                 learner: learner, content: content, speech: speech, realtime: realtime,
                 pack: pack, director: LiveDirectorService(chat: chat)),
-            audio: audio)
+            audio: audio, learnerName: name)
         let runner = SessionRunner(mode: mode, plan: plan, store: store, learner: learner, sync: sync)
         return (runner, audio, script)
     }
