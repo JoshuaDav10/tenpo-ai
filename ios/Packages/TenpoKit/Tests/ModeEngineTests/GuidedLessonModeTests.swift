@@ -376,6 +376,33 @@ private let repeatStep = """
         #expect(result.status == .completed)
     }
 
+    @Test func recapFiresAfterARunOfTaughtPhrases() async throws {
+        let second = """
+        { "kind": "model_repeat", "target": "よろしく", "gloss_en": "nice to meet you",
+          "accepted": ["よろしく"], "item_ref": "vocab:名前" }
+        """
+        let h = try await makeHarness(steps: """
+        \(repeatStep), \(second), { "kind": "explain", "focus_en": "next up" }, { "kind": "wrap" }
+        """)
+        // Teach + pass two phrases in a row.
+        #expect(await waitUntil { h.stepKinds == ["lesson.model_repeat"] })
+        h.assistantDone()
+        h.learnerSays("はじめまして")
+        #expect(await waitUntil { h.stepKinds.count == 2 })
+        h.assistantDone()
+        h.learnerSays("よろしく")
+
+        // The run ends (next step isn't a repeat) → recap ties them together.
+        #expect(await waitUntil { h.stepKinds.last == "lesson.recap" })
+        let recap = h.wire.sentSteps.last!
+        #expect(recap.variables["covered"] == .string("はじめまして、よろしく"))
+
+        // Then the lesson continues normally.
+        h.assistantDone()
+        #expect(await waitUntil { h.stepKinds.last == "lesson.explain" })
+        _ = await h.session.finish()
+    }
+
     @Test func typedText_devPath_actsAsTranscript() async throws {
         let h = try await makeHarness(steps: "\(repeatStep), { \"kind\": \"wrap\" }")
         #expect(await waitUntil { h.stepKinds.count == 1 })

@@ -14,6 +14,7 @@ const ALL_KINDS = [
   "lesson.translate_to_en",
   "lesson.meaning_retry",
   "lesson.hint",
+  "lesson.recap",
   "lesson.roleplay_open",
   "lesson.roleplay_turn",
   "lesson.roleplay_help",

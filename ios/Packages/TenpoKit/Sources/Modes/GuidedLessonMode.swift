@@ -76,6 +76,8 @@ actor GuidedLessonSession: ModeSession {
     private var reviews: [ReviewEvent] = []
     private var errors: [ErrorEvent] = []
     private var struggles: [String] = []     // targets that needed retries
+    /// Phrases taught since the last recap beat (drives "now you know X and Y").
+    private var taughtSinceRecap: [String] = []
     private var repeatsPassed = 0
     private var repeatsTotal = 0
     private var roleplay: RoleplayEngine?
@@ -313,6 +315,10 @@ actor GuidedLessonSession: ModeSession {
 
     /// Move to the next step and deliver it.
     private func advance() async {
+        // A real tutor ties a chunk together before moving on ("now you know X
+        // and Y"). Fire a recap when a run of taught phrases ends.
+        if await deliverRecapIfDue() { return }
+
         stepIndex += 1
         guard stepIndex < steps.count else {
             await beginWrap()
@@ -325,6 +331,30 @@ actor GuidedLessonSession: ModeSession {
             return
         }
         await deliverCurrentStep()
+    }
+
+    /// True when a recap beat was sent (the caller must not also advance).
+    private func deliverRecapIfDue() async -> Bool {
+        guard taughtSinceRecap.count >= 2 else { return false }
+        // Only recap at a natural seam: the NEXT step isn't another repeat.
+        let nextIsRepeat: Bool = {
+            let next = stepIndex + 1
+            guard next < steps.count else { return false }
+            if case .modelAndRepeat = steps[next] { return true }
+            return false
+        }()
+        guard !nextIsRepeat else { return false }
+
+        let covered = taughtSinceRecap.joined(separator: "、")
+        taughtSinceRecap.removeAll()
+        phase = .delivering(thenLearner: false)
+        var vars: [String: JSONValue] = ["covered": .string(covered)]
+        if let transition {
+            vars["transition"] = .string(transition)
+            self.transition = nil
+        }
+        await send(step: "lesson.recap", vars)
+        return true
     }
 
     private func deliverCurrentStep() async {
@@ -542,6 +572,8 @@ actor GuidedLessonSession: ModeSession {
             var vars: [String: JSONValue] = [
                 "heard": .string(heard),
                 "target": .string(rep.target),
+                // Lets the tutor slow down further on a second miss.
+                "attempt": .number(Double(attempt)),
             ]
             if let reading = rep.reading { vars["reading"] = .string(reading) }
             await send(step: "lesson.correct_retry", vars)
@@ -580,6 +612,7 @@ actor GuidedLessonSession: ModeSession {
 
     private func recordPass(_ rep: LessonStep.Repeat, heard: String) {
         repeatsPassed += 1
+        taughtSinceRecap.append(rep.target)
         record(rep, grade: attempt == 0 ? .good : .hard, heard: nil)
     }
 
